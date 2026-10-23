@@ -64,7 +64,11 @@ async def solve_schedule(
     )
 
     # 5. Independent schedule validation
-    schedule_val = validate_assignments(outcome.assignments, scenario)
+    schedule_val = validate_assignments(
+        outcome.assignments,
+        scenario,
+        min_rest_hours=request.objective.min_rest_hours,
+    )
 
     # 6. Compute metrics
     metrics = compute_metrics(

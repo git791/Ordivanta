@@ -3,7 +3,7 @@ Deterministic, reproducible manufacturing scenario generator for scalability ben
 Uses fixed random seeds and explicit parameter sets.
 """
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from app.domain.models import Scenario, Employee, ProductionUnit, Shift, Demand
 
 
@@ -69,21 +69,25 @@ def generate_manufacturing_scenario(
     # 2. Shifts
     shifts: list[Shift] = []
     shift_defs = [
-        ("morning", "07:00", "15:00", 8.0),
-        ("afternoon", "15:00", "23:00", 8.0),
-        ("night", "23:00", "07:00", 8.0),
+        ("morning", "07:00", "15:00", 8.0, 0),
+        ("afternoon", "15:00", "23:00", 8.0, 0),
+        ("night", "23:00", "07:00", 8.0, 1),
     ]
     shift_ids: list[str] = []
+    base_date = datetime(2026, 10, 1)
     for day in range(horizon_days):
-        for s_name, start_t, end_t, dur in shift_defs:
+        day_date = base_date + timedelta(days=day)
+        for s_name, start_t, end_t, dur, day_offset in shift_defs:
             s_id = f"d{day+1}_{s_name}"
             shift_ids.append(s_id)
+            start_iso = f"{day_date.strftime('%Y-%m-%d')}T{start_t}:00"
+            end_iso = f"{(day_date + timedelta(days=day_offset)).strftime('%Y-%m-%d')}T{end_t}:00"
             shifts.append(
                 Shift(
                     id=s_id,
                     name=f"Day {day+1} {s_name.capitalize()}",
-                    start_time=start_t,
-                    end_time=end_t,
+                    start_time=start_iso,
+                    end_time=end_iso,
                     duration_hours=dur,
                 )
             )

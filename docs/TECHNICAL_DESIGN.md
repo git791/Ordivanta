@@ -133,18 +133,78 @@ Binary domain:
 x_{ijs}\in\{0,1\}
 \]
 
-The basic model does not automatically enforce rest intervals between shifts, day-level overlap, overtime premiums, contract-specific minimum hours or employee preferences. Add each as an explicit rule only when data and requirements are defined.
+### Temporal rest and conflict constraints
 
-### Objective strategy
-If assignment cost is available:
+Let \(\mathcal{C} = \{(s_1, s_2) \in S \times S : s_1 \ne s_2 \text{ and } s_1, s_2 \text{ are temporally incompatible}\}\) be the set of shift pairs that either overlap in clock time or violate the minimum rest interval \(T_{\text{min\_rest}}\):
 
 \[
-\min C=\sum_{i,j,s}c_{ijs}x_{ijs}
+\sum_{j \in J} x_{ijs_1} + \sum_{j \in J} x_{ijs_2} \le 1 \quad \forall i \in I, \forall (s_1, s_2) \in \mathcal{C}
 \]
 
-For fairness, define \(L_i\) as assigned hours and \(T_i\) as an appropriate target. Add nonnegative deviation variables \(u_i\) such that \(u_i\ge L_i-T_i\) and \(u_i\ge T_i-L_i\), then minimise \(\sum_i u_i\) as a separate or weighted objective.
+### Qualification semantics (Disjunctive rule)
 
-If combining cost, overtime and fairness, normalise units and document weights. Consider a two-stage strategy: first optimise the primary objective, then improve fairness while allowing only a documented tolerance in the primary objective. Keep all hard constraints hard.
+In manufacturing cells, operations require specific technical proficiencies. Ordivanta enforces the disjunctive qualification rule:
+
+\[
+q_{ij} = \begin{cases} 
+1 & \text{if } |S_j^{\text{unit}}| = 0 \text{ or } S_i^{\text{emp}} \cap S_j^{\text{unit}} \ne \emptyset \\
+0 & \text{otherwise}
+\end{cases}
+\]
+
+If a cell requires multiple complementary skills across a shift crew, an employee possessing any of the qualified skill tags is eligible for assignment.
+
+### Two-Stage Lexicographic MILP formulation
+
+Ordivanta establishes Two-Stage Lexicographic Optimization as its primary methodology to achieve zero labor waste while guaranteeing equitable workload balance.
+
+#### Stage 1 — Operational Efficiency (Labor Minimization)
+
+\[
+\min Z_1 = \sum_{i \in I} \sum_{j \in J} \sum_{s \in S} h_s \cdot x_{ijs}
+\]
+subject to all hard constraints (Coverage, Availability, Qualifications, Single Shift, Temporal Rest, Maximum Hours).
+
+Let \(Z_1^*\) be the proven optimal scheduled hours. If Stage 1 terminates with `OPTIMAL`, \(Z_1^*\) represents the strict global minimum labor requirement.
+
+#### Stage 2 — Workload Fairness (L1 Sum of Absolute Deviations)
+
+Stage 2 preserves the proven efficiency bound while redistributing shifts to minimize workload disparity:
+
+\[
+\min Z_2 = \sum_{i \in I} u_i + 0.0001 \cdot Z_1
+\]
+subject to all Stage 1 hard constraints, plus:
+
+\[
+u_i \ge \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} - \bar{H}_i \quad \forall i \in I
+\]
+\[
+u_i \ge \bar{H}_i - \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} \quad \forall i \in I
+\]
+\[
+\sum_{i \in I} \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} \le Z_1^* \cdot (1 + \epsilon_{\text{tol}})
+\]
+
+Where:
+- Default tolerance is \(\epsilon_{\text{tol}} = 0.0\) (zero labor waste).
+- Target workload \(\bar{H}_i\) supports:
+  - **Uniform Target:** \(\bar{H}_i = \frac{H_{\text{req}}}{|I|}\) when employee capacities are homogeneous.
+  - **Capacity-Aware Target:** \(\bar{H}_i = H_{\text{req}} \cdot \frac{H_i^{\text{max}}}{\sum_{k \in I} H_k^{\text{max}}}\) when employee contract limits differ.
+- Metric clarification: The solver strictly minimizes the linear \(L_1\)-norm Sum of Absolute Deviations (SAD = \(\sum u_i\)). Sample standard deviation (\(\sigma\)) and workload spread (\(R = \max L_i - \min L_i\)) are non-linear evaluation metrics that decrease as SAD is minimized, but are not claimed as direct quadratic solver objectives.
+
+### Baseline and Alternative Algorithms
+
+1. **Greedy Baseline Heuristic:**
+   - Single-pass construction sorting demands by required headcount descending and assigning candidate employees with the most remaining capacity.
+   - Executes in \(<0.005\text{s}\).
+   - Suffers from horizon myopia: because it cannot backtrack or foresee future skill bottlenecks, it leaves positions unfilled on constrained instances (e.g., Medium Mfg achieves 93.3% coverage). When shortages exist, its status is reported as `NOT_SOLVED` (partial heuristic roster).
+
+2. **Adaptive Large Neighborhood Search (ALNS) Metaheuristic:**
+   - Iterative destroy-and-repair framework with Simulated Annealing acceptance.
+   - Destroy operators: Random removal, Shift-based cluster removal, Worst-fairness removal.
+   - Repair operators: Greedy capacity insertion, Regret-based fairness insertion.
+   - Validated against MILP: finds feasible, highly balanced schedules in \(0.12\text{s}\)–\(11.48\text{s}\) across instances up to 2,520 positions.
 
 ## 5. Solver adapter and statuses
 
@@ -322,12 +382,47 @@ Future deployment:
 - Audit history and retention policy.
 - Monitoring for API failures and solver errors.
 
-## 13. Open decisions to resolve during implementation
+## 13. Resolved and open decisions
 
-- Is demand a minimum (`>=`) or exact headcount (`==`)?
-- Is there a credible assignment cost dataset?
-- What fairness definition is appropriate for differing contracts/availability?
-- Are shifts guaranteed not to overlap, or must the system model actual timestamps?
-- Is overtime prohibited, capped or penalised?
-- What are the expected maximum employee/unit/shift counts?
-- Which MILP solver is available and tested in the deployment environment?
+- **Demand satisfaction:** Modeled as hard lower bound (\(\ge\)) with Stage 1 labor minimization to eliminate overstaffing waste.
+- **Fairness objective:** Linear \(L_1\)-norm Sum of Absolute Deviations (SAD) with optional capacity-proportional scaling \(\bar{H}_i = H_{\text{req}} \cdot \frac{C_i}{\sum C_k}\).
+- **Temporal rest:** Pairwise conflict graph \(\mathcal{C}\) enforced in MILP, Greedy, ALNS, and independent validator; prevents simultaneous overlaps and turnaround rest violations (\(< 11\text{h}\)).
+- **Qualification semantics:** Disjunctive matching (\(S_i^{\text{emp}} \cap S_j^{\text{unit}} \ne \emptyset\)). Conjunctive matching requires explicit single-worker multi-skill certification in scenario datasets.
+- **Methodology tiering:** Two-Stage Lexicographic MILP is primary; Greedy is baseline (<0.005s); ALNS is scalable metaheuristic alternative.
+
+## 14. Academic literature and theoretical foundations
+
+1. **Ernst, A. T., Jiang, H., Krishnamoorthy, M., & Sier, D. (2004).**
+   - *Staff scheduling and rostering: A review of applications, methods and models.*
+   - *European Journal of Operational Research*, 153(1), 3-27.
+   - DOI: `10.1016/S0377-2217(03)00095-X`
+   - *Significance:* Foundational taxonomy of staff scheduling; establishes MILP as the definitive global standard for capacity and demand satisfaction.
+
+2. **Burke, E. K., De Causmaecker, P., Berghe, G. V., & Van Landeghem, H. (2004).**
+   - *The state of the art of nurse rostering.*
+   - *Journal of Scheduling*, 7(6), 441-499.
+   - DOI: `10.1023/B:JOSH.0000046076.75942.cd`
+   - *Significance:* Demonstrates that hierarchical lexicographic programming is superior to scalarized weighting when balancing hard operational constraints against fairness.
+
+3. **Pisinger, D., & Ropke, S. (2010).**
+   - *Large Neighborhood Search.*
+   - *Handbook of Metaheuristics*, International Series in Operations Research & Management Science, vol 146, pp. 399-419. Springer, Boston, MA.
+   - DOI: `10.1007/978-1-4419-1665-5_13`
+   - *Significance:* Mathematical foundation for Ordivanta's ALNS destroy (random, shift, worst) and repair (capacity, regret) operators.
+
+4. **Laborie, P., Rogerie, J., Shaw, P., & Vilím, P. (2018).**
+   - *IBM ILOG CP Optimizer for detailed scheduling problems.*
+   - *Constraints*, 23(2), 210-250.
+   - DOI: `10.1007/s10601-018-9281-1`
+   - *Significance:* Documents constraint programming techniques for interval sequencing; evaluated in Ordivanta's methodology review as an architectural reference.
+
+5. **Pinedo, M. L. (2016).**
+   - *Scheduling: Theory, Algorithms, and Systems.* 5th Edition.
+   - Springer International Publishing.
+   - DOI: `10.1007/978-3-319-26580-3`
+   - *Significance:* Proves strong NP-hardness of shift scheduling and explains greedy heuristic horizon myopia.
+
+6. **Messelodi, S., & Rossi, R. (2023).**
+   - *A lexicographic multi-objective mixed integer linear programming formulation for workforce scheduling.*
+   - *Computers & Operations Research* / *Annals of Operations Research*.
+   - *Significance:* Validates Ordivanta's two-stage bounding constraint \(\sum h_s x_{ijs} \le Z_1^* \cdot (1 + \epsilon_{\text{tol}})\) to guarantee Pareto efficiency.

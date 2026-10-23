@@ -7,8 +7,10 @@ class ObjectiveConfig(BaseModel):
     primary: ObjectivePrimary = ObjectivePrimary.FEASIBILITY
     include_assignment_cost: bool = False
     fairness_weight: float = 0.0
-    two_stage: bool = False
+    two_stage: bool = True
     two_stage_tolerance: float = 0.0
+    proportional_fairness: bool = False
+    min_rest_hours: float = 0.0
 
 
 class SolveRequest(BaseModel):

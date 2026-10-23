@@ -1,6 +1,7 @@
 import time
 from app.domain.models import Scenario, Assignment
 from app.domain.enums import SolverStatus
+from app.domain.temporal import build_shift_conflict_map
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome
 
@@ -26,6 +27,7 @@ class GreedyScheduler(Scheduler):
 
         assigned_shifts: dict[str, set[str]] = {e.id: set() for e in scenario.employees}
         assigned_hours: dict[str, float] = {e.id: 0.0 for e in scenario.employees}
+        conflict_map = build_shift_conflict_map(scenario.shifts, min_rest_hours=config.min_rest_hours)
 
         assignments: list[Assignment] = []
         shortages = 0
@@ -53,7 +55,10 @@ class GreedyScheduler(Scheduler):
                 # 3. One assignment per shift check
                 if d.shift_id in assigned_shifts[emp.id]:
                     continue
-                # 4. Max scheduled hours check
+                # 4. Temporal conflict check (overlapping shifts or minimum rest violation)
+                if any(assigned_s in conflict_map.get(d.shift_id, set()) for assigned_s in assigned_shifts[emp.id]):
+                    continue
+                # 5. Max scheduled hours check
                 if assigned_hours[emp.id] + shift_duration > emp.max_hours:
                     continue
 

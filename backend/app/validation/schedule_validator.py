@@ -1,9 +1,11 @@
 from app.domain.models import Assignment, Scenario, ValidationResult, ValidationError
+from app.domain.temporal import build_shift_conflict_pairs, shifts_conflict
 
 
 def validate_assignments(
     assignments: list[Assignment],
     scenario: Scenario,
+    min_rest_hours: float = 0.0,
 ) -> ValidationResult:
     """
     Independently validate extracted assignments against the scenario's ground truth rules.
@@ -85,6 +87,36 @@ def validate_assignments(
                         shift_id=shift_id,
                     )
                 )
+
+    # 4. TEMPORAL_CONFLICT check (overlapping shifts or minimum rest violation)
+    shift_map = {s.id: s for s in scenario.shifts}
+    for emp_id, shift_counts in emp_shift_assignments.items():
+        distinct_shifts = list(shift_counts.keys())
+        n_shifts = len(distinct_shifts)
+        for idx1 in range(n_shifts):
+            for idx2 in range(idx1 + 1, n_shifts):
+                s1_id = distinct_shifts[idx1]
+                s2_id = distinct_shifts[idx2]
+                s1 = shift_map.get(s1_id)
+                s2 = shift_map.get(s2_id)
+                if s1 is not None and s2 is not None:
+                    is_conf, conf_type = shifts_conflict(s1, s2, min_rest_hours=min_rest_hours)
+                    if is_conf:
+                        code = conf_type or "TEMPORAL_CONFLICT"
+                        errors.append(
+                            ValidationError(
+                                code=code,
+                                message=(
+                                    f"Employee '{emp_id}' assigned to conflicting shifts "
+                                    f"'{s1_id}' and '{s2_id}' ({code})"
+                                ),
+                                field="shift_id",
+                                entity_id=emp_id,
+                                severity="error",
+                                employee_id=emp_id,
+                                shift_id=s2_id,
+                            )
+                        )
 
     # 4. HOURS_EXCEEDED check
     for emp_id, total_hours in emp_total_hours.items():

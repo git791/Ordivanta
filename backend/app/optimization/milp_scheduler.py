@@ -2,6 +2,7 @@ import time
 import pulp
 from app.domain.models import Scenario, Assignment
 from app.domain.enums import SolverStatus, ObjectivePrimary
+from app.domain.temporal import build_shift_conflict_pairs
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome, SolverUnavailableError
 from .solver_adapter import get_solver, map_pulp_status
@@ -115,6 +116,26 @@ class MILPScheduler(Scheduler):
                         f"one_shift_{i}_{s}",
                     )
 
+            # Pairwise temporal conflicts (overlapping shifts or minimum rest violation)
+            conflict_pairs = build_shift_conflict_pairs(scenario.shifts, min_rest_hours=config.min_rest_hours)
+            for i in emp_ids:
+                for s1, s2 in conflict_pairs:
+                    vars_s1 = [
+                        x.get((i, j, s1), 0)
+                        for j in unit_ids
+                        if (i, j, s1) in x and isinstance(x.get((i, j, s1)), pulp.LpVariable)
+                    ]
+                    vars_s2 = [
+                        x.get((i, j, s2), 0)
+                        for j in unit_ids
+                        if (i, j, s2) in x and isinstance(x.get((i, j, s2)), pulp.LpVariable)
+                    ]
+                    if vars_s1 and vars_s2:
+                        model += (
+                            pulp.lpSum(vars_s1) + pulp.lpSum(vars_s2) <= 1,
+                            f"temporal_conflict_{i}_{s1}_{s2}",
+                        )
+
             # Max scheduled hours: sum_{j,s} duration_s * x_{ijs} <= max_hours_i for each i
             emp_scheduled_hours: dict[str, pulp.LpAffineExpression] = {}
             for i in emp_ids:
@@ -139,7 +160,7 @@ class MILPScheduler(Scheduler):
             total_hours_expr = (
                 pulp.lpSum(coeff * var for coeff, var in active_vars)
                 if active_vars
-                else pulp.LpAffineExpression()
+                else pulp.lpSum([])
             )
 
             # Term B: Workload balance / Fairness (Linear absolute deviation)
@@ -147,30 +168,37 @@ class MILPScheduler(Scheduler):
                 d.required_headcount * shift_durations.get(d.shift_id, 0.0)
                 for d in scenario.demands
             )
-            target_hours = (
-                total_demanded_hours / len(emp_ids) if len(emp_ids) > 0 else 0.0
-            )
+            # Target workload calculation: Uniform vs Capacity-Proportional
+            target_hours: dict[str, float] = {}
+            total_capacity = sum(emp_max_hours.get(i, 0.0) for i in emp_ids)
+            for i in emp_ids:
+                if config.proportional_fairness and total_capacity > 0:
+                    target_hours[i] = total_demanded_hours * (emp_max_hours.get(i, 0.0) / total_capacity)
+                else:
+                    target_hours[i] = total_demanded_hours / len(emp_ids) if len(emp_ids) > 0 else 0.0
 
             u_fairness: dict[str, pulp.LpVariable] = {}
             for i in emp_ids:
                 u_fairness[i] = create_var(f"u_fairness_{i}", low_bound=0.0, cat="Continuous")
                 model += (
-                    u_fairness[i] >= emp_scheduled_hours[i] - target_hours,
+                    u_fairness[i] >= emp_scheduled_hours[i] - target_hours[i],
                     f"fairness_pos_{i}",
                 )
                 model += (
-                    u_fairness[i] >= target_hours - emp_scheduled_hours[i],
+                    u_fairness[i] >= target_hours[i] - emp_scheduled_hours[i],
                     f"fairness_neg_{i}",
                 )
 
             fairness_expr = (
                 pulp.lpSum(u_fairness[i] for i in emp_ids)
                 if emp_ids
-                else pulp.LpAffineExpression()
+                else pulp.lpSum([])
             )
 
             # 6. Apply Objective Configuration
             solver = get_solver(time_limit=time_limit)
+
+            two_stage_narrative: str | None = None
 
             if config.two_stage and len(scenario.demands) > 0:
                 # Stage 1: Solve for minimum total scheduled hours
@@ -182,9 +210,25 @@ class MILPScheduler(Scheduler):
                     if getattr(stage1_res, "has_solution", False)
                     else getattr(model, "sol_status", None)
                 )
-                status1, _ = map_pulp_status(st1_lp, st1_sol)
+                status1, msg1 = map_pulp_status(st1_lp, st1_sol)
 
-                if status1 in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
+                if status1 == SolverStatus.INFEASIBLE:
+                    return SolveOutcome(
+                        status=SolverStatus.INFEASIBLE,
+                        assignments=[],
+                        objective_value=None,
+                        runtime_seconds=time.perf_counter() - start_time,
+                        message="Problem is mathematically proven infeasible in Stage 1",
+                    )
+                elif status1 == SolverStatus.NOT_SOLVED:
+                    return SolveOutcome(
+                        status=SolverStatus.NOT_SOLVED,
+                        assignments=[],
+                        objective_value=None,
+                        runtime_seconds=time.perf_counter() - start_time,
+                        message=f"Stage 1 returned without a feasible solution: {msg1 or 'time limit'}",
+                    )
+                elif status1 in (SolverStatus.OPTIMAL, SolverStatus.FEASIBLE):
                     opt_hours = pulp.value(total_hours_expr)
                     if opt_hours is not None:
                         allowed_hours = opt_hours * (1.0 + max(0.0, config.two_stage_tolerance))
@@ -192,9 +236,39 @@ class MILPScheduler(Scheduler):
                             total_hours_expr <= allowed_hours,
                             "stage2_hours_ceiling",
                         )
+                    else:
+                        allowed_hours = None
+
                     # Stage 2: Minimize workload deviation subject to hours ceiling
                     model.setObjective(fairness_expr + 0.0001 * total_hours_expr)
                     solve_res = model.solve(solver)
+
+                    st2_lp = getattr(solve_res, "status", getattr(model, "status", None))
+                    st2_sol = (
+                        1
+                        if getattr(solve_res, "has_solution", False)
+                        else getattr(model, "sol_status", None)
+                    )
+                    status2, _ = map_pulp_status(st2_lp, st2_sol)
+
+                    # Compute Stage 2 achieved metrics for outcome narrative
+                    stage2_sad = pulp.value(fairness_expr) or 0.0
+                    achieved_h = pulp.value(total_hours_expr) or (opt_hours or 0.0)
+
+                    if status1 == SolverStatus.OPTIMAL and status2 == SolverStatus.OPTIMAL:
+                        status = SolverStatus.OPTIMAL
+                        two_stage_narrative = (
+                            f"Optimal lexicographic schedule: Stage 1 proven minimum hours = {opt_hours:.1f}h, "
+                            f"Stage 2 SAD = {stage2_sad:.2f} (achieved hours: {achieved_h:.1f}h, ceiling: {allowed_hours:.1f}h)"
+                        )
+                    else:
+                        status = SolverStatus.FEASIBLE
+                        st1_desc = "proven optimal" if status1 == SolverStatus.OPTIMAL else "incumbent (optimality unproven)"
+                        st2_desc = "optimal" if status2 == SolverStatus.OPTIMAL else "incumbent"
+                        two_stage_narrative = (
+                            f"Feasible lexicographic schedule: Stage 1 {st1_desc} = {opt_hours:.1f}h, "
+                            f"Stage 2 {st2_desc} SAD = {stage2_sad:.2f} (achieved hours: {achieved_h:.1f}h)"
+                        )
                 else:
                     solve_res = stage1_res
             else:
@@ -222,6 +296,14 @@ class MILPScheduler(Scheduler):
                 raw_sol = getattr(model, "sol_status", None)
 
             status, message = map_pulp_status(raw_lp, raw_sol)
+
+            # In Two-Stage mode, only claim OPTIMAL if Stage 1 proved optimality AND Stage 2 proved optimality
+            if config.two_stage and len(scenario.demands) > 0:
+                if status1 != SolverStatus.OPTIMAL and status == SolverStatus.OPTIMAL:
+                    status = SolverStatus.FEASIBLE
+
+            if two_stage_narrative:
+                message = f"{two_stage_narrative} [{message}]" if message else two_stage_narrative
 
             # Capture solver bound and optimality gap if available
             if hasattr(solve_res, "best_bound") and solve_res.best_bound is not None:

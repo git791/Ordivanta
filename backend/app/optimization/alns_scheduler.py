@@ -15,6 +15,7 @@ import time
 import random
 from app.domain.models import Scenario, Assignment
 from app.domain.enums import SolverStatus, ObjectivePrimary
+from app.domain.temporal import build_shift_conflict_map
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome
 from .greedy_scheduler import GreedyScheduler
@@ -53,12 +54,19 @@ class ALNSScheduler(Scheduler):
             d.required_headcount * shift_durations.get(d.shift_id, 0.0)
             for d in scenario.demands
         )
-        target_hours = (
-            total_demanded_hours / len(scenario.employees)
-            if scenario.employees
-            else 0.0
-        )
-        fairness_dev = sum(abs(h - target_hours) for h in emp_hours.values())
+        total_capacity = sum(e.max_hours for e in scenario.employees)
+        if config.proportional_fairness and total_capacity > 0:
+            fairness_dev = sum(
+                abs(emp_hours[e.id] - (total_demanded_hours * (e.max_hours / total_capacity)))
+                for e in scenario.employees
+            )
+        else:
+            target_hours = (
+                total_demanded_hours / len(scenario.employees)
+                if scenario.employees
+                else 0.0
+            )
+            fairness_dev = sum(abs(h - target_hours) for h in emp_hours.values())
 
         # Unfilled demand penalty to drive complete coverage
         filled_per_demand: dict[tuple[str, str], int] = {}
@@ -96,6 +104,7 @@ class ALNSScheduler(Scheduler):
         unit_map = {u.id: u for u in scenario.units}
         shift_durations = {s.id: s.duration_hours for s in scenario.shifts}
         emp_map = {e.id: e for e in scenario.employees}
+        conflict_map = build_shift_conflict_map(scenario.shifts, min_rest_hours=config.min_rest_hours)
 
         # Disjunctive qualification lookup
         qualified = {
@@ -198,7 +207,13 @@ class ALNSScheduler(Scheduler):
                 d.required_headcount * shift_durations.get(d.shift_id, 0.0)
                 for d in scenario.demands
             )
-            target_hours = total_demanded_hours / len(scenario.employees) if scenario.employees else 0.0
+            total_capacity = sum(e.max_hours for e in scenario.employees)
+            emp_targets: dict[str, float] = {}
+            for e in scenario.employees:
+                if config.proportional_fairness and total_capacity > 0:
+                    emp_targets[e.id] = total_demanded_hours * (e.max_hours / total_capacity)
+                else:
+                    emp_targets[e.id] = total_demanded_hours / len(scenario.employees) if scenario.employees else 0.0
 
             for u_id, s_id, dur in missing_demands:
                 # Find feasible candidates
@@ -210,6 +225,9 @@ class ALNSScheduler(Scheduler):
                     if not qualified[emp.id][u_id]:
                         continue
                     if s_id in assigned_shifts[emp.id]:
+                        continue
+                    # Temporal conflict check (overlapping shifts or minimum rest violation)
+                    if any(assigned_s in conflict_map.get(s_id, set()) for assigned_s in assigned_shifts[emp.id]):
                         continue
                     if assigned_hours[emp.id] + dur > emp.max_hours:
                         continue
@@ -226,7 +244,7 @@ class ALNSScheduler(Scheduler):
                 else:
                     # Worker closest to or below target hours
                     candidates.sort(
-                        key=lambda e: (assigned_hours[e.id] - target_hours, e.id)
+                        key=lambda e: (assigned_hours[e.id] - emp_targets.get(e.id, 0.0), e.id)
                     )
 
                 chosen = candidates[0]
