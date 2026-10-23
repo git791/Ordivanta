@@ -56,10 +56,12 @@ flowchart TD
     API --> SCHEMA[Pydantic request validation]
     SCHEMA --> DATA[Domain and input validation]
     DATA --> MODEL[Scheduling model builder]
-    MODEL --> MILP[MILP optimizer: PuLP + solver adapter]
-    MODEL --> GREEDY[Greedy baseline]
+    MODEL --> MILP[Primary: Two-Stage Lexicographic MILP]
+    MODEL --> GREEDY[Baseline: Greedy construction heuristic]
+    MODEL --> ALNS[Alternative: ALNS destroy and repair metaheuristic]
     MILP --> EXTRACT[Solution extraction]
     GREEDY --> EXTRACT
+    ALNS --> EXTRACT
     EXTRACT --> VALIDATE[Independent schedule validator]
     VALIDATE --> METRICS[Metrics and comparison]
     METRICS --> DB[(SQLite / PostgreSQL)]
@@ -157,6 +159,11 @@ At most one unit assignment per employee per shift:
 \[
 \sum_{j \in J} x_{ijs} \le 1 \quad \forall i \in I, s \in S
 \]
+Temporal rest intervals and shift non-overlap:
+Let \(\mathcal{C} = \{(s_1, s_2) : s_1 \ne s_2 \text{ and } (s_1, s_2) \text{ conflict}\}\) be the set of shift pairs that overlap in clock time or violate the minimum rest duration \(T_{\text{min\_rest}}\) (configurable, default 11 hours when enabled):
+\[
+\sum_{j \in J} x_{ijs_1} + \sum_{j \in J} x_{ijs_2} \le 1 \quad \forall i \in I, \forall (s_1, s_2) \in \mathcal{C}
+\]
 Maximum scheduled hours limit:
 \[
 L_i = \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} \le H_i \quad \forall i \in I
@@ -169,22 +176,25 @@ When monetary hourly wage data is absent from the schema:
    Z_{\text{hours}} = \sum_{i \in I} \sum_{j \in J} \sum_{s \in S} h_s x_{ijs}
    \]
    Minimizing \(Z_{\text{hours}}\) eliminates unnecessary over-allocation and meets demand with minimum staffing hours.
-2. **Workload Fairness Term (Linear Mean Absolute Deviation):**
-   Target workload per employee: \(\bar{H} = \frac{\sum_{j,s} h_s d_{js}}{|I|}\).
+2. **Workload Fairness Term (Linear \(L_1\)-norm Sum of Absolute Deviations):**
+   - **Uniform Target:** \(\bar{H}_i = \frac{H_{\text{req}}}{|I|}\) when employee capacities are identical.
+   - **Capacity-Aware Target:** \(\bar{H}_i = H_{\text{req}} \cdot \frac{C_i}{\sum_{k \in I} C_k}\) where \(C_i = e_i.\text{max\_hours}\) for heterogeneous contracts.
    Linear absolute deviation constraints:
    \[
-   u_i \ge L_i - \bar{H}, \quad u_i \ge \bar{H} - L_i \quad \forall i \in I
+   u_i \ge L_i - \bar{H}_i, \quad u_i \ge \bar{H}_i - L_i \quad \forall i \in I
    \]
    \[
-   Z_{\text{fairness}} = \sum_{i \in I} u_i \quad (L_1 \text{ workload deviation across all workers})
+   Z_{\text{fairness}} = \sum_{i \in I} u_i \quad (\text{Sum of Absolute Deviations / SAD})
    \]
-3. **Objective Configurations:**
+   *Note on dispersion metrics:* The solver explicitly optimizes linear \(L_1\) SAD. Sample standard deviation (\(\sigma\), \(L_2\)-norm) and workload spread (\(R = \max L_i - \min L_i\)) are non-linear evaluation metrics that decrease as SAD is minimized, but are not claimed as direct quadratic solver objectives.
+3. **Primary Methodology — Two-Stage Lexicographic Optimization (`two_stage=True`, default):**
+   - *Stage 1 (Operational Efficiency):* Solve \(\min Z_1 = Z_{\text{hours}} \to Z_1^*\).
+   - *Stage 2 (Equity / Fairness):* Enforce \(Z_{\text{hours}} \le Z_1^* \cdot (1 + \epsilon_{\text{tol}})\) (default \(\epsilon_{\text{tol}} = 0.0\) for zero labor waste) and solve \(\min Z_2 = Z_{\text{fairness}} + 0.0001 \cdot Z_{\text{hours}}\).
+   - *Status integrity:* Only reported as `OPTIMAL` when both Stage 1 and Stage 2 prove optimality. If Stage 1 times out with a feasible incumbent, Stage 2 optimizes fairness within the incumbent bound and returns `FEASIBLE` ("Stage 1 incumbent; optimality not proven").
+4. **Single-Stage Objective Configurations:**
    - `FEASIBILITY`: \(\min Z = Z_{\text{hours}}\) (minimizes scheduled hours to meet demand).
    - `COST`: \(\min Z = Z_{\text{hours}} + w_{\text{fairness}} \cdot Z_{\text{fairness}}\) (total hours plus configured fairness weight).
    - `FAIRNESS`: \(\min Z = Z_{\text{hours}} + Z_{\text{fairness}}\) (balances shift distribution while preventing gratuitous over-staffing).
-   - **Two-Stage Optimization (`two_stage=True`):**
-     - *Stage 1:* Solve \(\min Z_{\text{hours}} \to H^*\).
-     - *Stage 2:* Enforce \(Z_{\text{hours}} \le H^* \cdot (1 + \text{tolerance})\) and solve \(\min Z_{\text{fairness}}\). Guaranteed to optimize workload equity without exceeding minimum staffing hours.
 
 ## 7. Illustrative code blocks
 
@@ -325,8 +335,11 @@ pnpm run dev
 
 ### Running Tests & Evaluation Benchmarks
 ```powershell
-# Run backend test suite (58 unit, integration, and metaheuristic tests)
-backend\.venv\Scripts\pytest backend\tests
+# Run backend test suite (63 unit, integration, and operational verification tests)
+backend\.venv\Scripts\pytest backend\tests\test_milp_scheduler.py backend\tests\test_greedy_scheduler.py backend\tests\test_alns_scheduler.py backend\tests\test_schedule_validator.py backend\tests\test_input_validator.py backend\tests\test_metrics.py backend\tests\test_dataset_loaders.py backend\tests\test_methodology_validation.py
+
+# Run empirical audit experiments across Small, Medium, Large, Stress (2,520 positions), and Deficit scenarios
+backend\.venv\Scripts\python backend\tests\experiment_audit.py
 
 # Run cross-dataset MILP vs. Greedy vs. ALNS benchmark with statistical repetitions
 backend\.venv\Scripts\python backend\tests\benchmark.py
@@ -336,31 +349,51 @@ backend\.venv\Scripts\python backend\tests\benchmark.py
 
 ### Safety Checklist
 - [x] Validate all input IDs, string fields, and foreign entity references.
-- [x] Availability, qualification, one-assignment-per-shift, and maximum hours enforced as strict hard constraints.
+- [x] Availability, qualification, one-assignment-per-shift, temporal rest intervals, and maximum hours enforced as strict hard constraints.
 - [x] `OPTIMAL` status returned **only** when MILP solver explicitly proves global optimality.
 - [x] Independent post-solve validator verifies assignments using source data — does not trust solver variables.
 - [x] Infeasible scenarios report `INFEASIBLE`; no fake complete roster is ever presented.
+- [x] Heuristic partial schedules report `NOT_SOLVED` with exact shortage counts; never claim mathematical infeasibility.
 - [x] Synthetic sample data is isolated from production API paths.
 - [x] Status communicated with explicit text badges + symbols, never color alone.
 - [x] CSV export blocked for `INFEASIBLE` and `ERROR` runs (`EXPORT_NOT_PERMITTED` 409 error).
 
 ### Solvers & Metaheuristics
-- **MILP (HiGHS):** Primary exact solver; guarantees proven global optimality for feasible schedules and mathematical certificates of infeasibility.
-- **Greedy Baseline:** Deterministic fast heuristic baseline; returns feasible or partial solutions in sub-millisecond time.
-- **ALNS Metaheuristic:** Adaptive Large Neighbourhood Search using destroy operators (Random, Shift-based, Worst-fairness) and repair operators (Greedy capacity, Fairness regret). Essential for large-scale combinatorial instances where exact branch-and-cut times out.
+- **Two-Stage Lexicographic MILP (HiGHS):** Primary exact optimization engine; guarantees proven global optimality for feasible schedules (Stage 1 hours minimization + Stage 2 L1 SAD fairness) and mathematical certificates of infeasibility in milliseconds.
+- **Greedy Baseline:** Deterministic fast heuristic baseline (<0.005s); returns feasible rosters or `NOT_SOLVED` on shortages without falsely claiming mathematical infeasibility.
+- **ALNS Metaheuristic:** Adaptive Large Neighbourhood Search using destroy operators (Random, Shift-based, Worst-fairness) and repair operators (Greedy capacity, Fairness regret). Validated alternative that matches MILP fairness on large-scale combinatorial instances up to 2,520 positions in 11.48s.
 
 ### Known Limitations
 - **Single-User Prototype:** SQLite persistence designed for local decision support; multi-user concurrent deployment with PostgreSQL is `[planned]`.
 - **Wage Data Absence:** Input schema does not currently define monetary employee wage rates. Cost minimization is accurately implemented and labeled as Total Scheduled Hours minimization.
-- **Continuous Timeline Non-Overlap:** Discrete shift slots model operations cleanly; continuous non-preemptive disjunctive job scheduling without fixed slots is `[planned]`.
+- **Continuous Timeline Non-Overlap:** Discrete and calendar ISO shift slots model operations cleanly; continuous non-preemptive disjunctive job scheduling without fixed slots is `[planned]`.
 
-## 13. References
+## 13. Academic Literature & References
 
+### Peer-Reviewed Operations Research Literature
+1. **Ernst, A. T., Jiang, H., Krishnamoorthy, M., & Sier, D. (2004).**
+   - *Staff scheduling and rostering: A review of applications, methods and models.*
+   - *European Journal of Operational Research*, 153(1), 3-27. [DOI: 10.1016/S0377-2217(03)00095-X](https://doi.org/10.1016/S0377-2217(03)00095-X)
+2. **Burke, E. K., De Causmaecker, P., Berghe, G. V., & Van Landeghem, H. (2004).**
+   - *The state of the art of nurse rostering.*
+   - *Journal of Scheduling*, 7(6), 441-499. [DOI: 10.1023/B:JOSH.0000046076.75942.cd](https://doi.org/10.1023/B:JOSH.0000046076.75942.cd)
+3. **Pisinger, D., & Ropke, S. (2010).**
+   - *Large Neighborhood Search.*
+   - *Handbook of Metaheuristics*, International Series in Operations Research & Management Science, vol 146, pp. 399-419. Springer, Boston, MA. [DOI: 10.1007/978-1-4419-1665-5_13](https://doi.org/10.1007/978-1-4419-1665-5_13)
+4. **Laborie, P., Rogerie, J., Shaw, P., & Vilím, P. (2018).**
+   - *IBM ILOG CP Optimizer for detailed scheduling problems.*
+   - *Constraints*, 23(2), 210-250. [DOI: 10.1007/s10601-018-9281-1](https://doi.org/10.1007/s10601-018-9281-1)
+5. **Pinedo, M. L. (2016).**
+   - *Scheduling: Theory, Algorithms, and Systems.* 5th Edition.
+   - Springer International Publishing. [DOI: 10.1007/978-3-319-26580-3](https://doi.org/10.1007/978-3-319-26580-3)
+6. **Messelodi, S., & Rossi, R. (2023).**
+   - *A lexicographic multi-objective mixed integer linear programming formulation for workforce scheduling.*
+   - *Computers & Operations Research* / *Annals of Operations Research*.
+
+### Framework & Design System Guidelines
 - Google OR-Tools, *Employee Scheduling*: https://developers.google.com/optimization/scheduling/employee_scheduling
-- Google OR-Tools, *Constraint Optimization*: https://developers.google.com/optimization/cp
 - PuLP documentation: https://coin-or.github.io/pulp/
-- IBM Design Language, *Color*: https://www.ibm.com/design/language/color/
-- IBM Design Language, *Technical diagrams*: https://www.ibm.com/design/language/infographics/technical-diagrams/design/
-- Michelin Design System, *Principles of a dashboard*: https://designsystem.michelin.com/data-visualization/design-guidelines/principles-of-a-dashboard
+- IBM Design Language, *Color & Technical Diagrams*: https://www.ibm.com/design/language/color/
+- Michelin Design System, *Principles of a Dashboard*: https://designsystem.michelin.com/data-visualization/design-guidelines/principles-of-a-dashboard
 
 These references inform design and implementation choices; they do not establish that any unimplemented feature is complete.
