@@ -20,8 +20,8 @@ def test_greedy_scenario_1_fully_feasible_small(minimal_valid_scenario: Scenario
 def test_greedy_scenario_2_demand_greater_than_workforce(infeasible_scenario: Scenario):
     scheduler = GreedyScheduler()
     outcome = scheduler.solve(infeasible_scenario, ObjectiveConfig())
-    # Should report INFEASIBLE because demand cannot be satisfied
-    assert outcome.status == SolverStatus.INFEASIBLE
+    # Greedy returns NOT_SOLVED (partial schedule with shortages) rather than claiming mathematical INFEASIBLE
+    assert outcome.status == SolverStatus.NOT_SOLVED
 
 
 # 3. Employee unavailable for a requested shift
@@ -31,7 +31,7 @@ def test_greedy_scenario_3_unavailable_for_shift(minimal_valid_scenario: Scenari
     minimal_valid_scenario.employees[2].available_shifts = []
     scheduler = GreedyScheduler()
     outcome = scheduler.solve(minimal_valid_scenario, ObjectiveConfig())
-    assert outcome.status == SolverStatus.INFEASIBLE
+    assert outcome.status == SolverStatus.NOT_SOLVED
 
 
 # 4. Employee missing unit qualification
@@ -41,7 +41,7 @@ def test_greedy_scenario_4_missing_unit_qualification(minimal_valid_scenario: Sc
     minimal_valid_scenario.employees[2].skills = ["other_skill"]
     scheduler = GreedyScheduler()
     outcome = scheduler.solve(minimal_valid_scenario, ObjectiveConfig())
-    assert outcome.status == SolverStatus.INFEASIBLE
+    assert outcome.status == SolverStatus.NOT_SOLVED
 
 
 # 5. Duplicate assignment prevented in one shift
@@ -80,8 +80,8 @@ def test_greedy_scenario_6_hours_limit_enforced(minimal_valid_scenario: Scenario
     )
     scheduler = GreedyScheduler()
     outcome = scheduler.solve(minimal_valid_scenario, ObjectiveConfig())
-    # Capacity is 24h, demand is 32h -> INFEASIBLE
-    assert outcome.status == SolverStatus.INFEASIBLE
+    # Capacity is 24h, demand is 32h -> NOT_SOLVED (shortages exist)
+    assert outcome.status == SolverStatus.NOT_SOLVED
     # Ensure no employee had their hours exceeded
     for emp in minimal_valid_scenario.employees:
         total_hours = sum(a.hours for a in outcome.assignments if a.employee_id == emp.id)

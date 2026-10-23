@@ -223,6 +223,13 @@ class MILPScheduler(Scheduler):
 
             status, message = map_pulp_status(raw_lp, raw_sol)
 
+            # Capture solver bound and optimality gap if available
+            if hasattr(solve_res, "best_bound") and solve_res.best_bound is not None:
+                gap_val = getattr(solve_res, "gap_rel", None)
+                gap_str = f", gap: {gap_val*100:.2f}%" if gap_val is not None else ""
+                bound_info = f"bound: {solve_res.best_bound:.2f}{gap_str}"
+                message = f"{message} ({bound_info})" if message else bound_info
+
             # 8. Extract assignments if solution found
             assignments: list[Assignment] = []
             objective_value: float | None = None

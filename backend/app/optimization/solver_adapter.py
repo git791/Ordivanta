@@ -28,15 +28,33 @@ def get_solver(name: str | None = None, time_limit: int | None = None) -> pulp.L
 
 
 def map_pulp_status(lp_status: int | None, sol_status: int | None = None) -> tuple[SolverStatus, str | None]:
-    """Return (SolverStatus, message)."""
-    # lp_status: 1=Optimal, -1=Infeasible, -2=Unbounded, -3=Undefined, 0=Not solved
-    # sol_status: 1=Optimal, 2=Feasible, 0=Infeasible/not solved
+    """
+    Return (SolverStatus, message).
+    lp_status (PuLP / HiGHS):
+      1  = Optimal
+     -1  = Infeasible
+     -2  = Unbounded
+     -3  = Undefined
+     -4  = Time limit reached
+      0  = Not solved
+    sol_status:
+      1  = Optimal or feasible solution exists
+      2  = Feasible (unproven)
+      0  = Infeasible or no solution
+     -1  = Infeasible
+    """
     if lp_status == 1 and (sol_status == 1 or sol_status is None):
         return SolverStatus.OPTIMAL, None
+    elif lp_status == -4:
+        # Time limit reached
+        if sol_status in (1, 2):
+            return SolverStatus.FEASIBLE, "Time limit reached; feasible incumbent solution retained"
+        else:
+            return SolverStatus.NOT_SOLVED, "Time limit reached without a feasible solution"
     elif sol_status == 2 or (lp_status == 1 and sol_status == 2):
         return SolverStatus.FEASIBLE, "Feasible solution found but optimality not proven"
     elif lp_status == -1 or sol_status == -1:
-        return SolverStatus.INFEASIBLE, "Problem is infeasible"
+        return SolverStatus.INFEASIBLE, "Problem is mathematically proven infeasible"
     elif lp_status == 0 or sol_status == 0:
         return SolverStatus.NOT_SOLVED, "Solver returned without a usable solution"
     else:

@@ -273,15 +273,24 @@ class ALNSScheduler(Scheduler):
 
         runtime_seconds = time.perf_counter() - start_time
 
-        # Status: ALNS never claims OPTIMAL
+        # Status: ALNS is a metaheuristic and cannot prove mathematical optimality or infeasibility
         coverage_count = len(best_assignments)
         is_feasible = (coverage_count >= total_required_headcount)
-        status = SolverStatus.FEASIBLE if is_feasible else SolverStatus.INFEASIBLE
+        if is_feasible:
+            status = SolverStatus.FEASIBLE
+            msg = f"Feasible schedule found by ALNS ({iteration} iterations, objective: {best_obj:.2f})"
+        else:
+            status = SolverStatus.NOT_SOLVED
+            shortage = total_required_headcount - coverage_count
+            msg = (
+                f"Heuristic partial schedule: {shortage} positions unfilled after {iteration} iterations "
+                f"(ALNS cannot prove mathematical infeasibility)"
+            )
 
         return SolveOutcome(
             status=status,
             assignments=best_assignments,
             objective_value=best_obj,
             runtime_seconds=runtime_seconds,
-            message=f"ALNS completed {iteration} iterations (best objective: {best_obj:.2f})",
+            message=msg,
         )

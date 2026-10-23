@@ -25,8 +25,8 @@ def test_alns_respects_infeasible_scenario(infeasible_scenario: Scenario):
     scheduler = ALNSScheduler(max_iterations=30, seed=42)
     outcome = scheduler.solve(infeasible_scenario, ObjectiveConfig())
 
-    # Never marks an under-covered schedule as FEASIBLE
-    assert outcome.status == SolverStatus.INFEASIBLE
+    # Heuristic ALNS reports NOT_SOLVED on shortages, never claiming mathematical INFEASIBLE or FEASIBLE
+    assert outcome.status == SolverStatus.NOT_SOLVED
     val = validate_assignments(outcome.assignments, infeasible_scenario)
     # Any partial assignments still must not violate availability or max hours
     assert len(val.errors) == 0

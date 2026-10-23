@@ -86,10 +86,13 @@ class GreedyScheduler(Scheduler):
 
         runtime_seconds = time.perf_counter() - start_time
 
-        # Status determination: Greedy never proves optimality
+        # Status determination: Greedy never proves mathematical optimality or infeasibility
         if shortages > 0:
-            status = SolverStatus.INFEASIBLE
-            message = f"Greedy heuristic could not satisfy all demand ({shortages} positions unfilled)"
+            status = SolverStatus.NOT_SOLVED
+            message = (
+                f"Heuristic partial schedule: {shortages} positions unfilled "
+                f"(Greedy heuristic cannot prove mathematical infeasibility)"
+            )
         else:
             status = SolverStatus.FEASIBLE
             message = "Feasible schedule found (Greedy heuristic does not prove optimality)"
