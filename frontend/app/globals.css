@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/* ─── Tell Tailwind v4 where to scan for classes ─────────────────────── */
+@source "../app/**/*.{ts,tsx}";
+@source "../components/**/*.{ts,tsx}";
+@source "../features/**/*.{ts,tsx}";
+@source "../lib/**/*.{ts,tsx}";
+
+/* ─── Design tokens ───────────────────────────────────────────────────── */
+:root {
+  --canvas: #F3F5F7;
+  --surface: #FFFFFF;
+  --surface-muted: #E9EEF2;
+  --ink: #17212B;
+  --ink-muted: #536171;
+  --border: #D4DCE3;
+  --primary: #245A81;
+  --primary-hover: #1B4667;
+  --primary-soft: #E4EEF5;
+  --steel: #667B8D;
+  --success: #276749;
+  --success-soft: #E5F3EB;
+  --warning: #8A5A13;
+  --warning-soft: #FFF3D8;
+  --danger: #A33131;
+  --danger-soft: #FBEAEA;
+  --info: #315E83;
+}
+
+/* ─── Tailwind v4 theme tokens (generates utility classes) ───────────── */
+@theme {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-soft);
+  --color-steel: var(--steel);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --font-sans: 'IBM Plex Sans', Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ─── Base styles ─────────────────────────────────────────────────────── */
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Constrain SVG icons to their parent's text size by default ─────── */
+/* HeroIcons renders <svg> with no intrinsic px size; Tailwind v4 preflight
+   sets display:block but not width/height. We pin icons using w-* / h-*
+   Tailwind classes, and also add a safe fallback here so bare <svg> never
+   expands to fill its container. */
+svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ─── Focus rings ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,32 @@
+[project]
+name = "ordivanta-backend"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.111",
+  "uvicorn[standard]>=0.29",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.2",
+  "pulp>=2.8",
+  "highspy>=1.7",
+  "sqlalchemy[asyncio]>=2.0",
+  "greenlet>=3.0",
+  "aiosqlite>=0.20",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2",
+  "pytest-asyncio>=0.23",
+  "httpx>=0.27",
+  "ruff>=0.4",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

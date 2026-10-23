@@ -1,0 +1,75 @@
+# ─── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Database files ──────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+backend/ordivanta.db
+
+# ─── Optimization Solvers & Temp Files ───────────────────────────────────────
+*.lp
+*.mps
+*.sol
+*.ilp
+
+# ─── Node & Frontend ─────────────────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
+out/
+frontend/out/
+.pnp
+.pnp.*
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Environment / Secrets ───────────────────────────────────────────────────
+.env
+.env.*
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+backend/.env
+backend/.env.*
+!.env.example
+!frontend/.env.example
+!backend/.env.example
+
+# ─── Editor / OS ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ─── Test / Coverage / Linting ───────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

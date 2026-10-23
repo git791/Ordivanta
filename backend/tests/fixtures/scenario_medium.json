@@ -1,0 +1,55 @@
+{
+  "id": "scenario_medium",
+  "name": "Medium Test Scenario",
+  "employees": [
+    {"id": "EMP_01", "name": "Worker 01", "skills": ["s1"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_02", "name": "Worker 02", "skills": ["s1"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_03", "name": "Worker 03", "skills": ["s1"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_04", "name": "Worker 04", "skills": ["s1"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_05", "name": "Worker 05", "skills": ["s2"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_06", "name": "Worker 06", "skills": ["s2"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_07", "name": "Worker 07", "skills": ["s2"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_08", "name": "Worker 08", "skills": ["s2"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_09", "name": "Worker 09", "skills": ["s3"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_10", "name": "Worker 10", "skills": ["s3"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_11", "name": "Worker 11", "skills": ["s3"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_12", "name": "Worker 12", "skills": ["s3"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_13", "name": "Worker 13", "skills": ["s4"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_14", "name": "Worker 14", "skills": ["s4"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_15", "name": "Worker 15", "skills": ["s4"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_16", "name": "Worker 16", "skills": ["s4"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_17", "name": "Worker 17", "skills": ["s5"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_18", "name": "Worker 18", "skills": ["s5"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_19", "name": "Worker 19", "skills": ["s5"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0},
+    {"id": "EMP_20", "name": "Worker 20", "skills": ["s5"], "available_shifts": ["SH1", "SH2", "SH3"], "max_hours": 24.0}
+  ],
+  "units": [
+    {"id": "U_01", "name": "Fabrication", "required_skills": ["s1"]},
+    {"id": "U_02", "name": "Welding", "required_skills": ["s2"]},
+    {"id": "U_03", "name": "Painting", "required_skills": ["s3"]},
+    {"id": "U_04", "name": "Assembly", "required_skills": ["s4"]},
+    {"id": "U_05", "name": "Quality", "required_skills": ["s5"]}
+  ],
+  "shifts": [
+    {"id": "SH1", "name": "Morning", "start_time": "06:00", "end_time": "14:00", "duration_hours": 8.0},
+    {"id": "SH2", "name": "Afternoon", "start_time": "14:00", "end_time": "22:00", "duration_hours": 8.0},
+    {"id": "SH3", "name": "Night", "start_time": "22:00", "end_time": "06:00", "duration_hours": 8.0}
+  ],
+  "demands": [
+    {"unit_id": "U_01", "shift_id": "SH1", "required_headcount": 1},
+    {"unit_id": "U_02", "shift_id": "SH1", "required_headcount": 1},
+    {"unit_id": "U_03", "shift_id": "SH1", "required_headcount": 1},
+    {"unit_id": "U_04", "shift_id": "SH1", "required_headcount": 1},
+    {"unit_id": "U_05", "shift_id": "SH1", "required_headcount": 1},
+    {"unit_id": "U_01", "shift_id": "SH2", "required_headcount": 1},
+    {"unit_id": "U_02", "shift_id": "SH2", "required_headcount": 1},
+    {"unit_id": "U_03", "shift_id": "SH2", "required_headcount": 1},
+    {"unit_id": "U_04", "shift_id": "SH2", "required_headcount": 1},
+    {"unit_id": "U_05", "shift_id": "SH2", "required_headcount": 1},
+    {"unit_id": "U_01", "shift_id": "SH3", "required_headcount": 1},
+    {"unit_id": "U_02", "shift_id": "SH3", "required_headcount": 1},
+    {"unit_id": "U_03", "shift_id": "SH3", "required_headcount": 1},
+    {"unit_id": "U_04", "shift_id": "SH3", "required_headcount": 1},
+    {"unit_id": "U_05", "shift_id": "SH3", "required_headcount": 1}
+  ]
+}

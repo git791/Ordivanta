@@ -1,0 +1,91 @@
+{
+  "id": "scenario_small",
+  "name": "Small Test Scenario",
+  "employees": [
+    {
+      "id": "E1",
+      "name": "Employee 1",
+      "skills": ["assembly"],
+      "available_shifts": ["S1", "S2"],
+      "max_hours": 16.0
+    },
+    {
+      "id": "E2",
+      "name": "Employee 2",
+      "skills": ["assembly"],
+      "available_shifts": ["S1", "S2"],
+      "max_hours": 16.0
+    },
+    {
+      "id": "E3",
+      "name": "Employee 3",
+      "skills": ["packaging"],
+      "available_shifts": ["S1", "S2"],
+      "max_hours": 16.0
+    },
+    {
+      "id": "E4",
+      "name": "Employee 4",
+      "skills": ["packaging"],
+      "available_shifts": ["S1", "S2"],
+      "max_hours": 16.0
+    },
+    {
+      "id": "E5",
+      "name": "Employee 5",
+      "skills": ["assembly", "packaging"],
+      "available_shifts": ["S1", "S2"],
+      "max_hours": 16.0
+    }
+  ],
+  "units": [
+    {
+      "id": "U1",
+      "name": "Assembly Unit",
+      "required_skills": ["assembly"]
+    },
+    {
+      "id": "U2",
+      "name": "Packaging Unit",
+      "required_skills": ["packaging"]
+    }
+  ],
+  "shifts": [
+    {
+      "id": "S1",
+      "name": "Morning",
+      "start_time": "08:00",
+      "end_time": "16:00",
+      "duration_hours": 8.0
+    },
+    {
+      "id": "S2",
+      "name": "Evening",
+      "start_time": "16:00",
+      "end_time": "00:00",
+      "duration_hours": 8.0
+    }
+  ],
+  "demands": [
+    {
+      "unit_id": "U1",
+      "shift_id": "S1",
+      "required_headcount": 1
+    },
+    {
+      "unit_id": "U2",
+      "shift_id": "S1",
+      "required_headcount": 1
+    },
+    {
+      "unit_id": "U1",
+      "shift_id": "S2",
+      "required_headcount": 1
+    },
+    {
+      "unit_id": "U2",
+      "shift_id": "S2",
+      "required_headcount": 1
+    }
+  ]
+}

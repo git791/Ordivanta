@@ -1,0 +1,43 @@
+{
+  "id": "scenario_infeasible",
+  "name": "Infeasible Test Scenario",
+  "employees": [
+    {
+      "id": "E1",
+      "name": "Employee 1",
+      "skills": ["qc"],
+      "available_shifts": ["S1"],
+      "max_hours": 8.0
+    },
+    {
+      "id": "E2",
+      "name": "Employee 2",
+      "skills": ["qc"],
+      "available_shifts": ["S1"],
+      "max_hours": 8.0
+    }
+  ],
+  "units": [
+    {
+      "id": "U1",
+      "name": "Quality Unit",
+      "required_skills": ["qc"]
+    }
+  ],
+  "shifts": [
+    {
+      "id": "S1",
+      "name": "Day Shift",
+      "start_time": "08:00",
+      "end_time": "16:00",
+      "duration_hours": 8.0
+    }
+  ],
+  "demands": [
+    {
+      "unit_id": "U1",
+      "shift_id": "S1",
+      "required_headcount": 5
+    }
+  ]
+}
