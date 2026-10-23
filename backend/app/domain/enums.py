@@ -12,6 +12,7 @@ class SolverStatus(str, Enum):
 class Algorithm(str, Enum):
     MILP = "milp"
     GREEDY = "greedy"
+    ALNS = "alns"
 
 
 class ObjectivePrimary(str, Enum):

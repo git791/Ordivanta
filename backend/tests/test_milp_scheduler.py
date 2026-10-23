@@ -1,6 +1,6 @@
 import pytest
 from app.domain.models import Scenario, Employee, ProductionUnit, Shift, Demand, Assignment
-from app.domain.enums import SolverStatus
+from app.domain.enums import SolverStatus, ObjectivePrimary
 from app.schemas.schedule import ObjectiveConfig
 from app.optimization.milp_scheduler import MILPScheduler
 from app.optimization.solver_adapter import get_solver
@@ -139,3 +139,33 @@ def test_scenario_9_tampered_assignment_caught(minimal_valid_scenario: Scenario)
     val = validate_assignments(tampered, minimal_valid_scenario)
     assert val.is_valid is False
     assert any(e.code == "AVAILABILITY_VIOLATION" for e in val.errors)
+
+
+# 10. Multi-objective: Fairness primary objective
+def test_scenario_10_fairness_objective(minimal_valid_scenario: Scenario):
+    scheduler = MILPScheduler()
+    config = ObjectiveConfig(primary=ObjectivePrimary.FAIRNESS)
+    outcome = scheduler.solve(minimal_valid_scenario, config)
+    assert outcome.status == SolverStatus.OPTIMAL
+    assert len(outcome.assignments) == 2
+    assert outcome.objective_value is not None
+    val = validate_assignments(outcome.assignments, minimal_valid_scenario)
+    assert val.is_valid is True
+
+
+# 11. Multi-objective: Two-stage optimization
+def test_scenario_11_two_stage_optimization(minimal_valid_scenario: Scenario):
+    scheduler = MILPScheduler()
+    config = ObjectiveConfig(
+        primary=ObjectivePrimary.FEASIBILITY,
+        two_stage=True,
+        two_stage_tolerance=0.0,
+    )
+    outcome = scheduler.solve(minimal_valid_scenario, config)
+    assert outcome.status == SolverStatus.OPTIMAL
+    assert len(outcome.assignments) == 2
+    val = validate_assignments(outcome.assignments, minimal_valid_scenario)
+    assert val.is_valid is True
+    # In two-stage, total hours is strictly preserved at 16h, and assignments are valid
+    total_hours = sum(a.hours for a in outcome.assignments)
+    assert total_hours == 16.0

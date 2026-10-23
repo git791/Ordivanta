@@ -1,5 +1,5 @@
 export type SolverStatus = 'OPTIMAL' | 'FEASIBLE' | 'INFEASIBLE' | 'NOT_SOLVED' | 'ERROR';
-export type Algorithm = 'milp' | 'greedy';
+export type Algorithm = 'milp' | 'greedy' | 'alns';
 export type ObjectivePrimary = 'feasibility' | 'cost' | 'fairness';
 
 export interface Employee {
@@ -71,6 +71,8 @@ export interface ObjectiveConfig {
   primary: ObjectivePrimary;
   include_assignment_cost: boolean;
   fairness_weight: number;
+  two_stage?: boolean;
+  two_stage_tolerance?: number;
 }
 
 export interface SolveRequest {

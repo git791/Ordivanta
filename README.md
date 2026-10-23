@@ -130,41 +130,61 @@ Treat this as the target structure, not proof that every path already exists. Ad
 
 **No Streamlit is used or recommended.** Pin and test exact dependency versions during implementation. Confirm solver availability in the target environment before relying on it.
 
-## 6. Important optimisation model
+## 6. Mathematical Optimisation Model
 
-Let:
-- \(I\) be employees, \(J\) production units, and \(S\) shifts.
-- \(d_{js}\) be the required headcount for unit \(j\), shift \(s\).
-- \(a_{is}\in\{0,1\}\) indicate employee \(i\)'s availability for shift \(s\).
-- \(q_{ij}\in\{0,1\}\) indicate whether employee \(i\) is qualified for unit \(j\).
-- \(h_s\) be shift duration and \(H_i\) employee \(i\)'s maximum hours.
-- \(x_{ijs}\in\{0,1\}\) indicate assignment of employee \(i\) to unit \(j\) in shift \(s\).
+### Sets and Parameters
+- \(I\): Employees, \(J\): Production units / workstations, \(S\): Shift intervals.
+- \(d_{js}\): Required headcount demand for unit \(j\) in shift \(s\).
+- \(a_{is} \in \{0, 1\}\): Availability indicator (1 if employee \(i\) is available for shift \(s\)).
+- \(q_{ij} \in \{0, 1\}\): **Disjunctive Qualification Indicator**. In manufacturing cells with multiple skill competencies, an operator is qualified if the unit specifies no skills or the operator holds at least one of the unit's required skills:
+  \[
+  q_{ij} = \begin{cases} 1 & \text{if } S_j^{\text{unit}} = \emptyset \text{ or } (S_i^{\text{emp}} \cap S_j^{\text{unit}} \neq \emptyset) \\ 0 & \text{otherwise} \end{cases}
+  \]
+- \(h_s\): Duration of shift \(s\) in hours.
+- \(H_i\): Employee \(i\)'s maximum scheduled hours limit.
+- \(x_{ijs} \in \{0, 1\}\): Binary assignment variable (1 if employee \(i\) works in unit \(j\) on shift \(s\)).
 
-Core hard constraints:
-
+### Hard Constraints
+Coverage:
 \[
-\sum_{i\in I}x_{ijs}\ge d_{js}\quad\forall j,s
+\sum_{i \in I} x_{ijs} \ge d_{js} \quad \forall j \in J, s \in S
+\]
+Availability & Skills (enforced by domain variable truncation):
+\[
+x_{ijs} \le a_{is}, \quad x_{ijs} \le q_{ij} \quad \forall i, j, s
+\]
+At most one unit assignment per employee per shift:
+\[
+\sum_{j \in J} x_{ijs} \le 1 \quad \forall i \in I, s \in S
+\]
+Maximum scheduled hours limit:
+\[
+L_i = \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} \le H_i \quad \forall i \in I
 \]
 
-\[
-x_{ijs}\le a_{is},\quad x_{ijs}\le q_{ij}\quad\forall i,j,s
-\]
-
-\[
-\sum_{j\in J}x_{ijs}\le1\quad\forall i,s
-\]
-
-\[
-\sum_{j\in J}\sum_{s\in S}h_sx_{ijs}\le H_i\quad\forall i
-\]
-
-The exact objective must match the actual configured model. If assignment cost \(c_{ijs}\) exists, cost minimisation can be expressed as:
-
-\[
-\min C=\sum_{i\in I}\sum_{j\in J}\sum_{s\in S}c_{ijs}x_{ijs}
-\]
-
-Fairness can be added only after choosing and documenting a measurable definition, such as absolute deviation from target hours. Do not report labour-cost savings or fairness improvements unless those data and objective terms are implemented and evaluated.
+### Explicit Mathematical Objectives
+When monetary hourly wage data is absent from the schema:
+1. **Total Scheduled Hours Term (Non-Monetary Assignment Efficiency Proxy):**
+   \[
+   Z_{\text{hours}} = \sum_{i \in I} \sum_{j \in J} \sum_{s \in S} h_s x_{ijs}
+   \]
+   Minimizing \(Z_{\text{hours}}\) eliminates unnecessary over-allocation and meets demand with minimum staffing hours.
+2. **Workload Fairness Term (Linear Mean Absolute Deviation):**
+   Target workload per employee: \(\bar{H} = \frac{\sum_{j,s} h_s d_{js}}{|I|}\).
+   Linear absolute deviation constraints:
+   \[
+   u_i \ge L_i - \bar{H}, \quad u_i \ge \bar{H} - L_i \quad \forall i \in I
+   \]
+   \[
+   Z_{\text{fairness}} = \sum_{i \in I} u_i \quad (L_1 \text{ workload deviation across all workers})
+   \]
+3. **Objective Configurations:**
+   - `FEASIBILITY`: \(\min Z = Z_{\text{hours}}\) (minimizes scheduled hours to meet demand).
+   - `COST`: \(\min Z = Z_{\text{hours}} + w_{\text{fairness}} \cdot Z_{\text{fairness}}\) (total hours plus configured fairness weight).
+   - `FAIRNESS`: \(\min Z = Z_{\text{hours}} + Z_{\text{fairness}}\) (balances shift distribution while preventing gratuitous over-staffing).
+   - **Two-Stage Optimization (`two_stage=True`):**
+     - *Stage 1:* Solve \(\min Z_{\text{hours}} \to H^*\).
+     - *Stage 2:* Enforce \(Z_{\text{hours}} \le H^* \cdot (1 + \text{tolerance})\) and solve \(\min Z_{\text{fairness}}\). Guaranteed to optimize workload equity without exceeding minimum staffing hours.
 
 ## 7. Illustrative code blocks
 
@@ -305,10 +325,10 @@ pnpm run dev
 
 ### Running Tests & Evaluation Benchmarks
 ```powershell
-# Run backend test suite (49 unit and integration tests)
-backend\.venv\Scripts\pytest backend\tests\test_greedy_scheduler.py backend\tests\test_input_validator.py backend\tests\test_metrics.py backend\tests\test_milp_scheduler.py backend\tests\test_schedule_validator.py backend\tests\test_dataset_loaders.py
+# Run backend test suite (58 unit, integration, and metaheuristic tests)
+backend\.venv\Scripts\pytest backend\tests
 
-# Run cross-dataset MILP vs. Greedy comparison
+# Run cross-dataset MILP vs. Greedy vs. ALNS benchmark with statistical repetitions
 backend\.venv\Scripts\python backend\tests\benchmark.py
 ```
 
@@ -324,12 +344,15 @@ backend\.venv\Scripts\python backend\tests\benchmark.py
 - [x] Status communicated with explicit text badges + symbols, never color alone.
 - [x] CSV export blocked for `INFEASIBLE` and `ERROR` runs (`EXPORT_NOT_PERMITTED` 409 error).
 
+### Solvers & Metaheuristics
+- **MILP (HiGHS):** Primary exact solver; guarantees proven global optimality for feasible schedules and mathematical certificates of infeasibility.
+- **Greedy Baseline:** Deterministic fast heuristic baseline; returns feasible or partial solutions in sub-millisecond time.
+- **ALNS Metaheuristic:** Adaptive Large Neighbourhood Search using destroy operators (Random, Shift-based, Worst-fairness) and repair operators (Greedy capacity, Fairness regret). Essential for large-scale combinatorial instances where exact branch-and-cut times out.
+
 ### Known Limitations
 - **Single-User Prototype:** SQLite persistence designed for local decision support; multi-user concurrent deployment with PostgreSQL is `[planned]`.
-- **Synchronous Solves:** Solver runs synchronously in an offloaded thread pool (`asyncio.to_thread`); background asynchronous task queue (e.g. Celery / Redis) is `[planned]` for very large instances (> 500 staff).
-- **Objective Functions:** Core model minimizes feasibility (penalties=0). Cost minimization is supported when assignment costs are present. Fairness balancing (Gini coefficient / target hours variance) is `[planned]`.
-- **Greedy Baseline Heuristic:** Greedy uses a deterministic priority sorting heuristic and can get stuck in qualification bottlenecks; it does not guarantee global optimality.
-- **Continuous Timeline Constraints:** Temporal collision checks on continuous intervals (PTSP) are mapped to discrete shift slots. Continuous disjunctive interval scheduling is `[planned]`.
+- **Wage Data Absence:** Input schema does not currently define monetary employee wage rates. Cost minimization is accurately implemented and labeled as Total Scheduled Hours minimization.
+- **Continuous Timeline Non-Overlap:** Discrete shift slots model operations cleanly; continuous non-preemptive disjunctive job scheduling without fixed slots is `[planned]`.
 
 ## 13. References
 

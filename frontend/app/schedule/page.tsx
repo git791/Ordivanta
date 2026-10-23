@@ -658,6 +658,20 @@ export default function ScheduleBuilderPage() {
                     <p className="text-xs text-ink-muted">Fast heuristic baseline for comparison; no optimality proof.</p>
                   </div>
                 </label>
+                <label className="flex items-center gap-2 p-3 border border-border rounded cursor-pointer hover:bg-surface-muted/50 flex-1">
+                  <input
+                    type="radio"
+                    name="algorithm"
+                    value="alns"
+                    checked={algorithm === 'alns'}
+                    onChange={() => setAlgorithm('alns')}
+                    className="accent-primary"
+                  />
+                  <div>
+                    <span className="font-semibold text-sm text-ink">ALNS Metaheuristic</span>
+                    <p className="text-xs text-ink-muted">Adaptive Large Neighbourhood Search; fast heuristic for large instances.</p>
+                  </div>
+                </label>
               </div>
             </fieldset>
 

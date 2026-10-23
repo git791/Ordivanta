@@ -17,6 +17,7 @@ from app.validation.input_validator import validate_scenario
 from app.validation.schedule_validator import validate_assignments
 from app.optimization.milp_scheduler import MILPScheduler
 from app.optimization.greedy_scheduler import GreedyScheduler
+from app.optimization.alns_scheduler import ALNSScheduler
 from app.metrics.schedule_metrics import compute_metrics
 from app.services.scenario_service import get_scenario_domain, ValidationFailedError
 from app.persistence import repository
@@ -49,6 +50,8 @@ async def solve_schedule(
         scheduler = MILPScheduler()
     elif request.algorithm == Algorithm.GREEDY:
         scheduler = GreedyScheduler()
+    elif request.algorithm == Algorithm.ALNS:
+        scheduler = ALNSScheduler()
     else:
         raise ValueError(f"Unsupported algorithm: {request.algorithm}")
 
