@@ -22,6 +22,7 @@ export default function ExperimentsPage() {
   const [runningGreedy, setRunningGreedy] = useState<boolean>(false);
   const [runningAlns, setRunningAlns] = useState<boolean>(false);
   const [runningAll, setRunningAll] = useState<boolean>(false);
+  const [objectivePrimary, setObjectivePrimary] = useState<'feasibility' | 'fairness' | 'cost'>('feasibility');
 
   // Benchmark Datasets state
   const [datasets, setDatasets] = useState<DatasetMetadata[]>([]);
@@ -112,9 +113,9 @@ export default function ExperimentsPage() {
       scenario_id: selectedScenarioId,
       algorithm: algo,
       objective: {
-        primary: 'feasibility',
+        primary: objectivePrimary,
         include_assignment_cost: false,
-        fairness_weight: 0,
+        fairness_weight: objectivePrimary === 'cost' ? 0.1 : 0,
       },
       time_limit_seconds: 60,
     };
@@ -194,28 +195,51 @@ export default function ExperimentsPage() {
 
       {/* Scenario & Control Bar */}
       <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex-1 max-w-md">
-            <label htmlFor="scenario-selector" className="block text-xs font-semibold text-ink uppercase mb-1">
-              Select Benchmark Scenario:
-            </label>
-            <select
-              id="scenario-selector"
-              value={selectedScenarioId}
-              onChange={e => {
-                setSelectedScenarioId(e.target.value);
-                setMilpRun(null);
-                setGreedyRun(null);
-                setAlnsRun(null);
-              }}
-              className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-            >
-              {scenarios.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.employee_count} emp, {s.unit_count} units, {s.shift_count} shifts)
-                </option>
-              ))}
-            </select>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="flex-1 max-w-sm">
+              <label htmlFor="scenario-selector" className="block text-xs font-semibold text-ink uppercase mb-1">
+                Select Benchmark Scenario:
+              </label>
+              <select
+                id="scenario-selector"
+                value={selectedScenarioId}
+                onChange={e => {
+                  setSelectedScenarioId(e.target.value);
+                  setMilpRun(null);
+                  setGreedyRun(null);
+                  setAlnsRun(null);
+                }}
+                className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                {scenarios.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.employee_count} emp, {s.unit_count} units, {s.shift_count} shifts)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="w-full sm:w-48">
+              <label htmlFor="objective-selector" className="block text-xs font-semibold text-ink uppercase mb-1">
+                Objective Mode:
+              </label>
+              <select
+                id="objective-selector"
+                value={objectivePrimary}
+                onChange={e => {
+                  setObjectivePrimary(e.target.value as 'feasibility' | 'fairness' | 'cost');
+                  setMilpRun(null);
+                  setGreedyRun(null);
+                  setAlnsRun(null);
+                }}
+                className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                <option value="feasibility">Feasibility (min hours)</option>
+                <option value="fairness">Fairness (Two-Stage MILP)</option>
+                <option value="cost">Cost (hours + fairness)</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

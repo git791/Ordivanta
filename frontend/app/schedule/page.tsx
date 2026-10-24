@@ -686,13 +686,15 @@ export default function ScheduleBuilderPage() {
                 onChange={e => setObjective({ ...objective, primary: e.target.value as ObjectiveConfig['primary'] })}
                 className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
               >
-                <option value="feasibility">Feasibility (maximize coverage, fulfill hard constraints)</option>
-                <option value="cost">Cost Minimisation</option>
-                <option value="fairness">Fairness (balance workload)</option>
+                <option value="feasibility">Feasibility (meet demand with minimum hours)</option>
+                <option value="fairness">Fairness (balance workload deviations via Two-Stage MILP)</option>
+                <option value="cost">Cost Minimisation (hours + fairness weight)</option>
               </select>
-              <p className="text-xs text-ink-muted mt-1.5 bg-surface-muted p-2.5 rounded border border-border">
-                Note: Cost minimisation requires cost data configured in the scenario. Fairness objective not yet implemented.
-              </p>
+              <div className="text-xs text-ink-muted mt-1.5 bg-surface-muted p-2.5 rounded border border-border space-y-1">
+                <p><strong>Feasibility:</strong> Minimizes total scheduled labor hours to eliminate overstaffing.</p>
+                <p><strong>Fairness:</strong> Solves Two-Stage Lexicographic MILP to minimize absolute workload spread without increasing labor waste.</p>
+                <p><strong>Cost:</strong> Joint linear objective combining scheduled hours with fairness penalty.</p>
+              </div>
             </div>
 
             {/* Time Limit Input */}
