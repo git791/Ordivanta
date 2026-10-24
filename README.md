@@ -10,8 +10,6 @@ Ordivanta is a prototype-oriented workforce planning application for assigning e
 - Mohammed Ayaan Adil Ahmed
 - Tejas J Ambig
 
-> Team member names are listed as supplied. Add each member's agreed role and contribution before submission; do not attribute completed work without confirming it with the team.
-
 ---
 
 ## 1. Problem and purpose
@@ -135,66 +133,80 @@ Treat this as the target structure, not proof that every path already exists. Ad
 ## 6. Mathematical Optimisation Model
 
 ### Sets and Parameters
-- \(I\): Employees, \(J\): Production units / workstations, \(S\): Shift intervals.
-- \(d_{js}\): Required headcount demand for unit \(j\) in shift \(s\).
-- \(a_{is} \in \{0, 1\}\): Availability indicator (1 if employee \(i\) is available for shift \(s\)).
-- \(q_{ij} \in \{0, 1\}\): **Disjunctive Qualification Indicator**. In manufacturing cells with multiple skill competencies, an operator is qualified if the unit specifies no skills or the operator holds at least one of the unit's required skills:
-  \[
-  q_{ij} = \begin{cases} 1 & \text{if } S_j^{\text{unit}} = \emptyset \text{ or } (S_i^{\text{emp}} \cap S_j^{\text{unit}} \neq \emptyset) \\ 0 & \text{otherwise} \end{cases}
-  \]
-- \(h_s\): Duration of shift \(s\) in hours.
-- \(H_i\): Employee \(i\)'s maximum scheduled hours limit.
-- \(x_{ijs} \in \{0, 1\}\): Binary assignment variable (1 if employee \(i\) works in unit \(j\) on shift \(s\)).
+- $I$: Employees, $J$: Production units / workstations, $S$: Shift intervals.
+- $d_{js}$: Required headcount demand for unit $j$ in shift $s$.
+- $a_{is} \in \{0, 1\}$: Availability indicator (1 if employee $i$ is available for shift $s$).
+- $q_{ij} \in \{0, 1\}$: **Disjunctive Qualification Indicator**. In manufacturing cells with multiple skill competencies, an operator is qualified if the unit specifies no skills or the operator holds at least one of the unit's required skills:
+
+$$
+q_{ij} = \begin{cases} 1 & \text{if } S_j^{\text{unit}} = \emptyset \text{ or } (S_i^{\text{emp}} \cap S_j^{\text{unit}} \neq \emptyset) \\ 0 & \text{otherwise} \end{cases}
+$$
+
+- $h_s$: Duration of shift $s$ in hours.
+- $H_i$: Employee $i$'s maximum scheduled hours limit.
+- $x_{ijs} \in \{0, 1\}$: Binary assignment variable (1 if employee $i$ works in unit $j$ on shift $s$).
 
 ### Hard Constraints
-Coverage:
-\[
+
+**Coverage:**
+$$
 \sum_{i \in I} x_{ijs} \ge d_{js} \quad \forall j \in J, s \in S
-\]
-Availability & Skills (enforced by domain variable truncation):
-\[
+$$
+
+**Availability & Skills** (enforced by domain variable truncation):
+$$
 x_{ijs} \le a_{is}, \quad x_{ijs} \le q_{ij} \quad \forall i, j, s
-\]
-At most one unit assignment per employee per shift:
-\[
+$$
+
+**At most one unit assignment per employee per shift:**
+$$
 \sum_{j \in J} x_{ijs} \le 1 \quad \forall i \in I, s \in S
-\]
-Temporal rest intervals and shift non-overlap:
-Let \(\mathcal{C} = \{(s_1, s_2) : s_1 \ne s_2 \text{ and } (s_1, s_2) \text{ conflict}\}\) be the set of shift pairs that overlap in clock time or violate the minimum rest duration \(T_{\text{min\_rest}}\) (configurable, default 11 hours when enabled):
-\[
+$$
+
+**Temporal rest intervals and shift non-overlap:**
+Let $\mathcal{C} = \{(s_1, s_2) : s_1 \ne s_2 \text{ and } (s_1, s_2) \text{ conflict}\}$ be the set of shift pairs that overlap in clock time or violate the minimum rest duration $T_{\text{min\_rest}}$ (configurable, default 11 hours when enabled):
+
+$$
 \sum_{j \in J} x_{ijs_1} + \sum_{j \in J} x_{ijs_2} \le 1 \quad \forall i \in I, \forall (s_1, s_2) \in \mathcal{C}
-\]
-Maximum scheduled hours limit:
-\[
+$$
+
+**Maximum scheduled hours limit:**
+$$
 L_i = \sum_{j \in J} \sum_{s \in S} h_s x_{ijs} \le H_i \quad \forall i \in I
-\]
+$$
 
 ### Explicit Mathematical Objectives
 When monetary hourly wage data is absent from the schema:
+
 1. **Total Scheduled Hours Term (Non-Monetary Assignment Efficiency Proxy):**
-   \[
+   $$
    Z_{\text{hours}} = \sum_{i \in I} \sum_{j \in J} \sum_{s \in S} h_s x_{ijs}
-   \]
-   Minimizing \(Z_{\text{hours}}\) eliminates unnecessary over-allocation and meets demand with minimum staffing hours.
-2. **Workload Fairness Term (Linear \(L_1\)-norm Sum of Absolute Deviations):**
-   - **Uniform Target:** \(\bar{H}_i = \frac{H_{\text{req}}}{|I|}\) when employee capacities are identical.
-   - **Capacity-Aware Target:** \(\bar{H}_i = H_{\text{req}} \cdot \frac{C_i}{\sum_{k \in I} C_k}\) where \(C_i = e_i.\text{max\_hours}\) for heterogeneous contracts.
+   $$
+   Minimizing $Z_{\text{hours}}$ eliminates unnecessary over-allocation and meets demand with minimum staffing hours.
+
+2. **Workload Fairness Term (Linear $L_1$-norm Sum of Absolute Deviations):**
+   - **Uniform Target:** $\bar{H}_i = \frac{H_{\text{req}}}{|I|}$ when employee capacities are identical.
+   - **Capacity-Aware Target:** $\bar{H}_i = H_{\text{req}} \cdot \frac{C_i}{\sum_{k \in I} C_k}$ where $C_i = e_i.\text{max\_hours}$ for heterogeneous contracts.
+
    Linear absolute deviation constraints:
-   \[
+   $$
    u_i \ge L_i - \bar{H}_i, \quad u_i \ge \bar{H}_i - L_i \quad \forall i \in I
-   \]
-   \[
+   $$
+   $$
    Z_{\text{fairness}} = \sum_{i \in I} u_i \quad (\text{Sum of Absolute Deviations / SAD})
-   \]
-   *Note on dispersion metrics:* The solver explicitly optimizes linear \(L_1\) SAD. Sample standard deviation (\(\sigma\), \(L_2\)-norm) and workload spread (\(R = \max L_i - \min L_i\)) are non-linear evaluation metrics that decrease as SAD is minimized, but are not claimed as direct quadratic solver objectives.
+   $$
+
+   *Note on dispersion metrics:* The solver explicitly optimizes linear $L_1$ SAD. Sample standard deviation ($\sigma$, $L_2$-norm) and workload spread ($R = \max L_i - \min L_i$) are non-linear evaluation metrics that decrease as SAD is minimized, but are not claimed as direct quadratic solver objectives.
+
 3. **Primary Methodology — Two-Stage Lexicographic Optimization (`two_stage=True`, default):**
-   - *Stage 1 (Operational Efficiency):* Solve \(\min Z_1 = Z_{\text{hours}} \to Z_1^*\).
-   - *Stage 2 (Equity / Fairness):* Enforce \(Z_{\text{hours}} \le Z_1^* \cdot (1 + \epsilon_{\text{tol}})\) (default \(\epsilon_{\text{tol}} = 0.0\) for zero labor waste) and solve \(\min Z_2 = Z_{\text{fairness}} + 0.0001 \cdot Z_{\text{hours}}\).
+   - *Stage 1 (Operational Efficiency):* Solve $\min Z_1 = Z_{\text{hours}} \to Z_1^*$.
+   - *Stage 2 (Equity / Fairness):* Enforce $Z_{\text{hours}} \le Z_1^* \cdot (1 + \epsilon_{\text{tol}})$ (default $\epsilon_{\text{tol}} = 0.0$ for zero labor waste) and solve $\min Z_2 = Z_{\text{fairness}} + 0.0001 \cdot Z_{\text{hours}}$.
    - *Status integrity:* Only reported as `OPTIMAL` when both Stage 1 and Stage 2 prove optimality. If Stage 1 times out with a feasible incumbent, Stage 2 optimizes fairness within the incumbent bound and returns `FEASIBLE` ("Stage 1 incumbent; optimality not proven").
+
 4. **Single-Stage Objective Configurations:**
-   - `FEASIBILITY`: \(\min Z = Z_{\text{hours}}\) (minimizes scheduled hours to meet demand).
-   - `COST`: \(\min Z = Z_{\text{hours}} + w_{\text{fairness}} \cdot Z_{\text{fairness}}\) (total hours plus configured fairness weight).
-   - `FAIRNESS`: \(\min Z = Z_{\text{hours}} + Z_{\text{fairness}}\) (balances shift distribution while preventing gratuitous over-staffing).
+   - `FEASIBILITY`: $\min Z = Z_{\text{hours}}$ (minimizes scheduled hours to meet demand).
+   - `COST`: $\min Z = Z_{\text{hours}} + w_{\text{fairness}} \cdot Z_{\text{fairness}}$ (total hours plus configured fairness weight).
+   - `FAIRNESS`: $\min Z = Z_{\text{hours}} + Z_{\text{fairness}}$ (balances shift distribution while preventing gratuitous over-staffing).
 
 ## 7. Illustrative code blocks
 
