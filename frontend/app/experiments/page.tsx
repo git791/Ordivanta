@@ -17,8 +17,11 @@ export default function ExperimentsPage() {
 
   const [milpRun, setMilpRun] = useState<SolveResponse | null>(null);
   const [greedyRun, setGreedyRun] = useState<SolveResponse | null>(null);
+  const [alnsRun, setAlnsRun] = useState<SolveResponse | null>(null);
   const [runningMilp, setRunningMilp] = useState<boolean>(false);
   const [runningGreedy, setRunningGreedy] = useState<boolean>(false);
+  const [runningAlns, setRunningAlns] = useState<boolean>(false);
+  const [runningAll, setRunningAll] = useState<boolean>(false);
 
   // Benchmark Datasets state
   const [datasets, setDatasets] = useState<DatasetMetadata[]>([]);
@@ -84,6 +87,7 @@ export default function ExperimentsPage() {
       setSelectedScenarioId(res.scenario.id);
       setMilpRun(null);
       setGreedyRun(null);
+      setAlnsRun(null);
       setLoadedInstanceSummary(res.instance_summary);
     } catch (err: unknown) {
       console.error('Failed to load benchmark instance:', err);
@@ -97,11 +101,12 @@ export default function ExperimentsPage() {
     return scenarios.find(s => s.id === selectedScenarioId)?.name ?? selectedScenarioId;
   }, [scenarios, selectedScenarioId]);
 
-  const runAlgorithm = async (algo: 'milp' | 'greedy') => {
+  const runAlgorithm = async (algo: 'milp' | 'greedy' | 'alns') => {
     if (!selectedScenarioId) return;
     setError(null);
     if (algo === 'milp') setRunningMilp(true);
-    else setRunningGreedy(true);
+    else if (algo === 'greedy') setRunningGreedy(true);
+    else setRunningAlns(true);
 
     const payload: SolveRequest = {
       scenario_id: selectedScenarioId,
@@ -118,20 +123,36 @@ export default function ExperimentsPage() {
       const res = await api.solve(payload);
       if (algo === 'milp') {
         setMilpRun(res);
-      } else {
+      } else if (algo === 'greedy') {
         setGreedyRun(res);
+      } else {
+        setAlnsRun(res);
       }
+      return res;
     } catch (err: unknown) {
       console.error(`Failed to run ${algo}:`, err);
       setError(`Failed to execute ${algo.toUpperCase()} algorithm.`);
     } finally {
       if (algo === 'milp') setRunningMilp(false);
-      else setRunningGreedy(false);
+      else if (algo === 'greedy') setRunningGreedy(false);
+      else setRunningAlns(false);
+    }
+  };
+
+  const runAllAlgorithms = async () => {
+    if (!selectedScenarioId) return;
+    setRunningAll(true);
+    try {
+      await runAlgorithm('milp');
+      await runAlgorithm('greedy');
+      await runAlgorithm('alns');
+    } finally {
+      setRunningAll(false);
     }
   };
 
   const handleDownloadComparison = () => {
-    if (!milpRun && !greedyRun) return;
+    if (!milpRun && !greedyRun && !alnsRun) return;
 
     const data = {
       scenario_id: selectedScenarioId,
@@ -140,6 +161,7 @@ export default function ExperimentsPage() {
       comparison: {
         milp: milpRun,
         greedy: greedyRun,
+        alns: alnsRun,
       },
     };
 
@@ -158,13 +180,14 @@ export default function ExperimentsPage() {
     return <LoadingSpinner label="Loading experiment environment…" />;
   }
 
-  const bothRan = milpRun !== null && greedyRun !== null;
+  const anyRan = milpRun !== null || greedyRun !== null || alnsRun !== null;
+  const allRan = milpRun !== null && greedyRun !== null && alnsRun !== null;
 
   return (
     <div className="space-y-6 max-w-5xl">
       <PageHeader
         title="Algorithm Experiments & Benchmarks"
-        description="Compare exact MILP optimization against the Greedy baseline using identical input scenarios."
+        description="Compare exact MILP optimization against Greedy and ALNS heuristics using identical input scenarios."
       />
 
       {error && <ErrorBanner title="Execution Error" message={error} />}
@@ -183,6 +206,7 @@ export default function ExperimentsPage() {
                 setSelectedScenarioId(e.target.value);
                 setMilpRun(null);
                 setGreedyRun(null);
+                setAlnsRun(null);
               }}
               className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             >
@@ -194,12 +218,12 @@ export default function ExperimentsPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => runAlgorithm('milp')}
-              disabled={runningMilp || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              disabled={runningMilp || runningAll || !selectedScenarioId}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             >
               <PlayIcon className="w-4 h-4" aria-hidden="true" />
               {runningMilp ? 'Solving MILP…' : 'Run MILP'}
@@ -208,11 +232,31 @@ export default function ExperimentsPage() {
             <button
               type="button"
               onClick={() => runAlgorithm('greedy')}
-              disabled={runningGreedy || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              disabled={runningGreedy || runningAll || !selectedScenarioId}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             >
               <PlayIcon className="w-4 h-4" aria-hidden="true" />
               {runningGreedy ? 'Running Greedy…' : 'Run Greedy'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => runAlgorithm('alns')}
+              disabled={runningAlns || runningAll || !selectedScenarioId}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            >
+              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              {runningAlns ? 'Running ALNS…' : 'Run ALNS'}
+            </button>
+
+            <button
+              type="button"
+              onClick={runAllAlgorithms}
+              disabled={runningMilp || runningGreedy || runningAlns || runningAll || !selectedScenarioId}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-steel/10 border border-steel/30 text-ink rounded text-sm font-medium hover:bg-steel/20 transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            >
+              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              {runningAll ? 'Running All…' : 'Run All (3)'}
             </button>
           </div>
         </div>
@@ -281,10 +325,11 @@ export default function ExperimentsPage() {
       </div>
 
       {/* Comparison Section */}
-      {bothRan && (
+      {anyRan && (
         <div className="p-3.5 bg-primary-soft/50 border border-primary/30 rounded-lg text-sm text-ink flex items-center justify-between">
           <span>
-            Both algorithms used the same scenario: <strong>{selectedScenarioName}</strong>.
+            {allRan ? 'All 3 algorithms evaluated on identical scenario: ' : 'Evaluated on scenario: '}
+            <strong>{selectedScenarioName}</strong>.
           </span>
           <button
             type="button"
@@ -298,7 +343,7 @@ export default function ExperimentsPage() {
       )}
 
       {/* Comparison Table */}
-      {(milpRun || greedyRun) && (
+      {anyRan && (
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
           <div className="p-4 border-b border-border bg-surface-muted/50">
             <h2 className="text-base font-semibold text-ink">Benchmark Results Comparison</h2>
@@ -316,6 +361,9 @@ export default function ExperimentsPage() {
                   <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-ink-muted uppercase border-b border-border">
                     Greedy (Baseline Heuristic)
                   </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-ink-muted uppercase border-b border-border">
+                    ALNS (Metaheuristic)
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -327,6 +375,9 @@ export default function ExperimentsPage() {
                   </td>
                   <td className="px-4 py-3">
                     {greedyRun ? <StatusBadge status={greedyRun.status} size="sm" /> : <span className="text-ink-muted italic">Not run yet</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    {alnsRun ? <StatusBadge status={alnsRun.status} size="sm" /> : <span className="text-ink-muted italic">Not run yet</span>}
                   </td>
                 </tr>
 
@@ -344,6 +395,13 @@ export default function ExperimentsPage() {
                     {greedyRun ? (
                       <span>
                         {(greedyRun.metrics.coverage_rate * 100).toFixed(1)}% ({greedyRun.metrics.total_filled_positions} / {greedyRun.metrics.total_required_positions})
+                      </span>
+                    ) : '—'}
+                  </td>
+                  <td className="px-4 py-3 font-mono">
+                    {alnsRun ? (
+                      <span>
+                        {(alnsRun.metrics.coverage_rate * 100).toFixed(1)}% ({alnsRun.metrics.total_filled_positions} / {alnsRun.metrics.total_required_positions})
                       </span>
                     ) : '—'}
                   </td>
@@ -366,6 +424,13 @@ export default function ExperimentsPage() {
                       </span>
                     ) : '—'}
                   </td>
+                  <td className="px-4 py-3 font-mono">
+                    {alnsRun ? (
+                      <span className={alnsRun.violations.length > 0 ? 'text-danger font-semibold' : 'text-success'}>
+                        {alnsRun.violations.length}
+                      </span>
+                    ) : '—'}
+                  </td>
                 </tr>
 
                 {/* Runtime */}
@@ -376,6 +441,9 @@ export default function ExperimentsPage() {
                   </td>
                   <td className="px-4 py-3 font-mono">
                     {greedyRun ? `${greedyRun.runtime_seconds.toFixed(3)}s` : '—'}
+                  </td>
+                  <td className="px-4 py-3 font-mono">
+                    {alnsRun ? `${alnsRun.runtime_seconds.toFixed(3)}s` : '—'}
                   </td>
                 </tr>
 
@@ -388,6 +456,9 @@ export default function ExperimentsPage() {
                   <td className="px-4 py-3 font-mono">
                     {greedyRun && greedyRun.objective_value !== null ? greedyRun.objective_value.toFixed(2) : 'N/A'}
                   </td>
+                  <td className="px-4 py-3 font-mono">
+                    {alnsRun && alnsRun.objective_value !== null ? alnsRun.objective_value.toFixed(2) : 'N/A'}
+                  </td>
                 </tr>
 
                 {/* Unfilled positions */}
@@ -399,6 +470,9 @@ export default function ExperimentsPage() {
                   <td className="px-4 py-3 font-mono">
                     {greedyRun ? greedyRun.metrics.unfilled_positions : '—'}
                   </td>
+                  <td className="px-4 py-3 font-mono">
+                    {alnsRun ? alnsRun.metrics.unfilled_positions : '—'}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -407,12 +481,12 @@ export default function ExperimentsPage() {
       )}
 
       {/* Empty State before running */}
-      {!milpRun && !greedyRun && !runningMilp && !runningGreedy && (
+      {!anyRan && !runningMilp && !runningGreedy && !runningAlns && !runningAll && (
         <div className="bg-surface border border-border rounded-lg p-8 text-center">
           <BeakerIcon className="w-10 h-10 text-steel mx-auto mb-3" aria-hidden="true" />
           <h3 className="text-base font-semibold text-ink">No benchmark executed yet</h3>
           <p className="text-sm text-ink-muted mt-1 max-w-md mx-auto">
-            Choose a benchmark scenario above and click &quot;Run MILP&quot; and &quot;Run Greedy&quot; to execute comparative performance experiments.
+            Choose a benchmark scenario above and click &quot;Run MILP&quot;, &quot;Run Greedy&quot;, or &quot;Run ALNS&quot; to execute comparative performance experiments.
           </p>
         </div>
       )}
@@ -421,7 +495,7 @@ export default function ExperimentsPage() {
       <div className="bg-surface-muted border border-border rounded-lg p-4 text-xs text-ink-muted space-y-1">
         <p className="font-semibold text-ink">Scientific Methodology Note:</p>
         <p>
-          Greedy never proves optimality. OPTIMAL status for MILP means the solver has proven the solution optimal. Compare results on identical scenarios.
+          Greedy and ALNS never prove global mathematical optimality or mathematical infeasibility. OPTIMAL status for MILP indicates the solver has mathematically proven the solution optimal. Compare results on identical scenarios.
         </p>
       </div>
     </div>
