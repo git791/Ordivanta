@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from app.domain.enums import SolverStatus, Algorithm, ObjectivePrimary
+from app.domain.enums import SolverStatus, Algorithm, ObjectivePrimary, QualificationPolicy
 
 
 class ObjectiveConfig(BaseModel):
@@ -11,6 +11,16 @@ class ObjectiveConfig(BaseModel):
     two_stage_tolerance: float = 0.0
     proportional_fairness: bool = False
     min_rest_hours: float = 0.0
+
+    # --- Phase 3: Qualification policy ---
+    # Controls how employee skills are matched against unit requirements.
+    # ANY (default) preserves original disjunctive behaviour.
+    qualification_policy: QualificationPolicy = QualificationPolicy.ANY
+
+    # --- Phase 5: Recovery mode ---
+    # When True, use the recovery MILP with explicit shortage variables.
+    # When False (default), use the original hard-coverage MILP.
+    recovery_mode: bool = False
 
 
 class SolveRequest(BaseModel):

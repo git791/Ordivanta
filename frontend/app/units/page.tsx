@@ -80,30 +80,32 @@ export default function UnitsPage() {
   const columns: Column<ProductionUnit>[] = [
     {
       key: 'id',
-      header: 'Unit ID',
+      header: 'Cell / Unit ID',
       render: (u: ProductionUnit) => (
-        <span className="font-mono text-xs font-semibold text-ink">{u.id}</span>
+        <span className="font-mono text-xs font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
+          {u.id}
+        </span>
       ),
     },
     {
       key: 'name',
-      header: 'Unit Name / Station',
+      header: 'Workstation / Cell Name',
       render: (u: ProductionUnit) => (
-        <span className="font-medium text-ink">{u.name}</span>
+        <span className="font-semibold text-slate-900 text-sm">{u.name}</span>
       ),
     },
     {
       key: 'required_skills',
-      header: 'Required Qualifications',
+      header: 'Mandatory Qualifications & Certifications',
       render: (u: ProductionUnit) => (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {u.required_skills.length === 0 ? (
-            <span className="text-xs text-ink-muted">No specific qualifications required</span>
+            <span className="text-xs text-slate-400 italic">No specific qualifications required</span>
           ) : (
             u.required_skills.map((s, idx) => (
               <span
                 key={idx}
-                className="inline-block px-2 py-0.5 text-xs rounded bg-surface-muted border border-border text-ink-muted"
+                className="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full bg-purple-50 text-purple-700 border border-purple-200/80 shadow-2xs"
               >
                 {s}
               </span>
@@ -117,12 +119,12 @@ export default function UnitsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Production Units"
-        description="Configured workstations, manufacturing stations, and required qualifications."
+        title="Production Units & Cells"
+        description="Configured workstations, manufacturing stations, and qualification requirements."
       />
 
       {units.length === 0 ? (
-        <div className="bg-surface border border-border rounded-lg p-6">
+        <div className="bg-surface border border-border/80 rounded-3xl p-8 shadow-sm">
           <EmptyState
             title="No production units registered"
             description="Production units define the stations and qualified skill demands of your plant."
@@ -130,7 +132,7 @@ export default function UnitsPage() {
               <button
                 onClick={handleLoadSample}
                 disabled={loadingSample}
-                className="px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+                className="px-5 py-2.5 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 transition-colors disabled:opacity-50 shadow-2xs"
               >
                 {loadingSample ? 'Loading…' : 'Load Sample Scenario'}
               </button>
@@ -138,13 +140,15 @@ export default function UnitsPage() {
           />
         </div>
       ) : (
-        <div className="bg-surface border border-border rounded-lg p-5">
-          <DataTable<ProductionUnit>
-            columns={columns}
-            data={units}
-            keyField="id"
-            emptyMessage="No production units available."
-          />
+        <div className="bg-surface border border-border/80 rounded-3xl p-6 shadow-sm overflow-hidden">
+          <div className="rounded-2xl border border-border/70 overflow-hidden">
+            <DataTable<ProductionUnit>
+              columns={columns}
+              data={units}
+              keyField="id"
+              emptyMessage="No production units available."
+            />
+          </div>
         </div>
       )}
     </div>

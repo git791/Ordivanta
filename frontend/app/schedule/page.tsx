@@ -282,12 +282,12 @@ export default function ScheduleBuilderPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <PageHeader
-        title="Schedule Builder"
+        title="Schedule Builder & Solver Wizard"
         description="Configure scenario parameters, select optimization algorithm, and solve workforce schedules."
       />
 
-      {/* Stepper Header */}
-      <nav aria-label="Progress" className="bg-surface border border-border rounded-lg p-3">
+      {/* Stepper Header (Truck&Co Pill Style) */}
+      <nav aria-label="Progress" className="bg-surface border border-border/80 rounded-3xl p-3 shadow-2xs">
         <ol className="flex items-center justify-between gap-2 overflow-x-auto">
           {STEP_LABELS.map((label, idx) => {
             const stepNum = idx + 1;
@@ -296,22 +296,22 @@ export default function ScheduleBuilderPage() {
             return (
               <li key={label} className="flex-1 min-w-[120px]">
                 <div
-                  className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded transition-colors ${
+                  className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-full transition-all ${
                     isCurrent
-                      ? 'bg-primary-soft text-primary border border-primary'
+                      ? 'bg-slate-900 text-white shadow-2xs'
                       : isCompleted
-                      ? 'text-success bg-success-soft/50'
-                      : 'text-ink-muted'
+                      ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/80'
+                      : 'text-slate-500 bg-slate-50'
                   }`}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
                   <span
-                    className={`w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold ${
+                    className={`w-5 h-5 flex items-center justify-center rounded-full text-[11px] font-bold ${
                       isCurrent
-                        ? 'bg-primary text-white'
+                        ? 'bg-purple-600 text-white'
                         : isCompleted
-                        ? 'bg-success text-white'
-                        : 'bg-surface-muted text-steel'
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-200 text-slate-600'
                     }`}
                   >
                     {isCompleted ? '✓' : stepNum}
@@ -326,17 +326,17 @@ export default function ScheduleBuilderPage() {
 
       {/* STEP 1: Scenario Selection */}
       {step === 1 && (
-        <div className="bg-surface border border-border rounded-lg p-6 space-y-6">
+        <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-6 shadow-sm">
           <div>
-            <h2 className="text-lg font-semibold text-ink">Step 1 — Select Scenario</h2>
-            <p className="text-sm text-ink-muted mt-1">
+            <h2 className="text-base font-bold text-slate-900">Step 1 — Select Scenario</h2>
+            <p className="text-xs text-slate-500 mt-1">
               Select an existing manufacturing scenario or load the reference sample scenario.
             </p>
           </div>
 
           <div className="space-y-4 max-w-xl">
             <div>
-              <label htmlFor="scenario-select" className="block text-sm font-medium text-ink mb-1">
+              <label htmlFor="scenario-select" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
                 Active Scenario:
               </label>
               <select

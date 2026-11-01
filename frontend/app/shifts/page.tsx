@@ -180,10 +180,10 @@ export default function ShiftsPage() {
       />
 
       {/* Section 1: Shift Definitions */}
-      <section className="bg-surface border border-border rounded-lg p-5 space-y-4">
+      <section className="bg-surface border border-border/80 rounded-3xl p-6 space-y-4 shadow-sm overflow-hidden">
         <div>
-          <h2 className="text-base font-semibold text-ink">1. Shift Windows</h2>
-          <p className="text-xs text-ink-muted mt-0.5">Operating schedule windows and duration hours.</p>
+          <h2 className="text-base font-bold text-slate-900">1. Shift Windows & Operating Schedules</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Operating schedule windows, break rules, and duration hours.</p>
         </div>
         {shifts.length === 0 ? (
           <EmptyState
@@ -191,20 +191,22 @@ export default function ShiftsPage() {
             description="Shifts define working hours and operating time windows for the plant."
           />
         ) : (
-          <DataTable<Shift>
-            columns={shiftColumns}
-            data={shifts}
-            keyField="id"
-            emptyMessage="No shift definitions available."
-          />
+          <div className="rounded-2xl border border-border/70 overflow-hidden">
+            <DataTable<Shift>
+              columns={shiftColumns}
+              data={shifts}
+              keyField="id"
+              emptyMessage="No shift definitions available."
+            />
+          </div>
         )}
       </section>
 
       {/* Section 2: Demand Summary */}
-      <section className="bg-surface border border-border rounded-lg p-5 space-y-4">
+      <section className="bg-surface border border-border/80 rounded-3xl p-6 space-y-4 shadow-sm overflow-hidden">
         <div>
-          <h2 className="text-base font-semibold text-ink">2. Station Headcount Demand</h2>
-          <p className="text-xs text-ink-muted mt-0.5">Staffing requirements by production unit and shift.</p>
+          <h2 className="text-base font-bold text-slate-900">2. Station Headcount Demand</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Staffing requirements by production unit and shift.</p>
         </div>
         {demands.length === 0 ? (
           <EmptyState
@@ -212,12 +214,14 @@ export default function ShiftsPage() {
             description="Demand defines how many qualified operators each unit requires for a given shift."
           />
         ) : (
-          <DataTable<DemandRow>
-            columns={demandColumns}
-            data={demands}
-            getRowKey={(d, idx) => `${d.unit_id}-${d.shift_id}-${d.scenario_name}-${idx}`}
-            emptyMessage="No demand entries found."
-          />
+          <div className="rounded-2xl border border-border/70 overflow-hidden">
+            <DataTable<DemandRow>
+              columns={demandColumns}
+              data={demands}
+              getRowKey={(d, idx) => `${d.unit_id}-${d.shift_id}-${d.scenario_name}-${idx}`}
+              emptyMessage="No demand entries found."
+            />
+          </div>
         )}
       </section>
     </div>

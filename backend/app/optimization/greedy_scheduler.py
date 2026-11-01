@@ -2,6 +2,7 @@ import time
 from app.domain.models import Scenario, Assignment
 from app.domain.enums import SolverStatus
 from app.domain.temporal import build_shift_conflict_map
+from app.domain.qualification import is_qualified
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome
 
@@ -29,6 +30,12 @@ class GreedyScheduler(Scheduler):
         assigned_hours: dict[str, float] = {e.id: 0.0 for e in scenario.employees}
         conflict_map = build_shift_conflict_map(scenario.shifts, min_rest_hours=config.min_rest_hours)
 
+        # Qualification policy from config (default: ANY for backward compatibility)
+        pol = config.qualification_policy
+
+        # Qualification policy from config (default: ANY for backward compatibility)
+        pol = config.qualification_policy
+
         assignments: list[Assignment] = []
         shortages = 0
 
@@ -41,16 +48,18 @@ class GreedyScheduler(Scheduler):
         for d in sorted_demands:
             shift_duration = shift_durations.get(d.shift_id, 0.0)
             target_unit = unit_map.get(d.unit_id)
-            req_skills = target_unit.required_skills if target_unit else []
 
             # Identify eligible candidates
             candidates = []
             for emp in scenario.employees:
+                # 0. Absence check — absent employees are never eligible
+                if emp.is_absent:
+                    continue
                 # 1. Availability check
                 if d.shift_id not in emp.available_shifts:
                     continue
-                # 2. Qualification check
-                if req_skills and not any(sk in req_skills for sk in emp.skills):
+                # 2. Qualification check (policy-aware)
+                if target_unit is not None and not is_qualified(emp, target_unit, pol):
                     continue
                 # 3. One assignment per shift check
                 if d.shift_id in assigned_shifts[emp.id]:
@@ -58,8 +67,9 @@ class GreedyScheduler(Scheduler):
                 # 4. Temporal conflict check (overlapping shifts or minimum rest violation)
                 if any(assigned_s in conflict_map.get(d.shift_id, set()) for assigned_s in assigned_shifts[emp.id]):
                     continue
-                # 5. Max scheduled hours check
-                if assigned_hours[emp.id] + shift_duration > emp.max_hours:
+                # 5. Max scheduled hours check (uses effective max, respecting OT opt-in)
+                effective_max = emp.effective_max_hours()
+                if assigned_hours[emp.id] + shift_duration > effective_max:
                     continue
 
                 candidates.append(emp)

@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: '/shifts', label: 'Shift Demand', icon: ClockIcon },
   { href: '/schedule', label: 'Schedule Runs', icon: CalendarDaysIcon },
   { href: '/experiments', label: 'Experiments', icon: BeakerIcon },
+  { href: '/demo', label: 'Realism Demo', icon: BeakerIcon },
   { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
 

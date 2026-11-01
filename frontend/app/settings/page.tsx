@@ -71,95 +71,95 @@ export default function SettingsPage() {
             type="button"
             onClick={checkHealth}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full text-xs font-semibold hover:bg-slate-800 transition-all disabled:opacity-50 shadow-2xs"
           >
-            <ArrowPathIcon className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+            <ArrowPathIcon className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
             {refreshing ? 'Checking…' : 'Refresh Diagnostics'}
           </button>
         }
       />
 
       {/* Backend & Solver Diagnostics Card */}
-      <div className="bg-surface border border-border rounded-lg p-6 space-y-5">
-        <div className="flex items-center justify-between border-b border-border pb-4">
+      <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-5 shadow-sm">
+        <div className="flex items-center justify-between border-b border-border/70 pb-4">
           <div className="flex items-center gap-2.5">
-            <ServerIcon className="w-5 h-5 text-primary" aria-hidden="true" />
-            <h2 className="text-base font-semibold text-ink">Service Diagnostics</h2>
+            <ServerIcon className="w-5 h-5 text-purple-600" aria-hidden="true" />
+            <h2 className="text-base font-bold text-slate-900">Service Diagnostics</h2>
           </div>
           {lastChecked && (
-            <span className="text-xs text-ink-muted">Last checked: {lastChecked}</span>
+            <span className="text-xs text-slate-500 font-mono">Last checked: {lastChecked}</span>
           )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Status */}
-          <div className="p-4 bg-surface-muted rounded-lg border border-border space-y-1">
-            <span className="text-xs font-medium text-ink-muted uppercase">Backend Status</span>
+          <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-1">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Backend Status</span>
             <div className="flex items-center gap-2 pt-1">
               {isOnline ? (
                 <>
-                  <CheckCircleIcon className="w-5 h-5 text-success" aria-hidden="true" />
-                  <span className="font-semibold text-success text-sm">Online (Responding)</span>
+                  <CheckCircleIcon className="w-5 h-5 text-emerald-600" aria-hidden="true" />
+                  <span className="font-semibold text-emerald-800 text-sm">Online (Responding)</span>
                 </>
               ) : (
                 <>
-                  <XCircleIcon className="w-5 h-5 text-danger" aria-hidden="true" />
-                  <span className="font-semibold text-danger text-sm">Offline (Unreachable)</span>
+                  <XCircleIcon className="w-5 h-5 text-red-600" aria-hidden="true" />
+                  <span className="font-semibold text-red-800 text-sm">Offline (Unreachable)</span>
                 </>
               )}
             </div>
           </div>
 
           {/* Solver Availability */}
-          <div className="p-4 bg-surface-muted rounded-lg border border-border space-y-1">
-            <span className="text-xs font-medium text-ink-muted uppercase">MILP Solver Engine</span>
+          <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-1">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">MILP Solver Engine</span>
             <div className="flex items-center gap-2 pt-1">
-              <CpuChipIcon className="w-5 h-5 text-steel" aria-hidden="true" />
-              <span className="font-semibold text-ink text-sm">
+              <CpuChipIcon className="w-5 h-5 text-purple-600" aria-hidden="true" />
+              <span className="font-semibold text-slate-900 text-sm">
                 {health?.solver_available ? 'Available' : 'Unavailable'}
               </span>
             </div>
-            <p className="text-xs text-ink-muted">
+            <p className="text-xs text-slate-500">
               {health?.solver_available ? 'Ready for optimization runs' : 'Check backend solver setup'}
             </p>
           </div>
 
           {/* Solver Name */}
-          <div className="p-4 bg-surface-muted rounded-lg border border-border space-y-1">
-            <span className="text-xs font-medium text-ink-muted uppercase">Solver Backend</span>
+          <div className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 space-y-1">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Solver Backend</span>
             <div className="pt-1">
-              <span className="font-mono font-semibold text-ink text-sm">
+              <span className="font-mono font-bold text-slate-900 text-sm">
                 {health?.solver_name || 'N/A'}
               </span>
             </div>
-            <p className="text-xs text-ink-muted">Configured via PuLP</p>
+            <p className="text-xs text-slate-500">Configured via PuLP</p>
           </div>
         </div>
       </div>
 
       {/* Environment Section */}
-      <div className="bg-surface border border-border rounded-lg p-6 space-y-4">
-        <h2 className="text-base font-semibold text-ink">Environment Configuration</h2>
-        <div className="border border-border rounded overflow-hidden">
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-border">
+      <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-4 shadow-sm">
+        <h2 className="text-base font-bold text-slate-900">Environment Configuration</h2>
+        <div className="border border-border/70 rounded-2xl overflow-hidden">
+          <table className="w-full text-xs">
+            <tbody className="divide-y divide-border/60">
               <tr>
-                <td className="px-4 py-3 bg-surface-muted font-mono text-xs text-ink-muted w-1/3">
+                <td className="px-4 py-3 bg-slate-50/80 font-mono text-slate-500 w-1/3">
                   NEXT_PUBLIC_API_BASE_URL
                 </td>
-                <td className="px-4 py-3 font-mono text-xs text-ink">{apiBase}</td>
+                <td className="px-4 py-3 font-mono text-slate-900 font-semibold">{apiBase}</td>
               </tr>
               <tr>
-                <td className="px-4 py-3 bg-surface-muted font-mono text-xs text-ink-muted">
+                <td className="px-4 py-3 bg-slate-50/80 font-mono text-slate-500">
                   Client Framework
                 </td>
-                <td className="px-4 py-3 text-xs text-ink">Next.js (App Router) + React 19 + TypeScript</td>
+                <td className="px-4 py-3 text-slate-800 font-medium">Next.js (App Router) + React 19 + TypeScript</td>
               </tr>
               <tr>
-                <td className="px-4 py-3 bg-surface-muted font-mono text-xs text-ink-muted">
+                <td className="px-4 py-3 bg-slate-50/80 font-mono text-slate-500">
                   Design System
                 </td>
-                <td className="px-4 py-3 text-xs text-ink">Industrial Modern Utility (Tailwind CSS tokens)</td>
+                <td className="px-4 py-3 text-slate-800 font-medium">Truck&Co Executive B2B Theme (Tailwind CSS tokens)</td>
               </tr>
             </tbody>
           </table>
@@ -167,15 +167,15 @@ export default function SettingsPage() {
       </div>
 
       {/* Known Limitations */}
-      <div className="bg-surface border border-border rounded-lg p-6 space-y-3">
-        <div className="flex items-center gap-2 text-ink">
-          <InformationCircleIcon className="w-5 h-5 text-steel" aria-hidden="true" />
-          <h2 className="text-base font-semibold">System & Operational Scope</h2>
+      <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-3 shadow-sm">
+        <div className="flex items-center gap-2 text-slate-900">
+          <InformationCircleIcon className="w-5 h-5 text-purple-600" aria-hidden="true" />
+          <h2 className="text-base font-bold">System & Operational Scope</h2>
         </div>
-        <p className="text-xs text-ink-muted">
+        <p className="text-xs text-slate-500">
           Active architectural boundaries and constraints for this release:
         </p>
-        <ul className="space-y-2 text-xs text-ink list-disc list-inside">
+        <ul className="space-y-2 text-xs text-slate-700 list-disc list-inside">
           {KNOWN_LIMITATIONS.map((item, idx) => (
             <li key={idx} className="leading-relaxed">
               {item}

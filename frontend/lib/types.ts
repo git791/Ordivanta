@@ -1,6 +1,7 @@
 export type SolverStatus = 'OPTIMAL' | 'FEASIBLE' | 'INFEASIBLE' | 'NOT_SOLVED' | 'ERROR';
 export type Algorithm = 'milp' | 'greedy' | 'alns';
 export type ObjectivePrimary = 'feasibility' | 'cost' | 'fairness';
+export type QualificationPolicy = 'ANY' | 'ALL' | 'LEVEL_AND_CERTIFICATION';
 
 export interface Employee {
   id: string;
@@ -8,6 +9,15 @@ export interface Employee {
   skills: string[];
   available_shifts: string[];
   max_hours: number;
+  skill_levels?: Record<string, number>;
+  certifications?: string[];
+  is_absent?: boolean;
+  absence_reason?: string | null;
+  overtime_opt_in?: boolean;
+  regular_hours_limit?: number | null;
+  max_overtime_hours?: number;
+  overtime_hourly_premium?: number;
+  base_hourly_rate?: number;
 }
 
 export interface ProductionUnit {
@@ -73,6 +83,9 @@ export interface ObjectiveConfig {
   fairness_weight: number;
   two_stage?: boolean;
   two_stage_tolerance?: number;
+  min_rest_hours?: number;
+  qualification_policy?: QualificationPolicy;
+  recovery_mode?: boolean;
 }
 
 export interface SolveRequest {

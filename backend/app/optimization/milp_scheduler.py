@@ -1,8 +1,9 @@
 import time
 import pulp
 from app.domain.models import Scenario, Assignment
-from app.domain.enums import SolverStatus, ObjectivePrimary
+from app.domain.enums import SolverStatus, ObjectivePrimary, QualificationPolicy
 from app.domain.temporal import build_shift_conflict_pairs
+from app.domain.qualification import is_qualified
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome, SolverUnavailableError
 from .solver_adapter import get_solver, map_pulp_status
@@ -17,10 +18,12 @@ class MILPScheduler(Scheduler):
     - Single Assignment: sum_j x_{ijs} <= 1 for each employee and shift.
     - Max Hours: sum_{j,s} duration_s * x_{ijs} <= max_hours_i for each employee.
     - Availability: x_{ijs} = 0 if shift s is not in employee.available_shifts.
-    - Qualification (Disjunctive Rule): x_{ijs} = 0 if unit.required_skills is non-empty
-      and the employee has NONE of the unit's required skills.
-      Rationale: in manufacturing cells, multiple acceptable skill profiles exist;
-      an employee holding any compatible skill is qualified for assignment.
+    - Absence: x_{ijs} = 0 if employee.is_absent is True.
+    - Qualification (configurable via ObjectiveConfig.qualification_policy):
+        ANY (default): employee has at least one of the unit's required skills.
+        ALL: employee has every required skill (or mandatory_skill_requirements met).
+        LEVEL_AND_CERTIFICATION: every skill at required proficiency + certifications.
+      Overtime/on-call status never bypasses qualification.
 
     Mathematical Objectives:
     1. Total Scheduled Hours (Non-Monetary Assignment Efficiency Proxy):
@@ -57,21 +60,19 @@ class MILPScheduler(Scheduler):
             shift_ids = [s.id for s in scenario.shifts]
 
             shift_durations = {s.id: s.duration_hours for s in scenario.shifts}
-            emp_max_hours = {e.id: e.max_hours for e in scenario.employees}
+            emp_max_hours = {e.id: e.effective_max_hours() for e in scenario.employees}
 
             availability = {
                 e.id: {s_id: (s_id in e.available_shifts) for s_id in shift_ids}
                 for e in scenario.employees
             }
 
-            # Disjunctive qualification rule:
-            # Qualified if unit has no skill requirements OR employee possesses at least one required skill
+            # Qualification policy — checked via domain helper.
+            # Absent employees are unconditionally excluded regardless of policy.
+            pol = config.qualification_policy
             qualified = {
                 e.id: {
-                    u.id: (
-                        len(u.required_skills) == 0
-                        or any(sk in u.required_skills for sk in e.skills)
-                    )
+                    u.id: (not e.is_absent) and is_qualified(e, u, pol)
                     for u in scenario.units
                 }
                 for e in scenario.employees

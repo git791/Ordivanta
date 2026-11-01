@@ -193,12 +193,12 @@ export default function ExperimentsPage() {
 
       {error && <ErrorBanner title="Execution Error" message={error} />}
 
-      {/* Scenario & Control Bar */}
-      <div className="bg-surface border border-border rounded-lg p-5 space-y-4">
+      {/* Scenario & Control Bar (Truck&Co Style Card) */}
+      <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-5 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
             <div className="flex-1 max-w-sm">
-              <label htmlFor="scenario-selector" className="block text-xs font-semibold text-ink uppercase mb-1">
+              <label htmlFor="scenario-selector" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Select Benchmark Scenario:
               </label>
               <select
@@ -210,7 +210,7 @@ export default function ExperimentsPage() {
                   setGreedyRun(null);
                   setAlnsRun(null);
                 }}
-                className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 {scenarios.map(s => (
                   <option key={s.id} value={s.id}>
@@ -220,8 +220,8 @@ export default function ExperimentsPage() {
               </select>
             </div>
 
-            <div className="w-full sm:w-48">
-              <label htmlFor="objective-selector" className="block text-xs font-semibold text-ink uppercase mb-1">
+            <div className="w-full sm:w-56">
+              <label htmlFor="objective-selector" className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                 Objective Mode:
               </label>
               <select
@@ -233,7 +233,7 @@ export default function ExperimentsPage() {
                   setGreedyRun(null);
                   setAlnsRun(null);
                 }}
-                className="w-full px-3 py-2 border border-border rounded bg-surface text-ink text-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
               >
                 <option value="feasibility">Feasibility (min hours)</option>
                 <option value="fairness">Fairness (Two-Stage MILP)</option>
@@ -247,9 +247,9 @@ export default function ExperimentsPage() {
               type="button"
               onClick={() => runAlgorithm('milp')}
               disabled={runningMilp || runningAll || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-hover transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-xs font-semibold transition-all shadow-2xs disabled:opacity-50"
             >
-              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              <PlayIcon className="w-3.5 h-3.5" aria-hidden="true" />
               {runningMilp ? 'Solving MILP…' : 'Run MILP'}
             </button>
 
@@ -257,9 +257,9 @@ export default function ExperimentsPage() {
               type="button"
               onClick={() => runAlgorithm('greedy')}
               disabled={runningGreedy || runningAll || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-canvas border border-border/80 text-slate-800 hover:bg-slate-100 rounded-full text-xs font-semibold transition-all shadow-2xs disabled:opacity-50"
             >
-              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              <PlayIcon className="w-3.5 h-3.5" aria-hidden="true" />
               {runningGreedy ? 'Running Greedy…' : 'Run Greedy'}
             </button>
 
@@ -267,9 +267,9 @@ export default function ExperimentsPage() {
               type="button"
               onClick={() => runAlgorithm('alns')}
               disabled={runningAlns || runningAll || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-surface border border-border text-ink rounded text-sm font-medium hover:bg-surface-muted transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-canvas border border-border/80 text-slate-800 hover:bg-slate-100 rounded-full text-xs font-semibold transition-all shadow-2xs disabled:opacity-50"
             >
-              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              <PlayIcon className="w-3.5 h-3.5" aria-hidden="true" />
               {runningAlns ? 'Running ALNS…' : 'Run ALNS'}
             </button>
 
@@ -277,9 +277,9 @@ export default function ExperimentsPage() {
               type="button"
               onClick={runAllAlgorithms}
               disabled={runningMilp || runningGreedy || runningAlns || runningAll || !selectedScenarioId}
-              className="inline-flex items-center gap-2 px-3.5 py-2 bg-steel/10 border border-steel/30 text-ink rounded text-sm font-medium hover:bg-steel/20 transition-colors disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold transition-all shadow-2xs disabled:opacity-50"
             >
-              <PlayIcon className="w-4 h-4" aria-hidden="true" />
+              <PlayIcon className="w-3.5 h-3.5" aria-hidden="true" />
               {runningAll ? 'Running All…' : 'Run All (3)'}
             </button>
           </div>

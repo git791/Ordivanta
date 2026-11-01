@@ -7,6 +7,10 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'Ordivanta — Workforce Scheduling',
   description: 'Manufacturing workforce scheduling and shift optimization',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/logo-square.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

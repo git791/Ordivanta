@@ -16,6 +16,7 @@ from app.schemas.schedule import (
 from app.validation.input_validator import validate_scenario
 from app.validation.schedule_validator import validate_assignments
 from app.optimization.milp_scheduler import MILPScheduler
+from app.optimization.recovery_milp_scheduler import RecoveryMILPScheduler
 from app.optimization.greedy_scheduler import GreedyScheduler
 from app.optimization.alns_scheduler import ALNSScheduler
 from app.metrics.schedule_metrics import compute_metrics
@@ -47,7 +48,10 @@ async def solve_schedule(
 
     # 3. Choose scheduler
     if request.algorithm == Algorithm.MILP:
-        scheduler = MILPScheduler()
+        if request.objective.recovery_mode:
+            scheduler = RecoveryMILPScheduler()
+        else:
+            scheduler = MILPScheduler()
     elif request.algorithm == Algorithm.GREEDY:
         scheduler = GreedyScheduler()
     elif request.algorithm == Algorithm.ALNS:
@@ -68,6 +72,7 @@ async def solve_schedule(
         outcome.assignments,
         scenario,
         min_rest_hours=request.objective.min_rest_hours,
+        qualification_policy=request.objective.qualification_policy,
     )
 
     # 6. Compute metrics

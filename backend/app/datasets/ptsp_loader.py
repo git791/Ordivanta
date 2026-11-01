@@ -54,18 +54,19 @@ class PTSPLoader(BaseDatasetLoader):
                 "Worker qualification compatibility (mapped via multi-skilling available_shifts)",
                 "Task duration in hours (end_minute - start_minute) / 60.0",
                 "Single worker assignment per task (sum_i x_{ijs} >= 1)",
+                "Continuous timeline pairwise task non-overlap: Enforced via build_shift_conflict_pairs temporal constraints",
                 "Worker daily working-hours limit"
             ],
             unsupported_constraints=[
-                "Continuous timeline pairwise task non-overlap: In PTSP, tasks have continuous start/end minutes. "
-                "Ordivanta enforces that a worker works at most one unit per discrete shift slot, but does not "
-                "automatically enforce continuous interval non-overlap between two distinct overlapping shifts."
+                "Task preemption / splitting: In standard PTSP, tasks are continuous indivisible units; task pausing is not modeled.",
+                "Continuous travel time between distant physical workstation locations"
             ],
             transformation_notes=(
-                "Each job is mapped to an Ordivanta Shift with start_time, end_time, and duration_hours. "
+                "Each job is mapped to an Ordivanta Shift with start_time, end_time (HH:MM), and duration_hours. "
                 "A central task execution ProductionUnit ('unit_ptsp_ops') requires 1 worker per job. "
                 "Worker eligibility lists are transformed into worker shift availability mappings. "
-                "Continuous interval non-overlap across distinct jobs is flagged as an unsupported constraint."
+                "Pairwise temporal overlaps between simultaneous continuous jobs are natively resolved "
+                "via the temporal conflict graph in all schedulers."
             ),
         )
 
@@ -228,10 +229,10 @@ class PTSPLoader(BaseDatasetLoader):
             compatibility_status=CompatibilityStatus.PARTIALLY_COMPATIBLE,
             supported_constraints=[
                 "Task coverage (1 worker/job)", "Worker qualification match",
-                "Daily working hours cap"
+                "Daily working hours cap", "Pairwise task overlap conflict prevention"
             ],
             unsupported_constraints=[
-                "Continuous pairwise task time overlap"
+                "Continuous timeline task interval overlap (preemption/pausing)"
             ],
             notes="Personnel task scheduling with multi-skilling qualification matrix."
         )

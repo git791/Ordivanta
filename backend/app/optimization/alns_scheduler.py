@@ -2,20 +2,22 @@
 Adaptive Large Neighbourhood Search (ALNS) Metaheuristic Scheduler.
 
 An experimental iterative optimization method for large-scale workforce scheduling.
-ALNS never claims global optimality and strictly outputs FEASIBLE or INFEASIBLE.
+ALNS never claims global optimality and strictly outputs FEASIBLE or NOT_SOLVED.
 
 Preserves all hard constraints:
 1. Demand coverage
-2. Qualification (disjunctive rule)
+2. Qualification (policy-aware via QualificationPolicy enum)
 3. Availability
 4. At most one assignment per employee per shift
-5. Maximum scheduled hours limit
+5. Maximum scheduled hours limit (respects overtime opt-in)
+6. Absence exclusion (is_absent employees are never assigned)
 """
 import time
 import random
 from app.domain.models import Scenario, Assignment
 from app.domain.enums import SolverStatus, ObjectivePrimary
 from app.domain.temporal import build_shift_conflict_map
+from app.domain.qualification import is_qualified
 from app.schemas.schedule import ObjectiveConfig
 from .base import Scheduler, SolveOutcome
 from .greedy_scheduler import GreedyScheduler
@@ -106,13 +108,11 @@ class ALNSScheduler(Scheduler):
         emp_map = {e.id: e for e in scenario.employees}
         conflict_map = build_shift_conflict_map(scenario.shifts, min_rest_hours=config.min_rest_hours)
 
-        # Disjunctive qualification lookup
+        # Qualification policy lookup — absent employees unconditionally excluded
+        pol = config.qualification_policy
         qualified = {
             e.id: {
-                u.id: (
-                    len(u.required_skills) == 0
-                    or any(sk in u.required_skills for sk in e.skills)
-                )
+                u.id: (not e.is_absent) and is_qualified(e, u, pol)
                 for u in scenario.units
             }
             for e in scenario.employees
@@ -229,7 +229,7 @@ class ALNSScheduler(Scheduler):
                     # Temporal conflict check (overlapping shifts or minimum rest violation)
                     if any(assigned_s in conflict_map.get(s_id, set()) for assigned_s in assigned_shifts[emp.id]):
                         continue
-                    if assigned_hours[emp.id] + dur > emp.max_hours:
+                    if assigned_hours[emp.id] + dur > emp.effective_max_hours():
                         continue
                     candidates.append(emp)
 
