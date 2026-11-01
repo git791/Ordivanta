@@ -22,6 +22,13 @@ class PTSPLoader(BaseDatasetLoader):
         if data_dir is not None:
             self.data_dir = data_dir
         else:
+            import os
+            env_dir = os.environ.get("ORDIVANTA_DATA_DIR")
+            if env_dir:
+                candidate = Path(env_dir) / "ptask" / "ptsp"
+                if candidate.exists():
+                    self.data_dir = candidate
+                    return
             root = Path(__file__).resolve().parents[3]
             self.data_dir = root / "data" / "ptask" / "ptsp"
 
