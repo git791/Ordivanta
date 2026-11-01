@@ -19,14 +19,18 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 
-const NAV_ITEMS = [
+const PRIMARY_NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: Squares2X2Icon },
   { href: '/schedule', label: 'Planner', icon: CalendarDaysIcon, highlight: true },
-  { href: '/worker', label: 'My Portal', icon: UserIcon },
   { href: '/workforce', label: 'Workforce', icon: UsersIcon },
   { href: '/units', label: 'Cells', icon: CubeIcon },
   { href: '/shifts', label: 'Shifts', icon: ClockIcon },
   { href: '/experiments', label: 'Experiments', icon: BeakerIcon },
+];
+
+const ALL_NAV = [
+  ...PRIMARY_NAV,
+  { href: '/worker', label: 'Worker Portal', icon: UserIcon },
   { href: '/demo', label: 'Demo', icon: SparklesIcon },
   { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },
 ];
@@ -40,8 +44,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-canvas text-ink flex flex-col font-sans antialiased w-full max-w-full overflow-x-hidden">
       {/* ─── Truck&Co Inspired Floating / Pill Top Navigation ─────────────── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-2xs w-full">
-        <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-2xs w-full overflow-hidden">
+        <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 h-16 flex items-center justify-between gap-2 lg:gap-3">
           
           {/* Left: Brand Identity with Official Logo */}
           <div className="flex items-center gap-2 shrink-0">
@@ -63,21 +67,21 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     PLANT OS
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-500 -mt-0.5 hidden sm:block">Workforce Scheduling</span>
+                <span className="text-[10px] text-slate-500 -mt-0.5 hidden 2xl:block">Workforce Scheduling</span>
               </div>
             </Link>
           </div>
 
           {/* Center: Truck&Co Navigation Pill Container */}
-          <nav aria-label="Main Navigation" className="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 shadow-2xs shrink">
-            {NAV_ITEMS.map(({ href, label, icon: Icon, highlight }) => {
+          <nav aria-label="Main Navigation" className="hidden lg:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 shadow-2xs shrink-0">
+            {PRIMARY_NAV.map(({ href, label, icon: Icon, highlight }) => {
               const active = pathname === href || pathname.startsWith(href + '/');
               return (
                 <Link
                   key={href}
                   href={href}
                   className={clsx(
-                    'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap',
+                    'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap',
                     active
                       ? 'bg-slate-900 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/70',
@@ -89,10 +93,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
+
+            {/* Extended Items visible on 2xl */}
+            <div className="hidden 2xl:flex items-center gap-0.5 border-l border-slate-200/80 ml-1 pl-1">
+              <Link
+                href="/demo"
+                className={clsx(
+                  'flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap',
+                  pathname === '/demo' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                )}
+                title="Interactive Realism Demo"
+              >
+                <SparklesIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>Demo</span>
+              </Link>
+              <Link
+                href="/settings"
+                className={clsx(
+                  'flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-150 whitespace-nowrap',
+                  pathname === '/settings' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
+                )}
+                title="System Settings"
+              >
+                <Cog6ToothIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>Settings</span>
+              </Link>
+            </div>
           </nav>
 
-          {/* Right: Search, Plant Context, Supervisor Role & Action */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Right: Search, Persona Switcher, Supervisor Role & Action */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Quick Search */}
             <div className="relative hidden 2xl:block">
               {isSearching ? (
@@ -121,32 +151,32 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Persona / Role Switcher */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-medium shrink-0">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-semibold shrink-0">
               <Link
                 href="/dashboard"
                 className={clsx(
-                  "px-2.5 py-1 rounded-full transition-all flex items-center gap-1",
+                  "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full transition-all flex items-center gap-1",
                   pathname !== '/worker'
                     ? "bg-white text-slate-900 font-bold shadow-2xs"
                     : "text-slate-500 hover:text-slate-800"
                 )}
                 title="Switch to Supervisor Command Center"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
-                <span className="hidden sm:inline">Supervisor</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-600 shrink-0" />
+                <span>Supervisor</span>
               </Link>
               <Link
                 href="/worker"
                 className={clsx(
-                  "px-2.5 py-1 rounded-full transition-all flex items-center gap-1",
+                  "px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full transition-all flex items-center gap-1",
                   pathname === '/worker'
                     ? "bg-purple-600 text-white font-bold shadow-2xs"
                     : "text-slate-500 hover:text-slate-800"
                 )}
                 title="Switch to Worker Self-Service Portal"
               >
-                <UserIcon className="w-3 h-3" />
-                <span className="hidden sm:inline">Worker</span>
+                <UserIcon className="w-3 h-3 shrink-0" />
+                <span>Worker</span>
               </Link>
             </div>
 
@@ -156,37 +186,35 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 transition-colors relative shrink-0"
               title="Supervisory Alerts"
             >
-              <BellIcon className="w-4 h-4" />
+              <BellIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
             </Link>
 
-            {/* Plant Context & Role Pill */}
+            {/* Persona Profile Avatar Badge */}
             {pathname === '/worker' ? (
-              <div className="flex items-center gap-1.5 bg-purple-50/90 border border-purple-200/90 rounded-full px-2.5 py-1 text-xs shrink-0">
+              <div
+                className="flex items-center gap-1.5 bg-purple-50/90 border border-purple-200/90 rounded-full p-1 sm:px-2 sm:py-1 text-xs shrink-0 cursor-default"
+                title="David Kim • Senior Welder (Active Roster)"
+              >
                 <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
                   DK
                 </div>
-                <div className="hidden xl:flex flex-col text-left">
+                <div className="hidden 2xl:flex flex-col text-left">
                   <span className="font-semibold text-slate-900 leading-tight text-[11px]">David Kim</span>
                   <span className="text-[9px] text-purple-700 leading-none">Senior Welder</span>
                 </div>
-                <div className="h-3 w-px bg-purple-200 mx-0.5 hidden xl:block" />
-                <div className="flex items-center gap-1 text-purple-800 font-medium text-[11px]">
-                  <span className="truncate max-w-[95px] hidden sm:inline">Active Roster</span>
-                </div>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 rounded-full px-2.5 py-1 text-xs shrink-0">
+              <div
+                className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 rounded-full p-1 sm:px-2 sm:py-1 text-xs shrink-0 cursor-default"
+                title={`Elena Vance • Shift Supervisor (${plant})`}
+              >
                 <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
                   EV
                 </div>
-                <div className="hidden xl:flex flex-col text-left">
+                <div className="hidden 2xl:flex flex-col text-left">
                   <span className="font-semibold text-slate-900 leading-tight text-[11px]">Elena Vance</span>
                   <span className="text-[9px] text-slate-500 leading-none">Supervisor</span>
-                </div>
-                <div className="h-3 w-px bg-slate-300 mx-0.5 hidden xl:block" />
-                <div className="flex items-center gap-1 text-slate-700 font-medium text-[11px]">
-                  <span className="truncate max-w-[95px] hidden sm:inline">{plant}</span>
                 </div>
               </div>
             )}
@@ -194,17 +222,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Main Action: New Schedule / Solve */}
             <Link
               href="/schedule"
-              className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-2xs hover:shadow-xs transition-all shrink-0"
+              className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-semibold shadow-2xs hover:shadow-xs transition-all shrink-0"
+              title="Optimize Roster in Planner"
             >
               <SparklesIcon className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Optimize</span>
+              <span className="hidden xl:inline">Optimize</span>
             </Link>
           </div>
         </div>
 
         {/* Mobile / Tablet Horizontal Sub-Navigation */}
         <div className="lg:hidden flex items-center overflow-x-auto px-4 py-2 border-t border-slate-100 gap-1.5 bg-slate-50/60 no-scrollbar">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {ALL_NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + '/');
             return (
               <Link

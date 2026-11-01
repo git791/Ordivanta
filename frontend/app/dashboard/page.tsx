@@ -156,7 +156,7 @@ export default function DashboardPage() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-full overflow-x-hidden">
       {error && <ErrorBanner message={error} />}
 
       {/* Header with Plant & Period Selectors (Truck&Co style) */}

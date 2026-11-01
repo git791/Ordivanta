@@ -129,7 +129,7 @@ export default function WorkerPortalPage() {
   const estimatedGrossPay = totalWeeklyHours * currentWorker.base_wage;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto">
+    <div className="space-y-8 w-full max-w-5xl mx-auto overflow-x-hidden">
       {/* Toast Notification */}
       {syncToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-3 duration-300 border border-slate-700 text-xs">
