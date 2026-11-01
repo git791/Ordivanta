@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api } from '@/lib/api';
-import type { ScenarioSummary, RunSummary, ScenarioResponse, Assignment } from '@/lib/types';
+import type { ScenarioSummary, RunSummary, ScenarioResponse, Assignment, DatasetMetadata } from '@/lib/types';
 import PageHeader from '@/components/ui/PageHeader';
 import KpiCard from '@/components/ui/KpiCard';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -36,6 +36,7 @@ import {
 
 export default function DashboardPage() {
   const [scenarios, setScenarios] = useState<ScenarioSummary[]>([]);
+  const [datasets, setDatasets] = useState<DatasetMetadata[]>([]);
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [scenarioDetails, setScenarioDetails] = useState<ScenarioResponse | null>(null);
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
@@ -48,21 +49,47 @@ export default function DashboardPage() {
   const [assignedCandidateName, setAssignedCandidateName] = useState<string>('David Kim');
   const [dispatchToast, setDispatchToast] = useState<string | null>(null);
 
-  // Supervisor Plant State Filters
+  // Supervisor Plant & Dynamic Dataset State Filters
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>('default');
   const [selectedPlant, setSelectedPlant] = useState('Detroit Assembly Plant #1');
   const [selectedUnit, setSelectedUnit] = useState('All Production Units');
   const [schedulePeriod, setSchedulePeriod] = useState('Current Week (Nov 01 - Nov 07, 2026)');
+
+  // Worker Portal Real-Time Synchronization State
+  const [workerSyncState, setWorkerSyncState] = useState<{
+    emp_david?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
+    emp_alice?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
+    emp_004?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
+  } | null>(null);
+
+  useEffect(() => {
+    const syncWorkerState = () => {
+      try {
+        const raw = localStorage.getItem('ordivanta_worker_sync_state');
+        if (raw) {
+          setWorkerSyncState(JSON.parse(raw));
+        }
+      } catch {
+        // ignore
+      }
+    };
+    syncWorkerState();
+    window.addEventListener('storage', syncWorkerState);
+    return () => window.removeEventListener('storage', syncWorkerState);
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [scenariosData, runsData] = await Promise.all([
+      const [scenariosData, runsData, datasetsData] = await Promise.all([
         api.getScenarios().catch(() => [] as ScenarioSummary[]),
         api.getRuns().catch(() => [] as RunSummary[]),
+        api.getDatasets().catch(() => [] as DatasetMetadata[]),
       ]);
       setScenarios(scenariosData || []);
       setRuns(runsData || []);
+      setDatasets(datasetsData || []);
 
       // If we have runs, fetch latest run details for live assignments
       if (runsData && runsData.length > 0) {
@@ -116,6 +143,16 @@ export default function DashboardPage() {
     { employee_id: 'emp_01', shift_id: 'shift_morning', unit_id: 'unit_packaging', hours: 8.0 },
   ];
 
+  // Real-time synchronization values with Worker Self-Service Portal
+  const marcusSync = workerSyncState?.emp_004;
+  const isMarcusAbsent = marcusSync !== undefined ? marcusSync.is_absent : true;
+  const cell03FullyCovered = replacementAssigned || !isMarcusAbsent;
+
+  const davidSync = workerSyncState?.emp_david;
+  const davidOtConsent = davidSync !== undefined ? davidSync.overtime_opt_in : true;
+  const davidMaxOt = davidSync?.max_overtime_hours ?? 8.0;
+  const davidCerts = davidSync?.certifications ?? ['ISO 9001:2015', 'AWS D1.1 Structural Welding', 'Safety Level 2'];
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -131,28 +168,112 @@ export default function DashboardPage() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Dynamic Scenario / Plant Dropdown */}
           <select
-            value={selectedPlant}
-            onChange={(e) => setSelectedPlant(e.target.value)}
-            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
+            value={selectedScenarioId}
+            onChange={async (e) => {
+              const val = e.target.value;
+              setSelectedScenarioId(val);
+              if (val === 'default') {
+                setSelectedPlant('Detroit Assembly Plant #1');
+                if (scenarios.length > 0) {
+                  try {
+                    const sc = await api.getScenario(scenarios[0].id);
+                    setScenarioDetails(sc);
+                  } catch (err) {
+                    console.warn(err);
+                  }
+                }
+              } else {
+                const found = scenarios.find((s) => s.id === val);
+                if (found) {
+                  setSelectedPlant(found.name);
+                  try {
+                    const sc = await api.getScenario(found.id);
+                    setScenarioDetails(sc);
+                  } catch (err) {
+                    console.warn(err);
+                  }
+                }
+              }
+            }}
+            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[280px] truncate"
+            title="Select Manufacturing Plant Scenario"
           >
-            <option>Detroit Assembly Plant #1</option>
-            <option>Fremont Fabrication Plant #3</option>
+            <option value="default">Detroit Assembly Plant #1 (Synthetic Manufacturing)</option>
+            {scenarios.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.employee_count} workers, {s.unit_count} units)
+              </option>
+            ))}
           </select>
+
+          {/* Dynamic Production Unit Dropdown */}
           <select
             value={selectedUnit}
             onChange={(e) => setSelectedUnit(e.target.value)}
-            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
+            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+            title="Filter by Production Cell"
           >
-            <option>All Production Units</option>
-            <option>Cell 01 (Machining / Welding)</option>
-            <option>Cell 02 (CNC Stamping)</option>
-            <option>Cell 03 (Robotic Welding)</option>
-            <option>Cell 04 (Final QC & Packaging)</option>
+            <option value="All Production Units">All Production Units</option>
+            {scenarioDetails?.units && scenarioDetails.units.length > 0 ? (
+              scenarioDetails.units.map((u) => (
+                <option key={u.id} value={u.name}>
+                  {u.name}
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="Cell 01 (Machining / Welding)">Cell 01 (Machining / Welding)</option>
+                <option value="Cell 02 (CNC Stamping)">Cell 02 (CNC Stamping)</option>
+                <option value="Cell 03 (Robotic Welding)">Cell 03 (Robotic Welding)</option>
+                <option value="Cell 04 (Final QC & Packaging)">Cell 04 (Final QC & Packaging)</option>
+              </>
+            )}
           </select>
+
           <span className="px-3.5 py-1.5 bg-slate-100 border border-slate-200/80 rounded-full text-xs font-mono text-slate-600 shadow-2xs">
             {schedulePeriod}
           </span>
+        </div>
+      </div>
+
+      {/* Benchmark Datasets Provenance & Cross-Role Status Banner */}
+      <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-bold text-slate-800 flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Original Benchmark Datasets Available:
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 font-mono text-[11px] text-slate-700 shadow-2xs" title="225 instances in data/instances1_225">
+            Shift Scheduling: 225 TXT
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 font-mono text-[11px] text-slate-700 shadow-2xs" title="137 instances in data/ptask">
+            PTSP Task Allocation: 137 DAT
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full bg-white border border-slate-200 font-mono text-[11px] text-slate-700 shadow-2xs" title="24 instances in data/instances1_24">
+            Nurse Rostering: 24 Instances
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full bg-purple-50 border border-purple-200 font-mono text-[11px] text-purple-700 font-semibold shadow-2xs">
+            Synthetic Mfg: Primary
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/schedule"
+            className="font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-1 hover:underline"
+          >
+            <span>Solve Instance in Planner</span>
+            <ArrowRightIcon className="w-3 h-3" />
+          </Link>
+          <span className="text-slate-300">|</span>
+          <Link
+            href="/worker"
+            className="font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 hover:underline"
+          >
+            <span>Worker Portal (Self-Service)</span>
+            <ArrowRightIcon className="w-3 h-3" />
+          </Link>
         </div>
       </div>
 
@@ -233,23 +354,25 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold text-slate-900">Cell 03 • Robotic Welding</span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      replacementAssigned
+                      cell03FullyCovered
                         ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                         : 'bg-amber-100 text-amber-800 border-amber-200'
                     }`}
                   >
-                    {replacementAssigned ? '100% Optimal' : '88.9% Feasible'}
+                    {cell03FullyCovered ? '100% Optimal' : '88.9% Feasible'}
                   </span>
                 </div>
                 <div className="text-[11px] text-slate-600">
-                  {replacementAssigned
-                    ? 'Worker 004 absence covered by David Kim. 0 line stoppages.'
+                  {!isMarcusAbsent
+                    ? 'Worker 004 active on duty (Medical leave cleared in Worker Portal). 0 line stoppages.'
+                    : replacementAssigned
+                    ? `Worker 004 absence covered by ${assignedCandidateName}. 0 line stoppages.`
                     : '1 unstaffed slot on Afternoon shift. Replacement candidate on standby.'}
                 </div>
                 <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1">
                   <div
                     className={`h-1.5 rounded-full transition-all duration-500 ${
-                      replacementAssigned ? 'bg-emerald-500 w-[100%]' : 'bg-amber-500 w-[89%]'
+                      cell03FullyCovered ? 'bg-emerald-500 w-[100%]' : 'bg-amber-500 w-[89%]'
                     }`}
                   />
                 </div>
@@ -404,7 +527,22 @@ export default function DashboardPage() {
 
             <div className="space-y-3">
               {/* Alert 1: Specialist Replacement Workflow */}
-              {replacementAssigned ? (
+              {!isMarcusAbsent ? (
+                <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-950 mb-1">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheckIcon className="w-4 h-4 text-emerald-600" />
+                      Robotic Welding (Cell 03)
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full text-emerald-800 font-bold border border-emerald-200">
+                      Active via Portal ✓
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-800">
+                    Worker 004 marked active in Worker Self-Service Portal. Cell 03 is fully staffed with 0 line stoppage risk.
+                  </p>
+                </div>
+              ) : replacementAssigned ? (
                 <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
                   <div className="flex items-center justify-between text-xs font-bold text-emerald-950 mb-1">
                     <span className="flex items-center gap-1.5">
@@ -596,26 +734,53 @@ export default function DashboardPage() {
                     <ClockIcon className="w-4 h-4 text-indigo-600 shrink-0" />
                     <span>14.5h Rest Interval ✓</span>
                   </div>
-                  <div className="p-2 bg-white rounded-xl border border-purple-100 flex items-center gap-1.5 text-purple-700 font-semibold">
-                    <SparklesIcon className="w-4 h-4 text-purple-600 shrink-0" />
-                    <span>OT Consent Confirmed ✓</span>
+                  <div
+                    className={`p-2 bg-white rounded-xl border flex items-center gap-1.5 font-semibold ${
+                      davidOtConsent
+                        ? 'border-purple-100 text-purple-700'
+                        : 'border-rose-200 text-rose-700 bg-rose-50/50'
+                    }`}
+                  >
+                    {davidOtConsent ? (
+                      <SparklesIcon className="w-4 h-4 text-purple-600 shrink-0" />
+                    ) : (
+                      <ExclamationTriangleIcon className="w-4 h-4 text-rose-600 shrink-0" />
+                    )}
+                    <span>{davidOtConsent ? `OT Consent (${davidMaxOt}h max) ✓` : 'OT Consent Revoked in Portal'}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <div className="text-[11px] text-slate-500 truncate max-w-sm">
+                    Verified certs: <span className="font-medium text-slate-700">{davidCerts.join(', ')}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
                       setReplacementAssigned(true);
                       setAssignedCandidateName('David Kim');
                       setReplacementModalOpen(false);
-                      setDispatchToast('David Kim successfully dispatched to Robotic Welding (Cell 03) for Afternoon Shift. Mandatory 11h rest and ISO certification verified.');
+                      setDispatchToast(
+                        davidOtConsent
+                          ? 'David Kim successfully dispatched to Robotic Welding (Cell 03) for Afternoon Shift. Mandatory 11h rest and ISO certification verified.'
+                          : 'David Kim dispatched under Supervisory Overtime Override (Worker had revoked voluntary OT in portal).'
+                      );
                       setTimeout(() => setDispatchToast(null), 5000);
                     }}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer ${
+                      davidOtConsent
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-amber-600 hover:bg-amber-700 text-white'
+                    }`}
                   >
                     <CheckCircleIcon className="w-4 h-4" />
-                    <span>{replacementAssigned ? 'Reconfirm Dispatch' : 'Dispatch David Kim to Cell 03'}</span>
+                    <span>
+                      {replacementAssigned
+                        ? 'Reconfirm Dispatch'
+                        : davidOtConsent
+                        ? 'Dispatch David Kim to Cell 03'
+                        : 'Override & Dispatch (No OT Consent)'}
+                    </span>
                   </button>
                 </div>
               </div>

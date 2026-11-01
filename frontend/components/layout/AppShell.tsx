@@ -16,11 +16,13 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   SparklesIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: Squares2X2Icon },
   { href: '/schedule', label: 'Planner', icon: CalendarDaysIcon, highlight: true },
+  { href: '/worker', label: 'My Portal', icon: UserIcon },
   { href: '/workforce', label: 'Workforce', icon: UsersIcon },
   { href: '/units', label: 'Cells', icon: CubeIcon },
   { href: '/shifts', label: 'Shifts', icon: ClockIcon },
@@ -118,6 +120,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
+            {/* Persona / Role Switcher */}
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-medium shrink-0">
+              <Link
+                href="/dashboard"
+                className={clsx(
+                  "px-2.5 py-1 rounded-full transition-all flex items-center gap-1",
+                  pathname !== '/worker'
+                    ? "bg-white text-slate-900 font-bold shadow-2xs"
+                    : "text-slate-500 hover:text-slate-800"
+                )}
+                title="Switch to Supervisor Command Center"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-600" />
+                <span className="hidden sm:inline">Supervisor</span>
+              </Link>
+              <Link
+                href="/worker"
+                className={clsx(
+                  "px-2.5 py-1 rounded-full transition-all flex items-center gap-1",
+                  pathname === '/worker'
+                    ? "bg-purple-600 text-white font-bold shadow-2xs"
+                    : "text-slate-500 hover:text-slate-800"
+                )}
+                title="Switch to Worker Self-Service Portal"
+              >
+                <UserIcon className="w-3 h-3" />
+                <span className="hidden sm:inline">Worker</span>
+              </Link>
+            </div>
+
             {/* Notification Bell */}
             <Link
               href="/dashboard"
@@ -128,20 +160,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
             </Link>
 
-            {/* Plant Context & Supervisor Pill */}
-            <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 rounded-full px-2.5 py-1 text-xs shrink-0">
-              <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
-                EV
+            {/* Plant Context & Role Pill */}
+            {pathname === '/worker' ? (
+              <div className="flex items-center gap-1.5 bg-purple-50/90 border border-purple-200/90 rounded-full px-2.5 py-1 text-xs shrink-0">
+                <div className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
+                  DK
+                </div>
+                <div className="hidden xl:flex flex-col text-left">
+                  <span className="font-semibold text-slate-900 leading-tight text-[11px]">David Kim</span>
+                  <span className="text-[9px] text-purple-700 leading-none">Senior Welder</span>
+                </div>
+                <div className="h-3 w-px bg-purple-200 mx-0.5 hidden xl:block" />
+                <div className="flex items-center gap-1 text-purple-800 font-medium text-[11px]">
+                  <span className="truncate max-w-[95px] hidden sm:inline">Active Roster</span>
+                </div>
               </div>
-              <div className="hidden xl:flex flex-col text-left">
-                <span className="font-semibold text-slate-900 leading-tight text-[11px]">Elena Vance</span>
-                <span className="text-[9px] text-slate-500 leading-none">Supervisor</span>
+            ) : (
+              <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/90 rounded-full px-2.5 py-1 text-xs shrink-0">
+                <div className="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-[9px] shrink-0">
+                  EV
+                </div>
+                <div className="hidden xl:flex flex-col text-left">
+                  <span className="font-semibold text-slate-900 leading-tight text-[11px]">Elena Vance</span>
+                  <span className="text-[9px] text-slate-500 leading-none">Supervisor</span>
+                </div>
+                <div className="h-3 w-px bg-slate-300 mx-0.5 hidden xl:block" />
+                <div className="flex items-center gap-1 text-slate-700 font-medium text-[11px]">
+                  <span className="truncate max-w-[95px] hidden sm:inline">{plant}</span>
+                </div>
               </div>
-              <div className="h-3 w-px bg-slate-300 mx-0.5 hidden xl:block" />
-              <div className="flex items-center gap-1 text-slate-700 font-medium text-[11px]">
-                <span className="truncate max-w-[95px] hidden sm:inline">{plant}</span>
-              </div>
-            </div>
+            )}
 
             {/* Main Action: New Schedule / Solve */}
             <Link
@@ -181,31 +229,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <main className="flex-1 w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {children}
       </main>
-
-      {/* ─── Minimal Executive Footer ────────────────────────────────────── */}
-      <footer className="border-t border-border/80 bg-white/60 py-4 text-xs text-ink-muted">
-        <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/logo-icon.png"
-              alt="Ordivanta Icon"
-              width={16}
-              height={16}
-              className="object-contain"
-            />
-            <span className="font-semibold text-slate-800">Ordivanta Manufacturing Intelligence</span>
-            <span>&bull;</span>
-            <span>Detroit Assembly Plant #1</span>
-          </div>
-          <div className="flex items-center gap-4 text-slate-500">
-            <span>HiGHS/PuLP MILP Engine</span>
-            <span>&bull;</span>
-            <span>Rest Compliance &ge; 11h</span>
-            <span>&bull;</span>
-            <span className="font-mono">v2.4-prod</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
