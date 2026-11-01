@@ -18,6 +18,9 @@ import {
   ClockIcon,
   BuildingOffice2Icon,
   ArrowRightIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import {
   ResponsiveContainer,
@@ -38,6 +41,12 @@ export default function DashboardPage() {
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Replacement Dispatch State
+  const [replacementModalOpen, setReplacementModalOpen] = useState<boolean>(false);
+  const [replacementAssigned, setReplacementAssigned] = useState<boolean>(false);
+  const [assignedCandidateName, setAssignedCandidateName] = useState<string>('David Kim');
+  const [dispatchToast, setDispatchToast] = useState<string | null>(null);
 
   // Supervisor Plant State Filters
   const [selectedPlant, setSelectedPlant] = useState('Detroit Assembly Plant #1');
@@ -222,15 +231,27 @@ export default function DashboardPage() {
               <div className="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-2xl space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-900">Cell 03 • Robotic Welding</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                    88.9% Feasible
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      replacementAssigned
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border-amber-200'
+                    }`}
+                  >
+                    {replacementAssigned ? '100% Optimal' : '88.9% Feasible'}
                   </span>
                 </div>
                 <div className="text-[11px] text-slate-600">
-                  1 unstaffed slot on Night shift. On-call candidate on standby.
+                  {replacementAssigned
+                    ? 'Worker 004 absence covered by David Kim. 0 line stoppages.'
+                    : '1 unstaffed slot on Afternoon shift. Replacement candidate on standby.'}
                 </div>
                 <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1">
-                  <div className="bg-emerald-500 h-1.5 rounded-full w-[89%]" />
+                  <div
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      replacementAssigned ? 'bg-emerald-500 w-[100%]' : 'bg-amber-500 w-[89%]'
+                    }`}
+                  />
                 </div>
               </div>
 
@@ -382,21 +403,63 @@ export default function DashboardPage() {
             </p>
 
             <div className="space-y-3">
-              {/* Alert 1 */}
-              <div className="p-3.5 bg-red-50/70 border border-red-200/90 rounded-2xl">
-                <div className="flex items-center justify-between text-xs font-bold text-red-900 mb-1">
-                  <span>Robotic Welding (Cell 03)</span>
-                  <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded-full text-red-800 font-bold">Critical</span>
+              {/* Alert 1: Specialist Replacement Workflow */}
+              {replacementAssigned ? (
+                <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-950 mb-1">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheckIcon className="w-4 h-4 text-emerald-600" />
+                      Robotic Welding (Cell 03)
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full text-emerald-800 font-bold border border-emerald-200">
+                      Resolved ✓
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-800">
+                    Dispatched <strong>{assignedCandidateName}</strong> (Welding L4 + ISO 9001). Line stoppage averted.
+                  </p>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setReplacementModalOpen(true)}
+                      className="text-xs bg-emerald-700 text-white px-3 py-1 rounded-full font-semibold hover:bg-emerald-800 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      View Dispatch
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setReplacementAssigned(false);
+                        setDispatchToast('Replacement assignment undone. Cell 03 shortage reopened.');
+                        setTimeout(() => setDispatchToast(null), 4000);
+                      }}
+                      className="text-xs text-slate-500 hover:text-slate-800 underline px-2 cursor-pointer"
+                    >
+                      Undo
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-red-700">
-                  Worker 004 absent. Only 1 candidate holds ISO 9001 + Welding L4.
-                </p>
-                <div className="mt-2.5 flex gap-2">
-                  <button className="text-xs bg-red-600 text-white px-3 py-1 rounded-full font-semibold hover:bg-red-700 shadow-2xs">
-                    Assign Replacement
-                  </button>
+              ) : (
+                <div className="p-3.5 bg-red-50/70 border border-red-200/90 rounded-2xl">
+                  <div className="flex items-center justify-between text-xs font-bold text-red-900 mb-1">
+                    <span>Robotic Welding (Cell 03)</span>
+                    <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded-full text-red-800 font-bold">Critical</span>
+                  </div>
+                  <p className="text-xs text-red-700">
+                    Worker 004 absent. Only 1 candidate holds ISO 9001 + Welding L4.
+                  </p>
+                  <div className="mt-2.5 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setReplacementModalOpen(true)}
+                      className="text-xs bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 rounded-full font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <UserPlusIcon className="w-3.5 h-3.5" />
+                      <span>Assign Replacement</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Alert 2 */}
               <div className="p-3.5 bg-amber-50/70 border border-amber-200/90 rounded-2xl">
@@ -430,6 +493,172 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {dispatchToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-3 duration-300 border border-slate-700 text-xs">
+          <CheckCircleIcon className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{dispatchToast}</span>
+          <button
+            type="button"
+            onClick={() => setDispatchToast(null)}
+            className="ml-2 text-slate-400 hover:text-white"
+          >
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Replacement Dispatch Modal */}
+      {replacementModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white border border-border/80 rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-border/80">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700">
+                  <UserPlusIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Specialist Replacement Dispatch Engine
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Ranked candidates evaluated against skill qualifications, rest intervals, and overtime policies.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReplacementModalOpen(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Target Shortage Position Card */}
+            <div className="my-4 p-4 bg-slate-50/90 border border-slate-200/80 rounded-2xl">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div>
+                  <span className="text-slate-500">Target Cell:</span>{' '}
+                  <strong className="text-slate-900">Robotic Welding (Cell 03)</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500">Shift:</span>{' '}
+                  <strong className="text-slate-900">Afternoon (15:00–23:00 • 8.0h)</strong>
+                </div>
+                <div>
+                  <span className="text-slate-500">Absent Worker:</span>{' '}
+                  <span className="font-semibold text-rose-700">Worker 004 (Medical Leave)</span>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-slate-600 flex items-center gap-1.5">
+                <span className="font-semibold text-slate-700">Mandatory Prerequisite:</span>
+                <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-bold">
+                  Welding Level 4
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-bold">
+                  ISO 9001 Cert
+                </span>
+              </div>
+            </div>
+
+            {/* Candidate List */}
+            <div className="space-y-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Ranked Eligible Candidates (2 Found):
+              </div>
+
+              {/* Candidate 1: David Kim (Recommended) */}
+              <div className="p-4 bg-purple-50/50 border border-purple-200/90 rounded-2xl space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-slate-900">David Kim</h4>
+                      <span className="text-xs text-slate-500">(Senior Welding Specialist • #W412)</span>
+                    </div>
+                    <div className="text-xs text-slate-600 mt-0.5">
+                      Wage Rate: $32.50/h &bull; Est. Shift Cost: $260.00
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    96% Match • Recommended
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                  <div className="p-2 bg-white rounded-xl border border-purple-100 flex items-center gap-1.5 text-emerald-700 font-semibold">
+                    <ShieldCheckIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Welding L4 + ISO 9001 ✓</span>
+                  </div>
+                  <div className="p-2 bg-white rounded-xl border border-purple-100 flex items-center gap-1.5 text-indigo-700 font-semibold">
+                    <ClockIcon className="w-4 h-4 text-indigo-600 shrink-0" />
+                    <span>14.5h Rest Interval ✓</span>
+                  </div>
+                  <div className="p-2 bg-white rounded-xl border border-purple-100 flex items-center gap-1.5 text-purple-700 font-semibold">
+                    <SparklesIcon className="w-4 h-4 text-purple-600 shrink-0" />
+                    <span>OT Consent Confirmed ✓</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReplacementAssigned(true);
+                      setAssignedCandidateName('David Kim');
+                      setReplacementModalOpen(false);
+                      setDispatchToast('David Kim successfully dispatched to Robotic Welding (Cell 03) for Afternoon Shift. Mandatory 11h rest and ISO certification verified.');
+                      setTimeout(() => setDispatchToast(null), 5000);
+                    }}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <CheckCircleIcon className="w-4 h-4" />
+                    <span>{replacementAssigned ? 'Reconfirm Dispatch' : 'Dispatch David Kim to Cell 03'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Candidate 2: Carlos Diaz (Standby) */}
+              <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2 opacity-80">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-semibold text-slate-800">Carlos Diaz</h4>
+                      <span className="text-xs text-slate-500">(Assembly Operator • #A108)</span>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-0.5">
+                      Wage Rate: $24.00/h &bull; Current Hours: 24.0h
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    71% Partial Match
+                  </span>
+                </div>
+                <p className="text-[11px] text-amber-800">
+                  Holds Welding Level 3 (Required: Level 4). Assignment would require supervisory qualification override.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="mt-5 pt-4 border-t border-border/80 flex items-center justify-between text-xs text-slate-500">
+              <span className="flex items-center gap-1 text-emerald-700 font-medium">
+                <ShieldCheckIcon className="w-4 h-4 text-emerald-600" />
+                Enforces ISO 9001 Qualification & &ge; 11h Rest Interval Policy
+              </span>
+              <button
+                type="button"
+                onClick={() => setReplacementModalOpen(false)}
+                className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-semibold transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

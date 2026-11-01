@@ -31,6 +31,9 @@ export default function WorkforceTimelinePlanner({
   const [viewMode, setViewMode] = useState<'cell' | 'worker'>('cell');
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [activeTab, setActiveTab] = useState<'timeline' | 'shortages'>('timeline');
+  const [lockedAssignments, setLockedAssignments] = useState<Record<string, boolean>>({});
+  const [showReplacementSearch, setShowReplacementSearch] = useState<boolean>(false);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
 
   // Fallback defaults if no scenario is passed
   const units = scenario?.units || [
@@ -73,6 +76,11 @@ export default function WorkforceTimelinePlanner({
 
   // Filter units
   const displayedUnits = selectedCell === 'all' ? units : units.filter((u) => u.id === selectedCell);
+
+  const selectedKey = selectedAssignment
+    ? `${selectedAssignment.employee_id}-${selectedAssignment.shift_id}-${selectedAssignment.unit_id}`
+    : '';
+  const isCurrentAssignmentLocked = selectedKey ? Boolean(lockedAssignments[selectedKey]) : false;
 
   return (
     <div className="bg-surface border border-border/80 rounded-3xl p-6 shadow-sm">
@@ -371,19 +379,82 @@ export default function WorkforceTimelinePlanner({
               </div>
             </div>
 
+              {/* Replacement Candidates Section in Inspector */}
+              {showReplacementSearch && (
+                <div className="p-3 bg-purple-50/70 border border-purple-200/90 rounded-xl space-y-2 text-xs animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between font-bold text-purple-950">
+                    <span className="flex items-center gap-1.5">
+                      <UserPlusIcon className="w-3.5 h-3.5 text-purple-700" />
+                      Eligible Standby Replacements
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowReplacementSearch(false)}
+                      className="text-[10px] text-purple-600 hover:underline"
+                    >
+                      Hide
+                    </button>
+                  </div>
+                  <div className="p-2.5 bg-white border border-purple-200/80 rounded-lg space-y-1">
+                    <div className="flex justify-between items-center">
+                      <strong className="text-slate-900">David Kim (Welding L4)</strong>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-emerald-100 text-emerald-800">
+                        96% Match
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">14.5h rest gap &bull; Overtime consent confirmed</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActionFeedback(`Reassigned to David Kim for ${getShift(selectedAssignment.shift_id)?.name}`);
+                        setShowReplacementSearch(false);
+                        setTimeout(() => setActionFeedback(null), 4000);
+                      }}
+                      className="w-full mt-1.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-md text-[11px] font-semibold transition-colors"
+                    >
+                      Swap with David Kim
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            {/* Action Feedback Toast */}
+            {actionFeedback && (
+              <div className="my-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-[11px] font-medium flex items-center gap-1.5">
+                <CheckBadgeIcon className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{actionFeedback}</span>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="pt-4 border-t border-slate-200 mt-4 flex items-center gap-2">
               <button
                 type="button"
-                className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition-colors"
+                onClick={() => {
+                  setLockedAssignments(prev => ({ ...prev, [selectedKey]: !isCurrentAssignmentLocked }));
+                  setActionFeedback(isCurrentAssignmentLocked ? 'Assignment unlocked' : 'Assignment locked against re-optimization');
+                  setTimeout(() => setActionFeedback(null), 3500);
+                }}
+                className={clsx(
+                  'flex-1 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer',
+                  isCurrentAssignmentLocked
+                    ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white'
+                )}
               >
                 <LockClosedIcon className="w-3.5 h-3.5" />
-                Lock Assignment
+                {isCurrentAssignmentLocked ? 'Assignment Locked ✓' : 'Lock Assignment'}
               </button>
               <button
                 type="button"
-                className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center transition-colors"
-                title="Find Replacement"
+                onClick={() => setShowReplacementSearch(prev => !prev)}
+                className={clsx(
+                  'px-3 py-2 border rounded-xl text-xs font-semibold flex items-center justify-center transition-colors cursor-pointer',
+                  showReplacementSearch
+                    ? 'bg-purple-100 border-purple-300 text-purple-800'
+                    : 'bg-white border-slate-200 hover:bg-slate-100 text-slate-700'
+                )}
+                title="Find Replacement Candidates"
               >
                 <UserPlusIcon className="w-4 h-4 text-slate-600" />
               </button>
