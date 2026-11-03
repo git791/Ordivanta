@@ -138,7 +138,24 @@ async def delete_scenario(session: AsyncSession, id: str) -> None:
 
 
 async def list_scenarios(session: AsyncSession) -> list[ScenarioSummary]:
-    return await repository.list_scenarios(session)
+    scenarios = await repository.list_scenarios(session)
+    if not scenarios:
+        from app.datasets.registry import dataset_registry
+
+        for inst_id in [
+            "mfg_standard_sample",
+            "mfg_high_demand_feasible",
+            "mfg_shortage_infeasible",
+        ]:
+            try:
+                scenario, _ = dataset_registry.load_scenario(
+                    "synthetic_manufacturing", inst_id
+                )
+                await repository.save_scenario(session, scenario)
+            except Exception:
+                pass
+        scenarios = await repository.list_scenarios(session)
+    return scenarios
 
 
 async def validate_scenario_by_id(

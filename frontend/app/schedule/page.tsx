@@ -69,9 +69,45 @@ export default function ScheduleBuilderPage() {
   const fetchScenarios = useCallback(async () => {
     try {
       const data = await api.getScenarios();
-      setScenarios(data || []);
-      if (data && data.length > 0 && !selectedScenarioId) {
-        setSelectedScenarioId(data[0].id);
+      if (!data || data.length === 0) {
+        try {
+          const res = await api.loadDatasetInstance('synthetic_manufacturing', 'mfg_standard_sample');
+          const summary: ScenarioSummary = {
+            id: res.scenario.id,
+            name: res.scenario.name,
+            employee_count: res.scenario.employees?.length ?? 0,
+            unit_count: res.scenario.units?.length ?? 0,
+            shift_count: res.scenario.shifts?.length ?? 0,
+            demand_count: res.scenario.demands?.length ?? 0,
+            created_at: res.scenario.created_at,
+          };
+          setScenarios([summary]);
+          setSelectedScenarioId(res.scenario.id);
+          setSelectedScenario(res.scenario);
+        } catch {
+          try {
+            const sample = await api.loadSample();
+            const summary: ScenarioSummary = {
+              id: sample.id,
+              name: sample.name,
+              employee_count: sample.employees?.length ?? 0,
+              unit_count: sample.units?.length ?? 0,
+              shift_count: sample.shifts?.length ?? 0,
+              demand_count: sample.demands?.length ?? 0,
+              created_at: sample.created_at,
+            };
+            setScenarios([summary]);
+            setSelectedScenarioId(sample.id);
+            setSelectedScenario(sample);
+          } catch {
+            setScenarios([]);
+          }
+        }
+      } else {
+        setScenarios(data);
+        if (!selectedScenarioId) {
+          setSelectedScenarioId(data[0].id);
+        }
       }
     } catch (err: unknown) {
       console.error(err);

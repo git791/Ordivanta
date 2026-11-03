@@ -38,9 +38,43 @@ export default function ExperimentsPage() {
     setError(null);
     try {
       const data = await api.getScenarios();
-      setScenarios(data || []);
-      if (data && data.length > 0 && !selectedScenarioId) {
-        setSelectedScenarioId(data[0].id);
+      if (!data || data.length === 0) {
+        try {
+          const res = await api.loadDatasetInstance('synthetic_manufacturing', 'mfg_standard_sample');
+          const summary: ScenarioSummary = {
+            id: res.scenario.id,
+            name: res.scenario.name,
+            employee_count: res.scenario.employees?.length ?? 0,
+            unit_count: res.scenario.units?.length ?? 0,
+            shift_count: res.scenario.shifts?.length ?? 0,
+            demand_count: res.scenario.demands?.length ?? 0,
+            created_at: res.scenario.created_at,
+          };
+          setScenarios([summary]);
+          setSelectedScenarioId(res.scenario.id);
+        } catch {
+          try {
+            const sample = await api.loadSample();
+            const summary: ScenarioSummary = {
+              id: sample.id,
+              name: sample.name,
+              employee_count: sample.employees?.length ?? 0,
+              unit_count: sample.units?.length ?? 0,
+              shift_count: sample.shifts?.length ?? 0,
+              demand_count: sample.demands?.length ?? 0,
+              created_at: sample.created_at,
+            };
+            setScenarios([summary]);
+            setSelectedScenarioId(sample.id);
+          } catch {
+            setScenarios([]);
+          }
+        }
+      } else {
+        setScenarios(data);
+        if (!selectedScenarioId) {
+          setSelectedScenarioId(data[0].id);
+        }
       }
     } catch (err: unknown) {
       console.error(err);
@@ -210,13 +244,17 @@ export default function ExperimentsPage() {
                   setGreedyRun(null);
                   setAlnsRun(null);
                 }}
-                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
-                {scenarios.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.employee_count} emp, {s.unit_count} units, {s.shift_count} shifts)
-                  </option>
-                ))}
+                {scenarios.length === 0 ? (
+                  <option value="">No scenario loaded — choose from benchmark below</option>
+                ) : (
+                  scenarios.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.employee_count} emp, {s.unit_count} units, {s.shift_count} shifts)
+                    </option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -285,31 +323,71 @@ export default function ExperimentsPage() {
           </div>
         </div>
 
-        {/* Benchmark Dataset Import */}
-        <div className="pt-4 border-t border-border">
-          <p className="text-xs font-semibold text-ink uppercase mb-2">Import from Benchmark Datasets:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* Benchmark Datasets & Instances Selector */}
+        <div className="pt-4 border-t border-border/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
+              <p className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Benchmark Repositories (386 Instances Available):
+              </p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Select from ground-truth manufacturing benchmarks, continuous shift scheduling (225), PTSP task allocation (137), or nurse rostering (24).
+              </p>
+            </div>
+            {scenarios.length === 0 && (
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoadingBenchmark(true);
+                  try {
+                    const res = await api.loadDatasetInstance('synthetic_manufacturing', 'mfg_standard_sample');
+                    await fetchScenarios();
+                    setSelectedScenarioId(res.scenario.id);
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setLoadingBenchmark(false);
+                  }
+                }}
+                className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full text-xs font-bold shadow-2xs transition-all whitespace-nowrap cursor-pointer shrink-0"
+              >
+                Auto-Load Primary Benchmark
+              </button>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <div className="sm:col-span-5">
+              <label htmlFor="benchmark-collection" className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Benchmark Collection:
+              </label>
               <select
+                id="benchmark-collection"
                 aria-label="Benchmark Collection"
                 value={selectedDatasetId}
                 onChange={e => setSelectedDatasetId(e.target.value)}
-                className="w-full px-3 py-1.5 border border-border rounded bg-surface text-ink text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
               >
                 {datasets.map(d => (
                   <option key={d.dataset_id} value={d.dataset_id}>
-                    {d.name} ({d.total_instances})
+                    {d.name} ({d.total_instances} instances)
                   </option>
                 ))}
               </select>
             </div>
-            <div>
+
+            <div className="sm:col-span-4">
+              <label htmlFor="benchmark-instance" className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Instance:
+              </label>
               <select
+                id="benchmark-instance"
                 aria-label="Instance Selection"
                 value={selectedInstanceId}
                 onChange={e => setSelectedInstanceId(e.target.value)}
                 disabled={loadingInstances || instances.length === 0}
-                className="w-full px-3 py-1.5 border border-border rounded bg-surface text-ink text-xs focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-50"
+                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 cursor-pointer"
               >
                 {instances.map(inst => (
                   <option key={inst.instance_id} value={inst.instance_id}>
@@ -318,14 +396,15 @@ export default function ExperimentsPage() {
                 ))}
               </select>
             </div>
-            <div>
+
+            <div className="sm:col-span-3">
               <button
                 type="button"
                 onClick={handleLoadBenchmark}
                 disabled={loadingBenchmark || loadingInstances || !selectedInstanceId}
-                className="w-full sm:w-auto px-4 py-1.5 bg-surface border border-border rounded text-xs font-medium text-ink hover:bg-surface-muted transition-colors disabled:opacity-50"
+                className="w-full px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-full text-xs font-semibold shadow-2xs transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
               >
-                {loadingBenchmark ? 'Importing…' : 'Import Instance'}
+                {loadingBenchmark ? 'Loading…' : 'Load Benchmark Instance'}
               </button>
             </div>
           </div>
