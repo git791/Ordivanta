@@ -5,10 +5,13 @@ import type {
   DatasetMetadata, InstanceSummary, LoadInstanceResponse,
 } from './types';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+const rawBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+export const BASE = rawBase.trim().replace(/\/+$/, '');
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const url = `${BASE}${cleanPath}`;
+  const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });

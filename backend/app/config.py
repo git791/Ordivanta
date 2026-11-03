@@ -6,7 +6,13 @@ from pydantic import field_validator
 class Settings(BaseSettings):
     backend_host: str = "127.0.0.1"
     backend_port: int = 8000
-    allowed_origins: list[str] | str = ["http://localhost:3000"]
+    allowed_origins: list[str] | str = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "https://ordivanta.vercel.app",
+    ]
+    allowed_origin_regex: str | None = r"https://.*\.vercel\.app"
     database_url: str = "sqlite+aiosqlite:///./ordivanta.db"
     solver_name: str = "HiGHS"
     solver_time_limit: int = 60
@@ -15,6 +21,8 @@ class Settings(BaseSettings):
     @classmethod
     def parse_allowed_origins(cls, v):
         if isinstance(v, str):
+            if v.strip() == "*":
+                return ["*"]
             if v.startswith("[") and v.endswith("]"):
                 try:
                     parsed = json.loads(v)

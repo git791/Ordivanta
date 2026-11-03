@@ -1,14 +1,30 @@
+import re
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.types import ASGIApp, Scope, Receive, Send
 from app.config import settings
 from app.persistence.database import init_db
 from app.api.routes import health, workforce, scenarios, schedules, datasets, manufacturing
 from app.optimization.base import SolverUnavailableError
 from app.services.scenario_service import ScenarioNotFoundError, ValidationFailedError
 from app.services.schedule_service import RunNotFoundError, ExportNotPermittedError
+
+
+class NormalizePathMiddleware:
+    """Collapses consecutive duplicate slashes in the URL path (e.g. //api/schedules -> /api/schedules)."""
+
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] in ("http", "websocket"):
+            path = scope.get("path", "")
+            if "//" in path:
+                scope["path"] = re.sub(r"/+", "/", path)
+        await self.app(scope, receive, send)
 
 
 @asynccontextmanager
@@ -19,12 +35,34 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Ordivanta API", version="0.1.0", lifespan=lifespan)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_methods=["GET", "POST", "DELETE"],
-    allow_headers=["Content-Type", "Authorization"],
+# 1. Path normalization middleware
+app.add_middleware(NormalizePathMiddleware)
+
+# 2. CORS middleware with Vercel and production domain allowance
+cors_origins = (
+    settings.allowed_origins
+    if isinstance(settings.allowed_origins, list)
+    else [settings.allowed_origins]
 )
+
+if "*" in cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    cors_kwargs = {
+        "allow_origins": cors_origins,
+        "allow_credentials": True,
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+    }
+    if settings.allowed_origin_regex:
+        cors_kwargs["allow_origin_regex"] = settings.allowed_origin_regex
+    app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 
 @app.exception_handler(SolverUnavailableError)
