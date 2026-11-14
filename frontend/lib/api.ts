@@ -53,4 +53,14 @@ export const api = {
     apiFetch<InstanceSummary>(`/api/datasets/${datasetId}/instances/${instanceId}`),
   loadDatasetInstance: (datasetId: string, instanceId: string) =>
     apiFetch<LoadInstanceResponse>(`/api/datasets/${datasetId}/load/${instanceId}`, { method: 'POST' }),
+
+  getDatasetManifest: () => apiFetch<any>('/api/datasets/manifest'),
+  getTaskBenchmarks: (datasetId?: string) =>
+    apiFetch<Record<string, any[]>>(`/api/tasks/benchmarks${datasetId ? `?dataset_id=${datasetId}` : ''}`),
+  getTaskInstance: (datasetId: string, instanceId: string, maxTasks?: number) =>
+    apiFetch<any>(`/api/tasks/instance/${datasetId}/${instanceId}${maxTasks ? `?max_tasks=${maxTasks}` : ''}`),
+  solveTaskAllocation: (body: { dataset_id: string; instance_id: string; algorithm: string; max_tasks?: number; time_limit?: number }) =>
+    apiFetch<any>('/api/tasks/solve', { method: 'POST', body: JSON.stringify(body) }),
+  bridgeWorkflow: (body: { facility_id?: string; shift_name?: string; task_count?: number }) =>
+    apiFetch<any>('/api/tasks/workflow/bridge', { method: 'POST', body: JSON.stringify(body) }),
 };

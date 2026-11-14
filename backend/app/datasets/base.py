@@ -9,6 +9,7 @@ class DatasetType(str, Enum):
     SYNTHETIC_MANUFACTURING = "synthetic_manufacturing"
     SHIFT_SCHEDULING = "shift_scheduling"
     PTSP = "ptsp"
+    SMPTSP = "smptsp"
     NURSE_ROSTERING = "nurse_rostering"
 
 

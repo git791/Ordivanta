@@ -1,0 +1,13 @@
+tier,workers,tasks,algorithm,status,active_shifts,assigned_tasks,coverage_pct,runtime_seconds,is_valid
+Small,25,60,Greedy Allocator,FEASIBLE,15,60,100.0,0.0009,True
+Small,25,60,ALNS Metaheuristic,FEASIBLE,12,60,100.0,0.0226,True
+Small,25,60,Exact MILP,FEASIBLE,10,60,100.0,15.0545,True
+Medium,100,250,Greedy Allocator,FEASIBLE,45,250,100.0,0.017,True
+Medium,100,250,ALNS Metaheuristic,FEASIBLE,41,250,100.0,0.4099,True
+Medium,100,250,Exact MILP,FEASIBLE,85,225,90.0,15.8582,True
+Large,500,1200,Greedy Allocator,FEASIBLE,209,1200,100.0,0.2601,True
+Large,500,1200,ALNS Metaheuristic,FEASIBLE,184,1200,100.0,4.0988,True
+Large,500,1200,Exact MILP,TIME_LIMIT_EXCEEDED,0,0,0.0,30.0,False
+Very-Large,1000,2500,Greedy Allocator,FEASIBLE,441,2500,100.0,1.2949,True
+Very-Large,1000,2500,ALNS Metaheuristic,FEASIBLE,381,2500,100.0,25.0047,True
+Very-Large,1000,2500,Exact MILP,TIME_LIMIT_EXCEEDED,0,0,0.0,30.0,False

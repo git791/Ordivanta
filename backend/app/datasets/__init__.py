@@ -9,6 +9,7 @@ from .registry import DatasetRegistry, dataset_registry
 from .synthetic_loader import SyntheticManufacturingLoader
 from .shift_scheduling_loader import ShiftSchedulingLoader
 from .ptsp_loader import PTSPLoader
+from .smptsp_loader import SMPTSPLoader
 from .nurse_rostering_loader import NurseRosteringLoader
 
 __all__ = [
@@ -22,5 +23,6 @@ __all__ = [
     "SyntheticManufacturingLoader",
     "ShiftSchedulingLoader",
     "PTSPLoader",
+    "SMPTSPLoader",
     "NurseRosteringLoader",
 ]

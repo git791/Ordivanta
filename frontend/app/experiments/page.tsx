@@ -244,7 +244,7 @@ export default function ExperimentsPage() {
                   setGreedyRun(null);
                   setAlnsRun(null);
                 }}
-                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 cursor-pointer"
               >
                 {scenarios.length === 0 ? (
                   <option value="">No scenario loaded — choose from benchmark below</option>
@@ -271,7 +271,7 @@ export default function ExperimentsPage() {
                   setGreedyRun(null);
                   setAlnsRun(null);
                 }}
-                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 cursor-pointer"
               >
                 <option value="feasibility">Feasibility (min hours)</option>
                 <option value="fairness">Fairness (Two-Stage MILP)</option>
@@ -367,7 +367,7 @@ export default function ExperimentsPage() {
                 aria-label="Benchmark Collection"
                 value={selectedDatasetId}
                 onChange={e => setSelectedDatasetId(e.target.value)}
-                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 cursor-pointer"
               >
                 {datasets.map(d => (
                   <option key={d.dataset_id} value={d.dataset_id}>
@@ -387,7 +387,7 @@ export default function ExperimentsPage() {
                 value={selectedInstanceId}
                 onChange={e => setSelectedInstanceId(e.target.value)}
                 disabled={loadingInstances || instances.length === 0}
-                className="w-full px-3.5 py-2 border border-border/80 rounded-full bg-canvas text-slate-900 text-xs shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary disabled:opacity-50 cursor-pointer"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 text-xs shadow-2xs focus:outline-none focus:border-purple-600 focus:ring-1 focus:ring-purple-600 disabled:opacity-50 cursor-pointer"
               >
                 {instances.map(inst => (
                   <option key={inst.instance_id} value={inst.instance_id}>

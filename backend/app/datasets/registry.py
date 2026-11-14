@@ -12,6 +12,7 @@ from .base import (
 from .synthetic_loader import SyntheticManufacturingLoader
 from .shift_scheduling_loader import ShiftSchedulingLoader
 from .ptsp_loader import PTSPLoader
+from .smptsp_loader import SMPTSPLoader
 from .nurse_rostering_loader import NurseRosteringLoader
 
 
@@ -26,6 +27,7 @@ class DatasetRegistry:
             DatasetType.SYNTHETIC_MANUFACTURING.value: SyntheticManufacturingLoader(),
             DatasetType.SHIFT_SCHEDULING.value: ShiftSchedulingLoader(),
             DatasetType.PTSP.value: PTSPLoader(),
+            DatasetType.SMPTSP.value: SMPTSPLoader(),
             DatasetType.NURSE_ROSTERING.value: NurseRosteringLoader(),
         }
 

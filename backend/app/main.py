@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from starlette.types import ASGIApp, Scope, Receive, Send
 from app.config import settings
 from app.persistence.database import init_db
-from app.api.routes import health, workforce, scenarios, schedules, datasets, manufacturing
+from app.api.routes import health, workforce, scenarios, schedules, datasets, manufacturing, task_allocation
 from app.optimization.base import SolverUnavailableError
 from app.services.scenario_service import ScenarioNotFoundError, ValidationFailedError
 from app.services.schedule_service import RunNotFoundError, ExportNotPermittedError
@@ -161,3 +161,4 @@ app.include_router(scenarios.router, prefix="/api", tags=["scenarios"])
 app.include_router(schedules.router, prefix="/api", tags=["schedules"])
 app.include_router(datasets.router, prefix="/api", tags=["datasets"])
 app.include_router(manufacturing.router, prefix="/api", tags=["manufacturing"])
+app.include_router(task_allocation.router, prefix="/api", tags=["task_allocation"])

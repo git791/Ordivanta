@@ -1,0 +1,19 @@
+module,dataset,instance_id,workers,tasks,algorithm,status,shifts_count,assigned_tasks,coverage_pct,runtime_seconds,is_valid
+Module 2,PTSP,data_2_24_40_33,24,40,Greedy Allocator,FEASIBLE,22,40,100.0,0.0006,True
+Module 2,PTSP,data_2_24_40_33,24,40,Exact MILP Allocator,OPTIMAL,20,40,100.0,0.1741,True
+Module 2,PTSP,data_2_24_40_33,24,40,ALNS Metaheuristic,FEASIBLE,20,40,100.0,0.0506,True
+Module 2,PTSP,data_4_23_59_33,23,59,Greedy Allocator,PARTIAL,22,57,96.61016949152543,0.0009,True
+Module 2,PTSP,data_4_23_59_33,23,59,Exact MILP Allocator,OPTIMAL,20,59,100.0,0.32,True
+Module 2,PTSP,data_4_23_59_33,23,59,ALNS Metaheuristic,FEASIBLE,22,59,100.0,0.0768,True
+Module 2,PTSP,data_5_25_60_33,25,60,Greedy Allocator,FEASIBLE,22,60,100.0,0.0012,True
+Module 2,PTSP,data_5_25_60_33,25,60,Exact MILP Allocator,OPTIMAL,20,60,100.0,3.9977,True
+Module 2,PTSP,data_5_25_60_33,25,60,ALNS Metaheuristic,FEASIBLE,21,60,100.0,0.0434,True
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,50,50,Greedy Allocator,FEASIBLE,28,50,100.0,0.001,True
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,50,50,Exact MILP Allocator,OPTIMAL,25,50,100.0,0.173,True
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,50,50,ALNS Metaheuristic,FEASIBLE,27,50,100.0,0.0351,True
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,44,50,Greedy Allocator,FEASIBLE,29,50,100.0,0.0009,True
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,44,50,Exact MILP Allocator,OPTIMAL,26,50,100.0,1.0113,True
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,44,50,ALNS Metaheuristic,FEASIBLE,26,50,100.0,0.0238,True
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,102,50,Greedy Allocator,FEASIBLE,39,50,100.0,0.0017,True
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,102,50,Exact MILP Allocator,OPTIMAL,37,50,100.0,0.673,True
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,102,50,ALNS Metaheuristic,FEASIBLE,37,50,100.0,0.0808,True

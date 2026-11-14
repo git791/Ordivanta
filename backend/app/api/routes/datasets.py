@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
+from pathlib import Path
+import json
 
 from app.persistence.database import get_session
 from app.persistence import repository
@@ -54,6 +57,26 @@ def _to_dataset_response(m) -> DatasetMetadataResponse:
         unsupported_constraints=m.unsupported_constraints,
         transformation_notes=m.transformation_notes,
     )
+
+
+@router.get("/datasets/manifest")
+def get_dataset_manifest():
+    """Return the complete machine-readable dataset provenance manifest."""
+    root = Path(__file__).resolve().parents[4]
+    manifest_file = root / "data" / "dataset_manifest.json"
+    if not manifest_file.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Dataset manifest not found on server.",
+        )
+    try:
+        data = json.loads(manifest_file.read_text(encoding="utf-8"))
+        return JSONResponse(content=data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to read manifest: {str(e)}",
+        )
 
 
 @router.get("/datasets", response_model=List[DatasetMetadataResponse])

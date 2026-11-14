@@ -17,19 +17,23 @@ import {
   MagnifyingGlassIcon,
   SparklesIcon,
   UserIcon,
+  ClipboardDocumentListIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 
 const PRIMARY_NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: Squares2X2Icon },
-  { href: '/schedule', label: 'Planner', icon: CalendarDaysIcon, highlight: true },
-  { href: '/workforce', label: 'Workforce', icon: UsersIcon },
-  { href: '/units', label: 'Cells', icon: CubeIcon },
-  { href: '/shifts', label: 'Shifts', icon: ClockIcon },
+  { href: '/schedule', label: 'Shift Planner (M1)', icon: CalendarDaysIcon, highlight: true },
+  { href: '/tasks', label: 'Task Allocation (M2)', icon: ClipboardDocumentListIcon, highlight: true },
   { href: '/experiments', label: 'Experiments', icon: BeakerIcon },
+  { href: '/provenance', label: 'Provenance', icon: BookOpenIcon },
 ];
 
 const ALL_NAV = [
   ...PRIMARY_NAV,
+  { href: '/workforce', label: 'Workforce', icon: UsersIcon },
+  { href: '/units', label: 'Cells', icon: CubeIcon },
+  { href: '/shifts', label: 'Shifts', icon: ClockIcon },
   { href: '/worker', label: 'Worker Portal', icon: UserIcon },
   { href: '/demo', label: 'Demo', icon: SparklesIcon },
   { href: '/settings', label: 'Settings', icon: Cog6ToothIcon },

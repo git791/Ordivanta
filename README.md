@@ -1,8 +1,11 @@
 # Ordivanta — Workforce Scheduling & Shift Optimization
 
-> **Operations Research-Based Workforce Scheduling and Shift Optimization System for Manufacturing Industries**
+> **Operations Research-Based Two-Module Workforce Scheduling & Task Allocation System for Manufacturing Industries**
 
-Ordivanta is a prototype-oriented workforce planning application for assigning employees to manufacturing units and shifts while respecting staffing demand, skills, availability and working-hour limits. Its optimisation layer uses a Mixed-Integer Linear Programming (MILP) model; a Greedy scheduler provides a transparent baseline for comparison.
+Ordivanta is a comprehensive workforce optimization platform designed for modern manufacturing facilities. It features a **Two-Module Architecture** backed by published operations research benchmarks:
+1. **Module 1 (Macro Shift Planning & Optimization):** Multi-day workforce shift roster optimization balancing demand coverage, labor cost, and workload fairness on the **MATSP** benchmark (225 instances).
+2. **Module 2 (Micro Personnel Task Allocation):** Continuous-timeline workstation task scheduling respecting multi-skilling qualifications and strict non-overlapping execution on the **PTSP** (137 instances) and **SMPTSP** (10 instances) benchmarks.
+3. **Shared Dynamic Disruption Engine:** Rapid Recovery MILP for unexpected worker absences that achieves >80% reduction in schedule churn compared to rescheduling from scratch.
 
 **Team members**
 - Abhishek
@@ -12,20 +15,21 @@ Ordivanta is a prototype-oriented workforce planning application for assigning e
 
 ---
 
-## 1. Problem and purpose
+## 1. Problem and Purpose
 
-Manufacturing teams must staff the right production unit, at the right time, with enough qualified and available employees. Spreadsheet-based scheduling becomes harder to audit as the number of workers, shifts and units grows. An apparently complete roster may still contain skill mismatches, unavailable employees, duplicate assignments or uncovered demand.
+Manufacturing operations operate at two complementary decision layers:
+1. **Macro-Level Shift Rostering:** Planning shifts over 7-to-14 day horizons to ensure production lines have adequate headcount across all shifts while controlling labor cost and avoiding worker burnout.
+2. **Micro-Level Workstation Allocation:** Assigning multi-skilled operators to discrete, fixed-time workstation tasks during an active shift without temporal conflicts and while minimizing active shifts/personnel.
 
-Ordivanta aims to turn these decisions into a repeatable, explainable workflow:
+Ordivanta formalizes both problems into a unified, mathematically rigorous optimization platform with independent validation, published benchmark suites, and publication-ready deliverables suitable for IEEE and Springer journals.
 
-1. Maintain employee, skill, unit, shift and demand data.
-2. Validate inputs before optimisation.
-3. Generate a roster using a mathematical optimisation model.
-4. Independently validate the returned roster.
-5. Show coverage, workload, cost-related metrics (only when cost data is configured), warnings and solver status.
-6. Compare the MILP result with a Greedy baseline on the same input.
-
-The system is a decision-support tool. A supervisor should review the result before publishing a roster.
+### Key Capabilities
+- **Two Distinct Optimization Modules:** Shift Planning (Module 1) and Skill-Based Task Allocation (Module 2).
+- **Three Distinct Optimization Paradigms:** Exact MILP (PuLP/HiGHS), Greedy Heuristic, and Adaptive Large Neighborhood Search (ALNS) metaheuristic.
+- **Published Academic Benchmarks:** 225 MATSP instances, 137 PTSP instances, and 10 SMPTSP instances.
+- **Dynamic Disruption Recovery:** Stability-preserving Recovery MILP for worker absenteeism.
+- **Publication-Ready Figures and Tables:** 9 academic figures (300 DPI PNG & PDF) and 5 LaTeX/Markdown tables in `docs/figures/` and `docs/tables/`.
+- **Comprehensive Research Documentation:** Full mathematical formulations and benchmark findings in [`docs/RESEARCH_HANDOFF.md`](docs/RESEARCH_HANDOFF.md).
 
 ## 2. Core scope
 
