@@ -5,9 +5,9 @@
 In accordance with project direction, external benchmark sprawl is strictly constrained to prioritize our existing benchmarks:
 1. **Primary Manufacturing Benchmark:** Ordivanta Synthetic Manufacturing Benchmark (kept and extended with realistic disruption, skills proficiency, absenteeism, and overtime layers).
 2. **Shift Scheduling Benchmark:** Kept existing `instances1_225` dataset (225 raw TXT instances).
-3. **Personnel Task Scheduling (PTSP):** Kept existing `ptask/ptsp` dataset (137 raw DAT instances) as a supplementary specialist/task-allocation benchmark.
-4. **Nurse Rostering Benchmark:** Kept confirmed existing `instances1_24` dataset (24 raw TXT + 24 ROS instances) with transparent mapping.
-5. **Deferred Repositories:** Remote KAHO and INRC-II integrations are deferred as the existing 389 benchmark instances comprehensively satisfy all evaluation and stress requirements.
+3. **Personnel Task Scheduling (PTSP):** Kept existing `ptask/ptsp` dataset (137 raw DAT instances) as a primary Module 2 continuous task allocation benchmark (Krishnamoorthy et al. 2012).
+4. **Shift Minimisation Personnel Task Scheduling (SMPTSP):** Integrated 10 verified DAT instances from Smet et al. (2014) (`data/smptsp/instances/`) for shift minimisation research.
+5. **Nurse Rostering Benchmark:** Kept confirmed existing `instances1_24` dataset (24 raw TXT + 24 ROS instances) with transparent mapping.
 
 ---
 
@@ -16,10 +16,11 @@ In accordance with project direction, external benchmark sprawl is strictly cons
 | Dataset Identifier | Physical Files Present | Original Instances | Adapted Instances | Successfully Validated | Source & Format |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `synthetic_manufacturing` | Native domain modules | 3 baseline presets | 3 baseline + 5 scalability + Disruption generator | 100% (All tested) | Python domain models (`app.sample_data`, `scalability_generator`) |
-| `shift_scheduling` | 225 `.txt` + 225 `.xml` | 225 instances | 225 instances | 225 / 225 (100%) | `data/instances1_225/instances1_225/txt/*.txt` |
+| `shift_scheduling` | 225 `.txt` + 225 `.xml` | 225 instances | 225 instances | 225 / 225 (100%) | `data/instances1_225/instances1_225/txt/*.txt` (Côté et al. 2011) |
 | `ptsp` | 137 `.dat` | 137 instances | 137 instances | 137 / 137 (100%) | `data/ptask/ptsp/*.dat` (Krishnamoorthy et al. 2012) |
+| `smptsp` | 10 `.dat` | 10 instances | 10 instances | 10 / 10 (100%) | `data/smptsp/instances/*.dat` (Smet et al. 2014) |
 | `nurse_rostering` | 24 `.txt` + 24 `.ros` | 24 instances | 24 instances | 24 / 24 (100%) | `data/instances1_24/instances1_24/*.txt` (Curtois & Qu 2014) |
-| **Total** | **635 data files** | **389 instances** | **389 instances** | **100% compliant** | |
+| **Total** | **645 data files** | **399 instances** | **399 instances** | **100% compliant** | Authoritative Manifest in `data/dataset_manifest.json` |
 
 *Note: No missing files are reported as available instances. Every listed instance has a corresponding readable file on disk.*
 

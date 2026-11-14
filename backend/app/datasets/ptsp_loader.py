@@ -163,8 +163,10 @@ class PTSPLoader(BaseDatasetLoader):
                     if qual_lines:
                         qual_lines[-1].extend(q_jobs)
 
-        effective_jobs = len(job_lines)
-        if max_jobs and max_jobs < effective_jobs:
+        original_job_count = len(job_lines)
+        is_reduced = bool(max_jobs and max_jobs < original_job_count)
+        effective_jobs = original_job_count
+        if is_reduced:
             effective_jobs = max_jobs
             job_lines = job_lines[:effective_jobs]
 
@@ -213,9 +215,10 @@ class PTSPLoader(BaseDatasetLoader):
                 )
             )
 
+        subset_label = f" (Reduced Subset: {effective_jobs} tasks)" if is_reduced else ""
         scenario = Scenario(
             id=f"ptsp_{instance_id}",
-            name=f"PTSP {file_path.stem} ({len(employees)} staff, {len(shifts)} jobs)",
+            name=f"PTSP {file_path.stem} ({len(employees)} staff, {len(shifts)} jobs){subset_label}",
             employees=employees,
             units=[unit],
             shifts=shifts,
@@ -223,6 +226,10 @@ class PTSPLoader(BaseDatasetLoader):
             created_at=datetime.utcnow(),
         )
 
+        subset_note = (
+            f" [Reduced subset of {effective_jobs}/{original_job_count} tasks; worker eligibility and interval timestamps preserved.]"
+            if is_reduced else ""
+        )
         summary = InstanceSummary(
             instance_id=instance_id,
             dataset_id=self.dataset_id,
@@ -241,7 +248,7 @@ class PTSPLoader(BaseDatasetLoader):
             unsupported_constraints=[
                 "Continuous timeline task interval overlap (preemption/pausing)"
             ],
-            notes="Personnel task scheduling with multi-skilling qualification matrix."
+            notes=f"Personnel task scheduling with multi-skilling qualification matrix.{subset_note}"
         )
 
         return scenario, summary

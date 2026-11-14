@@ -1,13 +1,13 @@
-module,dataset,instance_id,employees,shifts,demands,algorithm,status,assignments_count,runtime_seconds,is_valid,violations_count
-Module 1,MATSP,1_7_10_1,10,72,72,Greedy Baseline,FEASIBLE,90,0.0145,True,0
-Module 1,MATSP,1_7_10_1,10,72,72,Exact MILP,OPTIMAL,90,0.1642,True,0
-Module 1,MATSP,1_7_10_1,10,72,72,ALNS Metaheuristic,FEASIBLE,90,0.2006,True,0
-Module 1,MATSP,2_7_10_1,10,72,72,Greedy Baseline,FEASIBLE,77,0.021,True,0
-Module 1,MATSP,2_7_10_1,10,72,72,Exact MILP,OPTIMAL,77,0.2151,True,0
-Module 1,MATSP,2_7_10_1,10,72,72,ALNS Metaheuristic,FEASIBLE,77,0.1153,True,0
-Module 1,MATSP,7_7_20_1,20,72,72,Greedy Baseline,FEASIBLE,193,0.0165,True,0
-Module 1,MATSP,7_7_20_1,20,72,72,Exact MILP,OPTIMAL,193,0.2642,True,0
-Module 1,MATSP,7_7_20_1,20,72,72,ALNS Metaheuristic,FEASIBLE,193,0.4892,True,0
-Module 1,MATSP,6_7_20_1,20,72,72,Greedy Baseline,FEASIBLE,191,0.0244,True,0
-Module 1,MATSP,6_7_20_1,20,72,72,Exact MILP,OPTIMAL,191,0.6476,True,0
-Module 1,MATSP,6_7_20_1,20,72,72,ALNS Metaheuristic,FEASIBLE,191,0.4535,True,0
+module,dataset,instance_id,employees,shifts,demands,algorithm,status,assignments_count,coverage_pct,total_scheduled_hours,workload_fairness_std_dev,runtime_seconds,is_valid,violations_count
+Module 1,MATSP,1_7_10_1,10,72,72,Greedy Baseline,FEASIBLE,90,125.0,22.5,1.47,0.0167,True,0
+Module 1,MATSP,1_7_10_1,10,72,72,Exact MILP,OPTIMAL,90,125.0,22.5,0.0,0.1414,True,0
+Module 1,MATSP,1_7_10_1,10,72,72,ALNS Metaheuristic,FEASIBLE,90,125.0,22.5,1.47,0.1623,True,0
+Module 1,MATSP,2_7_10_1,10,72,72,Greedy Baseline,FEASIBLE,77,106.9,19.2,1.26,0.0151,True,0
+Module 1,MATSP,2_7_10_1,10,72,72,Exact MILP,OPTIMAL,77,106.9,19.2,0.11,0.3052,True,0
+Module 1,MATSP,2_7_10_1,10,72,72,ALNS Metaheuristic,FEASIBLE,77,106.9,19.2,1.26,0.1855,True,0
+Module 1,MATSP,7_7_20_1,20,72,72,Greedy Baseline,FEASIBLE,193,268.1,48.2,1.58,0.0225,True,0
+Module 1,MATSP,7_7_20_1,20,72,72,Exact MILP,OPTIMAL,193,268.1,48.2,0.12,0.4734,True,0
+Module 1,MATSP,7_7_20_1,20,72,72,ALNS Metaheuristic,FEASIBLE,193,268.1,48.2,1.58,0.6662,True,0
+Module 1,MATSP,6_7_20_1,20,72,72,Greedy Baseline,FEASIBLE,191,265.3,47.8,0.8,0.0228,True,0
+Module 1,MATSP,6_7_20_1,20,72,72,Exact MILP,OPTIMAL,191,265.3,47.8,0.12,0.6661,True,0
+Module 1,MATSP,6_7_20_1,20,72,72,ALNS Metaheuristic,FEASIBLE,191,265.3,47.8,0.8,0.4922,True,0

@@ -186,8 +186,10 @@ class SMPTSPLoader(BaseDatasetLoader):
                     if qual_lines:
                         qual_lines[-1].extend(q_jobs)
 
-        effective_jobs = len(job_lines)
-        if max_jobs and max_jobs < effective_jobs:
+        original_job_count = len(job_lines)
+        is_reduced = bool(max_jobs and max_jobs < original_job_count)
+        effective_jobs = original_job_count
+        if is_reduced:
             effective_jobs = max_jobs
             job_lines = job_lines[:effective_jobs]
 
@@ -233,9 +235,10 @@ class SMPTSPLoader(BaseDatasetLoader):
                 )
             )
 
+        subset_label = f" (Reduced Subset: {effective_jobs} tasks)" if is_reduced else ""
         scenario = Scenario(
             id=f"smptsp_{instance_id}",
-            name=f"SMPTSP {file_path.stem} ({len(employees)} workers, {len(shifts)} tasks)",
+            name=f"SMPTSP {file_path.stem} ({len(employees)} workers, {len(shifts)} tasks){subset_label}",
             employees=employees,
             units=[unit],
             shifts=shifts,
@@ -243,6 +246,10 @@ class SMPTSPLoader(BaseDatasetLoader):
             created_at=datetime.utcnow(),
         )
 
+        subset_note = (
+            f" [Reduced subset of {effective_jobs}/{original_job_count} tasks; worker eligibility and interval timestamps preserved.]"
+            if is_reduced else ""
+        )
         summary = InstanceSummary(
             instance_id=instance_id,
             dataset_id=self.dataset_id,
@@ -264,7 +271,7 @@ class SMPTSPLoader(BaseDatasetLoader):
                 "Task preemption / splitting",
                 "Physical travel matrix",
             ],
-            notes=f"Loaded {len(shifts)} tasks and {len(employees)} workers from {file_path.name}",
+            notes=f"Loaded {len(shifts)} tasks and {len(employees)} workers from {file_path.name}.{subset_note}",
         )
 
         return scenario, summary

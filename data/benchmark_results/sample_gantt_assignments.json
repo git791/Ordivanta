@@ -1,0 +1,282 @@
+[
+  {
+    "worker_id": "ptsp_worker_1",
+    "task_id": "job_30",
+    "task_name": "Job 30 (14:59\u201322:43)",
+    "start_minute": 899,
+    "end_minute": 1363
+  },
+  {
+    "worker_id": "ptsp_worker_1",
+    "task_id": "job_15",
+    "task_name": "Job 15 (05:15\u201313:08)",
+    "start_minute": 315,
+    "end_minute": 788
+  },
+  {
+    "worker_id": "ptsp_worker_3",
+    "task_id": "job_20",
+    "task_name": "Job 20 (01:42\u201311:04)",
+    "start_minute": 102,
+    "end_minute": 664
+  },
+  {
+    "worker_id": "ptsp_worker_3",
+    "task_id": "job_13",
+    "task_name": "Job 13 (12:28\u201322:41)",
+    "start_minute": 748,
+    "end_minute": 1361
+  },
+  {
+    "worker_id": "ptsp_worker_4",
+    "task_id": "job_5",
+    "task_name": "Job 5 (00:01\u201310:06)",
+    "start_minute": 1,
+    "end_minute": 606
+  },
+  {
+    "worker_id": "ptsp_worker_4",
+    "task_id": "job_35",
+    "task_name": "Job 35 (11:33\u201321:53)",
+    "start_minute": 693,
+    "end_minute": 1313
+  },
+  {
+    "worker_id": "ptsp_worker_5",
+    "task_id": "job_24",
+    "task_name": "Job 24 (12:34\u201320:59)",
+    "start_minute": 754,
+    "end_minute": 1259
+  },
+  {
+    "worker_id": "ptsp_worker_5",
+    "task_id": "job_11",
+    "task_name": "Job 11 (03:03\u201312:29)",
+    "start_minute": 183,
+    "end_minute": 749
+  },
+  {
+    "worker_id": "ptsp_worker_6",
+    "task_id": "job_34",
+    "task_name": "Job 34 (13:44\u201323:02)",
+    "start_minute": 824,
+    "end_minute": 1382
+  },
+  {
+    "worker_id": "ptsp_worker_6",
+    "task_id": "job_8",
+    "task_name": "Job 8 (03:17\u201312:15)",
+    "start_minute": 197,
+    "end_minute": 735
+  },
+  {
+    "worker_id": "ptsp_worker_7",
+    "task_id": "job_2",
+    "task_name": "Job 2 (01:36\u201309:31)",
+    "start_minute": 96,
+    "end_minute": 571
+  },
+  {
+    "worker_id": "ptsp_worker_7",
+    "task_id": "job_17",
+    "task_name": "Job 17 (10:05\u201320:02)",
+    "start_minute": 605,
+    "end_minute": 1202
+  },
+  {
+    "worker_id": "ptsp_worker_8",
+    "task_id": "job_32",
+    "task_name": "Job 32 (10:50\u201320:52)",
+    "start_minute": 650,
+    "end_minute": 1252
+  },
+  {
+    "worker_id": "ptsp_worker_8",
+    "task_id": "job_7",
+    "task_name": "Job 7 (00:38\u201309:36)",
+    "start_minute": 38,
+    "end_minute": 576
+  },
+  {
+    "worker_id": "ptsp_worker_9",
+    "task_id": "job_0",
+    "task_name": "Job 0 (00:14\u201310:19)",
+    "start_minute": 14,
+    "end_minute": 619
+  },
+  {
+    "worker_id": "ptsp_worker_9",
+    "task_id": "job_19",
+    "task_name": "Job 19 (11:39\u201320:22)",
+    "start_minute": 699,
+    "end_minute": 1222
+  },
+  {
+    "worker_id": "ptsp_worker_10",
+    "task_id": "job_25",
+    "task_name": "Job 25 (00:07\u201310:19)",
+    "start_minute": 7,
+    "end_minute": 619
+  },
+  {
+    "worker_id": "ptsp_worker_10",
+    "task_id": "job_39",
+    "task_name": "Job 39 (12:19\u201320:25)",
+    "start_minute": 739,
+    "end_minute": 1225
+  },
+  {
+    "worker_id": "ptsp_worker_11",
+    "task_id": "job_31",
+    "task_name": "Job 31 (14:10\u201322:35)",
+    "start_minute": 850,
+    "end_minute": 1355
+  },
+  {
+    "worker_id": "ptsp_worker_11",
+    "task_id": "job_9",
+    "task_name": "Job 9 (02:19\u201312:03)",
+    "start_minute": 139,
+    "end_minute": 723
+  },
+  {
+    "worker_id": "ptsp_worker_12",
+    "task_id": "job_1",
+    "task_name": "Job 1 (00:29\u201309:50)",
+    "start_minute": 29,
+    "end_minute": 590
+  },
+  {
+    "worker_id": "ptsp_worker_12",
+    "task_id": "job_28",
+    "task_name": "Job 28 (12:37\u201321:22)",
+    "start_minute": 757,
+    "end_minute": 1282
+  },
+  {
+    "worker_id": "ptsp_worker_13",
+    "task_id": "job_16",
+    "task_name": "Job 16 (01:39\u201311:16)",
+    "start_minute": 99,
+    "end_minute": 676
+  },
+  {
+    "worker_id": "ptsp_worker_13",
+    "task_id": "job_21",
+    "task_name": "Job 21 (13:32\u201321:50)",
+    "start_minute": 812,
+    "end_minute": 1310
+  },
+  {
+    "worker_id": "ptsp_worker_14",
+    "task_id": "job_26",
+    "task_name": "Job 26 (11:09\u201319:28)",
+    "start_minute": 669,
+    "end_minute": 1168
+  },
+  {
+    "worker_id": "ptsp_worker_14",
+    "task_id": "job_10",
+    "task_name": "Job 10 (00:57\u201309:25)",
+    "start_minute": 57,
+    "end_minute": 565
+  },
+  {
+    "worker_id": "ptsp_worker_15",
+    "task_id": "job_12",
+    "task_name": "Job 12 (12:20\u201321:01)",
+    "start_minute": 740,
+    "end_minute": 1261
+  },
+  {
+    "worker_id": "ptsp_worker_15",
+    "task_id": "job_6",
+    "task_name": "Job 6 (03:50\u201312:05)",
+    "start_minute": 230,
+    "end_minute": 725
+  },
+  {
+    "worker_id": "ptsp_worker_18",
+    "task_id": "job_18",
+    "task_name": "Job 18 (00:04\u201309:42)",
+    "start_minute": 4,
+    "end_minute": 582
+  },
+  {
+    "worker_id": "ptsp_worker_18",
+    "task_id": "job_37",
+    "task_name": "Job 37 (12:08\u201322:29)",
+    "start_minute": 728,
+    "end_minute": 1349
+  },
+  {
+    "worker_id": "ptsp_worker_19",
+    "task_id": "job_33",
+    "task_name": "Job 33 (00:33\u201309:08)",
+    "start_minute": 33,
+    "end_minute": 548
+  },
+  {
+    "worker_id": "ptsp_worker_19",
+    "task_id": "job_4",
+    "task_name": "Job 4 (13:16\u201321:13)",
+    "start_minute": 796,
+    "end_minute": 1273
+  },
+  {
+    "worker_id": "ptsp_worker_20",
+    "task_id": "job_3",
+    "task_name": "Job 3 (12:17\u201321:37)",
+    "start_minute": 737,
+    "end_minute": 1297
+  },
+  {
+    "worker_id": "ptsp_worker_20",
+    "task_id": "job_22",
+    "task_name": "Job 22 (02:39\u201312:17)",
+    "start_minute": 159,
+    "end_minute": 737
+  },
+  {
+    "worker_id": "ptsp_worker_21",
+    "task_id": "job_38",
+    "task_name": "Job 38 (13:11\u201322:37)",
+    "start_minute": 791,
+    "end_minute": 1357
+  },
+  {
+    "worker_id": "ptsp_worker_21",
+    "task_id": "job_23",
+    "task_name": "Job 23 (01:36\u201310:13)",
+    "start_minute": 96,
+    "end_minute": 613
+  },
+  {
+    "worker_id": "ptsp_worker_22",
+    "task_id": "job_27",
+    "task_name": "Job 27 (00:55\u201310:09)",
+    "start_minute": 55,
+    "end_minute": 609
+  },
+  {
+    "worker_id": "ptsp_worker_22",
+    "task_id": "job_36",
+    "task_name": "Job 36 (10:25\u201320:23)",
+    "start_minute": 625,
+    "end_minute": 1223
+  },
+  {
+    "worker_id": "ptsp_worker_23",
+    "task_id": "job_14",
+    "task_name": "Job 14 (14:16\u201322:23)",
+    "start_minute": 856,
+    "end_minute": 1343
+  },
+  {
+    "worker_id": "ptsp_worker_23",
+    "task_id": "job_29",
+    "task_name": "Job 29 (02:37\u201311:42)",
+    "start_minute": 157,
+    "end_minute": 702
+  }
+]

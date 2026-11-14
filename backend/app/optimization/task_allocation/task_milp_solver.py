@@ -9,6 +9,7 @@ from .task_models import (
     TaskWorker,
 )
 from .task_validator import validate_task_allocation
+from app.domain.enums import SolverStatus
 from app.optimization.solver_adapter import get_solver, map_pulp_status
 
 
@@ -19,17 +20,41 @@ class MILPTaskSolver:
     using PuLP and the HiGHS/CBC solver adapter.
     """
 
-    def __init__(self, time_limit: int = 30):
+    def __init__(self, time_limit: int = 30, max_variables: int = 50000, max_conflicts: int = 150000):
         self.time_limit = time_limit
+        self.max_variables = max_variables
+        self.max_conflicts = max_conflicts
 
     def solve(self, scenario: TaskScenario) -> TaskAllocationResult:
-        start_time = time.perf_counter()
-
         tasks = scenario.tasks
         workers = scenario.workers
         task_map: Dict[str, Task] = {t.id: t for t in tasks}
         worker_map: Dict[str, TaskWorker] = {w.id: w for w in workers}
 
+        # 0. Safety Model-Size & Resource Threshold Check
+        est_vars = sum(len(w.qualified_task_ids) for w in workers) + len(tasks) + len(workers)
+        if est_vars > self.max_variables:
+            return TaskAllocationResult(
+                algorithm="Exact MILP Task Allocator",
+                status="NOT_RUN_RESOURCE_LIMIT",
+                assignments=[],
+                unassigned_tasks=[t.id for t in tasks],
+                active_workers_count=0,
+                total_assigned=0,
+                total_tasks=len(tasks),
+                coverage_percentage=0.0,
+                runtime_seconds=0.0,
+                model_construction_seconds=0.0,
+                solver_execution_seconds=0.0,
+                is_valid=False,
+                validation_violations=[],
+                message=(
+                    f"Model creation halted by safety limit: estimated {est_vars} binary decision variables "
+                    f"exceeds safe threshold of {self.max_variables}. Excluded from direct runtime comparison."
+                ),
+            )
+
+        build_start = time.perf_counter()
         prob = pulp.LpProblem(f"TaskAllocation_{scenario.id}", pulp.LpMinimize)
 
         def make_var(name: str, cat: str = "Binary", low_bound: float = 0.0, up_bound: float | None = 1.0):
@@ -37,8 +62,7 @@ class MILPTaskSolver:
                 return prob.add_variable(name, lowBound=low_bound, upBound=up_bound, cat=cat)
             return pulp.LpVariable(name, lowBound=low_bound, upBound=up_bound, cat=cat)
 
-        # 1. Variables
-        # x[w, j]: binary, worker w assigned to task j
+        # 1. Decision Variables (Sparse eligible worker-task allocation)
         x: Dict[Tuple[str, str], pulp.LpVariable] = {}
         for w in workers:
             for t_id in w.qualified_task_ids:
@@ -90,7 +114,6 @@ class MILPTaskSolver:
                 )
 
         # D. Temporal non-overlapping conflict constraints
-        # Efficient sweep-line conflict detection
         sorted_tasks = sorted(tasks, key=lambda t: t.start_minute)
         overlap_pairs: List[Tuple[str, str]] = []
         n_tasks = len(sorted_tasks)
@@ -102,14 +125,12 @@ class MILPTaskSolver:
                     break
                 overlap_pairs.append((t1.id, t2.id))
 
-        # Index qualified workers per task for fast intersection
         task_workers_map: Dict[str, Set[str]] = {t.id: set() for t in tasks}
         for w in workers:
             for t_id in w.qualified_task_ids:
                 if t_id in task_workers_map:
                     task_workers_map[t_id].add(w.id)
 
-        # Add conflict constraints only for workers qualified for BOTH overlapping tasks
         conflict_count = 0
         for t1_id, t2_id in overlap_pairs:
             common_workers = task_workers_map[t1_id] & task_workers_map[t2_id]
@@ -119,10 +140,13 @@ class MILPTaskSolver:
                     f"Conf_{w_id}_{t1_id}_{t2_id}",
                 )
                 conflict_count += 1
+                if conflict_count > self.max_conflicts:
+                    break
+            if conflict_count > self.max_conflicts:
+                break
 
         # 3. Objective Function
         if scenario.objective_type == "shift_minimization":
-            # Primary: minimize active shifts/workers; Heavily penalize unassigned
             prob += (
                 1000.0 * pulp.lpSum(y.values())
                 + 50000.0 * pulp.lpSum(u.values())
@@ -130,7 +154,6 @@ class MILPTaskSolver:
                 "ShiftMinimizationObjective",
             )
         else:
-            # Coverage balance objective
             prob += (
                 20000.0 * pulp.lpSum(u.values())
                 + 50.0 * pulp.lpSum(y.values())
@@ -138,11 +161,15 @@ class MILPTaskSolver:
                 "TaskCoverageObjective",
             )
 
-        # 4. Solve with configured solver
-        solver = get_solver(time_limit=self.time_limit)
-        solve_res = prob.solve(solver)
+        model_construction_time = time.perf_counter() - build_start
 
-        runtime = time.perf_counter() - start_time
+        # 4. Solver Execution
+        solver = get_solver(time_limit=self.time_limit)
+        solve_start = time.perf_counter()
+        solve_res = prob.solve(solver)
+        solver_execution_time = time.perf_counter() - solve_start
+        total_runtime = model_construction_time + solver_execution_time
+
         if hasattr(solve_res, "status"):
             raw_lp = solve_res.status
             raw_sol = 1 if getattr(solve_res, "has_solution", False) else None
@@ -152,7 +179,7 @@ class MILPTaskSolver:
 
         solver_status, status_msg = map_pulp_status(raw_lp, raw_sol)
 
-        # 5. Extract results
+        # 5. Extract Incumbent Solution Variables
         assignments: List[TaskAssignment] = []
         unassigned_tasks: List[str] = []
         worker_minutes: Dict[str, int] = {w.id: 0 for w in workers}
@@ -190,7 +217,6 @@ class MILPTaskSolver:
             if val > 0.5:
                 unassigned_tasks.append(t_id)
 
-        # Active workers count
         active_workers = {a.worker_id for a in assignments}
         active_shifts_count = len(active_workers)
         total_assigned = len(assignments)
@@ -203,9 +229,7 @@ class MILPTaskSolver:
             if minutes > 0
         }
 
-        # Independent validation
-        is_valid, violations = validate_task_allocation(scenario, assignments)
-
+        # 6. Objective & Optimality Gap
         obj_val = None
         try:
             val = pulp.value(prob.objective)
@@ -214,7 +238,23 @@ class MILPTaskSolver:
         except Exception:
             pass
 
+        best_bound = None
+        optimality_gap = None
         status_str = solver_status.value if hasattr(solver_status, "value") else str(solver_status)
+
+        # Check if solver timed out but found feasible incumbent
+        if solver_status == SolverStatus.OPTIMAL:
+            best_bound = obj_val
+            optimality_gap = 0.0
+        elif total_assigned > 0:
+            status_str = "FEASIBLE"
+            status_msg = f"Feasible incumbent retained under {self.time_limit}s time limit ({total_assigned}/{total_tasks} tasks)"
+        elif solver_status == SolverStatus.NOT_SOLVED or raw_lp == 0:
+            status_str = "TIME_LIMIT_EXCEEDED"
+            status_msg = f"Time limit of {self.time_limit}s reached without proving feasibility"
+
+        # Independent validation
+        is_valid, violations = validate_task_allocation(scenario, assignments)
 
         return TaskAllocationResult(
             algorithm="Exact MILP Task Allocator",
@@ -225,10 +265,14 @@ class MILPTaskSolver:
             total_assigned=total_assigned,
             total_tasks=total_tasks,
             coverage_percentage=coverage_pct,
-            runtime_seconds=runtime,
+            runtime_seconds=total_runtime,
+            model_construction_seconds=model_construction_time,
+            solver_execution_seconds=solver_execution_time,
             objective_value=obj_val,
+            best_lower_bound=best_bound,
+            optimality_gap=optimality_gap,
             worker_utilization_hours=worker_utilization,
             is_valid=is_valid,
             validation_violations=violations,
-            message=status_msg or f"MILP solved {total_assigned}/{total_tasks} tasks with {active_shifts_count} shifts in {runtime:.4f}s",
+            message=status_msg or f"MILP status: {status_str} ({total_assigned}/{total_tasks} tasks, {active_shifts_count} shifts)",
         )

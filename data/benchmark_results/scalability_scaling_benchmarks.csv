@@ -1,13 +1,13 @@
-tier,workers,tasks,algorithm,status,active_shifts,assigned_tasks,coverage_pct,runtime_seconds,is_valid
-Small,25,60,Greedy Allocator,FEASIBLE,15,60,100.0,0.0009,True
-Small,25,60,ALNS Metaheuristic,FEASIBLE,12,60,100.0,0.0226,True
-Small,25,60,Exact MILP,FEASIBLE,10,60,100.0,15.0545,True
-Medium,100,250,Greedy Allocator,FEASIBLE,45,250,100.0,0.017,True
-Medium,100,250,ALNS Metaheuristic,FEASIBLE,41,250,100.0,0.4099,True
-Medium,100,250,Exact MILP,FEASIBLE,85,225,90.0,15.8582,True
-Large,500,1200,Greedy Allocator,FEASIBLE,209,1200,100.0,0.2601,True
-Large,500,1200,ALNS Metaheuristic,FEASIBLE,184,1200,100.0,4.0988,True
-Large,500,1200,Exact MILP,TIME_LIMIT_EXCEEDED,0,0,0.0,30.0,False
-Very-Large,1000,2500,Greedy Allocator,FEASIBLE,441,2500,100.0,1.2949,True
-Very-Large,1000,2500,ALNS Metaheuristic,FEASIBLE,381,2500,100.0,25.0047,True
-Very-Large,1000,2500,Exact MILP,TIME_LIMIT_EXCEEDED,0,0,0.0,30.0,False
+tier,seed,workers,tasks,algorithm,status,active_shifts,assigned_tasks,coverage_pct,runtime_seconds,is_valid,runtime_std_dev
+Small,101,25,60,Exact MILP,OPTIMAL,9,60,100.0,7.6952,True,
+Small,aggregate_10_seeds,25,60,Greedy Allocator,PARTIAL,14.5,60,99.8,0.001,True,0.0
+Small,aggregate_10_seeds,25,60,ALNS Metaheuristic,PARTIAL,12.7,60,99.8,0.0314,True,0.0064
+Medium,101,100,250,Exact MILP,FEASIBLE,81,224,89.6,16.5106,True,
+Medium,aggregate_10_seeds,100,250,Greedy Allocator,FEASIBLE,46.9,250,100.0,0.0114,True,0.001
+Medium,aggregate_10_seeds,100,250,ALNS Metaheuristic,FEASIBLE,39.8,250,100.0,0.7435,True,0.1815
+Large,101,500,1200,Exact MILP,NOT_RUN_RESOURCE_LIMIT,0,0,0.0,0.0,False,
+Large,aggregate_10_seeds,500,1200,Greedy Allocator,FEASIBLE,211.7,1200,100.0,0.2771,True,0.0184
+Large,aggregate_10_seeds,500,1200,ALNS Metaheuristic,FEASIBLE,181.4,1200,100.0,9.9692,True,0.1005
+Very-Large,101,1000,2500,Exact MILP,NOT_RUN_RESOURCE_LIMIT,0,0,0.0,0.0,False,
+Very-Large,aggregate_10_seeds,1000,2500,Greedy Allocator,FEASIBLE,451.1,2500,100.0,1.3377,True,0.0465
+Very-Large,aggregate_10_seeds,1000,2500,ALNS Metaheuristic,FEASIBLE,417.3,2500,100.0,10.005,True,0.002

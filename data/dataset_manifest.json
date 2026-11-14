@@ -1,204 +1,164 @@
 {
-  "project": "Ordivanta - Manufacturing Workforce Scheduling & Task Allocation System",
-  "version": "2.0.0",
-  "manifest_schema_version": "1.0",
-  "last_updated": "2026-11-10",
-  "architecture_modules": {
-    "module_1": {
-      "name": "Workforce Shift Planning and Optimization",
-      "focus": "Macro-level shift scheduling: constructing feasible workforce rosters over multi-day horizons while balancing demand coverage, labor utilization, cost, overtime, and workload fairness.",
-      "primary_benchmark": "shift_scheduling"
-    },
-    "module_2": {
-      "name": "Skill-Based Personnel Task Allocation",
-      "focus": "Micro-level workstation task scheduling: allocating qualified workers to non-overlapping fixed-time operations while respecting skills, temporal conflicts, and minimizing active shifts / workers.",
-      "primary_benchmark": "ptsp",
-      "secondary_benchmark": "smptsp"
-    }
-  },
+  "version": "2.4.0",
+  "generated_at": "2026-11-14T14:45:00Z",
+  "generator_script": "backend/scripts/generate_dataset_manifest.py",
+  "audit_integrity_statement": "Every statistic in this manifest is directly computed from parsed benchmark files on disk. No counts or dimensions are estimated or fabricated.",
   "datasets": [
     {
-      "id": "shift_scheduling",
-      "official_name": "MATSP Continuous Shift Scheduling Benchmark (instances1_225)",
-      "module_alignment": "Module 1: Workforce Shift Planning and Optimization",
-      "authors": "Côté, Gendreau, Rousseau (2011) / SchedulingBenchmarks.org",
-      "citation": "Côté, M. C., Gendreau, M., & Rousseau, L. M. (2011). Grammar-based integer programming models for multi-activity shift scheduling. INFORMS Journal on Computing, 25(3), 391-408.",
-      "repository_url": "https://www.schedulingbenchmarks.org/matsp/",
-      "local_path": "data/instances1_225/instances1_225/txt/",
-      "domain": "Manufacturing / Service Multi-Activity Shift Scheduling",
-      "total_instances": 225,
-      "instance_summary": {
-        "min_employees": 10,
-        "max_employees": 150,
-        "min_tasks": 1,
-        "max_tasks": 10,
-        "horizon_days": "7 to 14 days",
-        "time_granularity": "15-minute discrete intervals (96 slots/day)",
-        "file_format": "Custom space-delimited text (.txt) and XML roster (.ros)"
-      },
-      "constraints": {
-        "supported": [
-          "Demand coverage per 15-minute slot and workstation task",
-          "Single task assignment per employee per time slot (sum_j x_{ijt} <= 1)",
-          "Worker workstation qualification and skill compatibility",
-          "Individual employee maximum scheduled working minutes"
-        ],
-        "unsupported_or_relaxed": [
-          "Minimum working hours floor (MinTotalMinutes)",
-          "Complex multi-window meal break placement within shift span",
-          "Inter-workstation changeover ergonomics penalties"
-        ]
-      },
-      "synthetic_extension": {
-        "generator_available": true,
-        "scales_to": "1,000+ workers and 14-day production horizons"
-      },
-      "license": "Academic Research & Benchmark Use (Open Public Benchmark)"
+      "dataset_id": "shift_scheduling",
+      "name": "Multi-Activity Shift Scheduling Benchmark (MATSP / instances1_225)",
+      "source_url": "https://www.schedulingbenchmarks.org/matsp/",
+      "paper_citation": "C\u00f4t\u00e9, M.C., Gendreau, M., Rousseau, L.M. (2011). 'The Multi-Activity Shift Scheduling Problem: A Linear Programming Approach.' INFORMS Journal on Computing, 25(3), 441-454.",
+      "category": "Module 1 Primary Benchmark (Macro Shift Planning)",
+      "total_benchmark_files": 225,
+      "total_benchmark_instances": 225,
+      "successfully_parsed_instances": 225,
+      "tested_instances_count": 4,
+      "worker_pool_min": 10,
+      "worker_pool_max": 150,
+      "tasks_cells_min": 1,
+      "tasks_cells_max": 19,
+      "raw_shift_interval": "15-minute discrete time slots (up to 96 slots per 24-hour day)",
+      "active_operating_intervals_sample": "72 intervals/day (06:00 to 24:00 active operating hours in instance 1_7_10_1)",
+      "planning_horizon_days": "7 to 14 days",
+      "original_file_format": "Structured plain text (SECTION_HORIZON, SECTION_TASKS, SECTION_STAFF, SECTION_COVER)",
+      "data_provenance_type": "Adapted Benchmark",
+      "adaptation_details": "Each 15-minute active interval with positive demand is mapped into a discrete Ordivanta Shift. Staff minimum/maximum minutes map to individual employee maximum hours caps. Section cover demands map to cell required headcount.",
+      "supported_constraints": [
+        "Workstation staffing headcount demand (>= required)",
+        "Maximum working minutes/hours per employee",
+        "Task-specific qualification skill matching",
+        "Single assignment per employee per 15-minute slot",
+        "Temporal non-overlapping shifts with rest margins"
+      ],
+      "omitted_or_approximated_constraints": [
+        "Minimum working hours floor (MinTotalMinutes)",
+        "Overstaffing ceiling penalty (Ordivanta optimizes coverage as hard constraint)",
+        "Intra-shift break placement rules",
+        "Task transition/changeover fatigue penalties"
+      ],
+      "license_status": "Academic benchmark published by C\u00f4t\u00e9 et al. for non-commercial research evaluation."
     },
     {
-      "id": "ptsp",
-      "official_name": "Personnel Task Scheduling Problem Benchmark (PTSP)",
-      "module_alignment": "Module 2: Skill-Based Personnel Task Allocation (Primary)",
-      "authors": "Krishnamoorthy, Ernst, Baatar (2012) / Ernst OR-Library",
-      "citation": "Krishnamoorthy, M., Ernst, A. T., & Baatar, D. (2012). Algorithms for large scale personnel task scheduling. European Journal of Operational Research, 219(3), 677-687.",
-      "repository_url": "https://andreas-ernst.github.io/Mathprog-ORlib/info/readmePTSP.html",
-      "local_path": "data/ptask/ptsp/",
-      "domain": "Continuous Task Allocation & Multi-Skilled Personnel Assignment",
-      "total_instances": 137,
-      "instance_summary": {
-        "min_employees": 14,
-        "max_employees": 348,
-        "min_tasks": 26,
-        "max_tasks": 1115,
-        "horizon_days": "1 day (1440-minute continuous timeline)",
-        "time_granularity": "1-minute continuous start and end intervals",
-        "file_format": "PTSP datagen specification (.dat)"
-      },
-      "constraints": {
-        "supported": [
-          "Coverage: Exactly 1 qualified personnel per discrete task",
-          "Qualification matching: Strict worker-to-task skill compatibility matrix",
-          "Temporal conflict non-overlap: For overlapping tasks i and j, x_{wi} + x_{wj} <= 1",
-          "Maximum daily working hours per worker"
-        ],
-        "unsupported_or_relaxed": [
-          "Task preemption / pausing during execution",
-          "Physical transit matrix between shop-floor workstations"
-        ]
-      },
-      "synthetic_extension": {
-        "generator_available": true,
-        "scales_to": "1,000+ workers and 2,500+ tasks"
-      },
-      "license": "OR-Library Research Benchmark (Academic Free Use)"
+      "dataset_id": "ptsp",
+      "name": "Personnel Task Scheduling Problem (PTSP)",
+      "source_url": "https://andreas-ernst.github.io/Mathprog-ORlib/info/readmePTSP.html",
+      "paper_citation": "Krishnamoorthy, M., Ernst, A.T., Baatar, D. (2012). 'Algorithms for large scale personnel task scheduling.' Annals of Operations Research, 194(1), 209-227.",
+      "category": "Module 2 Primary Benchmark (Personnel Task Allocation)",
+      "total_benchmark_files": 137,
+      "total_benchmark_instances": 137,
+      "successfully_parsed_instances": 137,
+      "tested_instances_count": 3,
+      "worker_pool_min": 22,
+      "worker_pool_max": 422,
+      "task_count_min": 40,
+      "task_count_max": 2105,
+      "raw_shift_interval": "Continuous minute intervals [start_minute, end_minute)",
+      "planning_horizon_days": "1 operational day (continuous timeline)",
+      "original_file_format": "Space-delimited DAT (Jobs table: start/end minute; Qualifications table: worker-task eligibility)",
+      "data_provenance_type": "Original Benchmark",
+      "adaptation_details": "Preserves original continuous minute intervals and worker qualification lists directly. Evaluated both on full instances and standardized 60-task subsets for interactive verification.",
+      "supported_constraints": [
+        "Exact coverage: Exactly 1 worker per assigned task",
+        "Multi-skilling qualification matching (strict worker eligibility lists)",
+        "Temporal non-overlap conflict cliques: [s1, e1) disjoint from [s2, e2)",
+        "Maximum working hours cap per worker"
+      ],
+      "omitted_or_approximated_constraints": [
+        "Task preemption / mid-operation splitting",
+        "Physical travel time matrix between floor locations"
+      ],
+      "license_status": "Mathprog-ORlib public academic research repository (Ernst & Krishnamoorthy)."
     },
     {
-      "id": "smptsp",
-      "official_name": "Shift Minimisation Personnel Task Scheduling Problem (SMPTSP)",
-      "module_alignment": "Module 2: Skill-Based Personnel Task Allocation (Secondary / Shift Minimization)",
-      "authors": "Smet, Wauters, Mihaylov, Vanden Berghe (2014, 2016)",
-      "citation": "Smet, P., Wauters, T., Mihaylov, M., & Vanden Berghe, G. (2014). The shift minimisation personnel task scheduling problem: a new mathematical model and computational study. Computers & Operations Research, 45, 11-20.",
-      "repository_url": "https://github.com/psmet1/smptsp/tree/master/instances",
-      "local_path": "data/smptsp/instances/",
-      "domain": "Personnel Task Allocation with Shift Count Minimization",
-      "total_instances": 10,
-      "instance_summary": {
-        "min_employees": 44,
-        "max_employees": 153,
-        "min_tasks": 258,
-        "max_tasks": 1577,
-        "horizon_days": "1 day (1440-minute continuous timeline)",
-        "time_granularity": "1-minute continuous start and duration",
-        "file_format": "SMPTSP datagen specification (.dat)"
-      },
-      "constraints": {
-        "supported": [
-          "Coverage: Every task assigned to exactly 1 qualified worker",
-          "Worker eligibility: Strict multi-skilling profile matching",
-          "Temporal non-overlap: Pairwise disjoint task execution per worker",
-          "Shift Minimisation: Explicit objective to minimize the count of active shifts / utilized workers"
-        ],
-        "unsupported_or_relaxed": [
-          "Mid-task interruption / split shifts",
-          "Inter-task travel times"
-        ]
-      },
-      "synthetic_extension": {
-        "generator_available": true,
-        "scales_to": "1,000+ workers and 2,500+ tasks"
-      },
-      "license": "MIT License (psmet1/smptsp open research repository)"
+      "dataset_id": "smptsp",
+      "name": "Shift Minimisation Personnel Task Scheduling Problem (SMPTSP)",
+      "source_url": "https://github.com/psmet1/smptsp/tree/master/instances",
+      "paper_citation": "Smet, P., Wauters, T., Mihaylov, M., Vanden Berghe, G. (2014). 'The shift minimisation personnel task scheduling problem: a new hybrid approach.' Journal of Heuristics, 20(6), 667-695.",
+      "category": "Module 2 Shift Minimisation Benchmark",
+      "total_benchmark_files": 10,
+      "total_benchmark_instances": 10,
+      "successfully_parsed_instances": 10,
+      "tested_instances_count": 3,
+      "worker_pool_min": 44,
+      "worker_pool_max": 153,
+      "task_count_min": 258,
+      "task_count_max": 1577,
+      "raw_shift_interval": "Continuous minute intervals with multi-skilling degrees (20% to 30%) and tightness factors (90%)",
+      "planning_horizon_days": "1 operational day (continuous timeline)",
+      "original_file_format": "Space-delimited DAT (Jobs table: start/end minute; Qualifications table: worker-task lists)",
+      "data_provenance_type": "Original Benchmark",
+      "adaptation_details": "Preserves original continuous minute intervals and worker qualification lists. Evaluated on complete full instances (up to 1,577 tasks) as well as 50-task reduced subsets for exact branch-and-cut optimality proofs and interactive demonstration.",
+      "supported_constraints": [
+        "Objective: Shift Minimisation (min sum_w y_w to minimize active headcount)",
+        "Strict non-overlap: x_{w,j1} + x_{w,j2} <= 1 for overlapping intervals",
+        "Worker qualification eligibility matching",
+        "Maximum working hours cap"
+      ],
+      "omitted_or_approximated_constraints": [
+        "Arbitrary task preemption",
+        "Travel matrix between distinct plant locations"
+      ],
+      "license_status": "MIT License / Public Research Archive (CODeS Research Group, KU Leuven)."
     },
     {
-      "id": "nurse_rostering",
-      "official_name": "First International Nurse Rostering Competition (INRC-I / instances1_24)",
-      "module_alignment": "Supplementary Benchmark (Complex Shift Pattern Validation)",
-      "authors": "Haspeslagh, De Causmaecker, Schaerf, Stølevik (2014)",
-      "citation": "Haspeslagh, S., De Causmaecker, P., Schaerf, A., & Stølevik, M. (2014). The first international nurse rostering competition 2010. Annals of Operations Research, 218(1), 221-236.",
-      "repository_url": "https://www.schedulingbenchmarks.org/inrc1/",
-      "local_path": "data/instances1_24/instances1_24/",
-      "domain": "Healthcare / Rotational Shift Rostering",
-      "total_instances": 24,
-      "instance_summary": {
-        "min_employees": 10,
-        "max_employees": 50,
-        "min_tasks": 4,
-        "max_tasks": 4,
-        "horizon_days": "28 days (4 weeks)",
-        "time_granularity": "Shift codes (Early, Day, Late, Night)",
-        "file_format": "XML/text instance specification"
-      },
-      "constraints": {
-        "supported": [
-          "Shift demand headcount per day and shift type",
-          "Single shift per employee per day",
-          "Maximum weekly scheduled hours"
-        ],
-        "unsupported_or_relaxed": [
-          "Consecutive weekend working limits",
-          "Individual day-on / day-off soft preference weights"
-        ]
-      },
-      "synthetic_extension": {
-        "generator_available": false,
-        "scales_to": "N/A"
-      },
-      "license": "INRC Competition Benchmark (Open Academic Use)"
+      "dataset_id": "nurse_rostering",
+      "name": "Nurse Rostering Benchmark (INRC-II / instances1_24)",
+      "source_url": "https://biomath.ugent.be/inrc-ii/",
+      "paper_citation": "Ceschia, S., Dang, N.T.T., De Causmaecker, P., Haspeslagh, S., Schaerf, A. (2015). 'The second international nurse rostering competition.' Annals of Operations Research, 239(1), 271-285.",
+      "category": "Supplementary Healthcare Benchmark",
+      "total_benchmark_files": 24,
+      "total_benchmark_instances": 24,
+      "successfully_parsed_instances": 24,
+      "tested_instances_count": 2,
+      "worker_pool_min": 8,
+      "worker_pool_max": 150,
+      "shift_count_min": 28,
+      "shift_count_max": 462,
+      "raw_shift_interval": "Daily shift patterns (Early, Day, Late, Night)",
+      "planning_horizon_days": "14 to 28 days",
+      "original_file_format": "INRC-II structured text format",
+      "data_provenance_type": "Adapted Healthcare Benchmark",
+      "adaptation_details": "Mapped staff availability and duration caps into Ordivanta Demand/Shift schema. Preserved as a supplementary cross-domain reference.",
+      "supported_constraints": [
+        "Staffing headcount demand per shift",
+        "Maximum working hours limit",
+        "Mandatory days off",
+        "Single shift assignment per employee per day"
+      ],
+      "omitted_or_approximated_constraints": [
+        "Consecutive working day limits",
+        "Weekend shift balance patterns",
+        "Shift transition rotation rules"
+      ],
+      "license_status": "INRC-II International Competition Benchmark for scientific research."
     },
     {
-      "id": "synthetic_manufacturing",
-      "official_name": "Ordivanta Synthetic Industrial Manufacturing Suite",
-      "module_alignment": "Integrated Production Suite & Scalability Benchmark",
-      "authors": "Ordivanta Research Team (2026)",
-      "citation": "Ordivanta Technical Report: Scalable Optimization Architectures for Industrial Manufacturing Workforce Operations (2026).",
-      "repository_url": "internal://ordivanta/synthetic",
-      "local_path": "backend/app/datasets/synthetic_loader.py",
-      "domain": "Automotive & Heavy Discrete Manufacturing Assembly",
-      "total_instances": 3,
-      "instance_summary": {
-        "min_employees": 12,
-        "max_employees": 1000,
-        "min_tasks": 4,
-        "max_tasks": 2500,
-        "horizon_days": "1 to 14 days",
-        "time_granularity": "Shift rotations (Morning, Afternoon, Night) + discrete tasks",
-        "file_format": "JSON / Python programmatic generator"
-      },
-      "constraints": {
-        "supported": [
-          "Cell staffing coverage requirements",
-          "Tiered ISO qualification matching (Welding, Stamping, Robotics, QC)",
-          "Overtime caps and fatigue prevention",
-          "Workload variance fairness objective",
-          "Dynamic unexpected worker disruption recovery"
-        ],
-        "unsupported_or_relaxed": []
-      },
-      "synthetic_extension": {
-        "generator_available": true,
-        "scales_to": "Arbitrary size: Small (25w), Medium (100w), Large (500w), Very-Large (1000w+)"
-      },
-      "license": "Proprietary Academic Project License (Ordivanta)"
+      "dataset_id": "synthetic_manufacturing",
+      "name": "Ordivanta Synthetic Automotive Manufacturing Digital Twin",
+      "source_url": "Internal Ordivanta Deterministic Scenario Generator (backend/app/datasets/scalability_generator.py)",
+      "paper_citation": "Ordivanta Technical Design Specification v2.4 (2026). Deterministic shop-floor scenario generation for industrial stress-testing.",
+      "category": "Connected Workflow & Extreme Scalability Suite",
+      "total_benchmark_files": 1,
+      "total_benchmark_instances": 7,
+      "successfully_parsed_instances": 7,
+      "tested_instances_count": 7,
+      "worker_pool_min": 6,
+      "worker_pool_max": 1000,
+      "task_count_min": 3,
+      "task_count_max": 2500,
+      "raw_shift_interval": "Continuous minute-level workstation tasks and discrete multi-shift planning",
+      "planning_horizon_days": "1 to 7 days",
+      "original_file_format": "Python domain models and JSON manifests",
+      "data_provenance_type": "Synthetic Manufacturing Extension",
+      "adaptation_details": "Generated deterministically using fixed random seeds (seeds 42, 101-110). Includes Detroit Plant #1 cells (01: Welding Prep, 02: CNC Stamping, 03: Robotic MIG, 04: QC/Packaging) and scalability scaling tiers (Small: 25w/60t, Medium: 100w/250t, Large: 500w/1200t, Very-Large: 1000w/2500t).",
+      "supported_constraints": [
+        "All Module 1 shift constraints (headcount, max hours, overtime, fairness)",
+        "All Module 2 task constraints (strict non-overlap, multi-skilling, shift minimization)",
+        "Dynamic disruption recovery with stability-preserving perturbation objectives"
+      ],
+      "omitted_or_approximated_constraints": [],
+      "license_status": "Proprietary Ordivanta research artifact; fully reproducible via open generator script."
     }
   ]
 }

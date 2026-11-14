@@ -120,6 +120,10 @@ class TaskAllocationResult:
     coverage_percentage: float
     runtime_seconds: float
     objective_value: Optional[float] = None
+    best_lower_bound: Optional[float] = None
+    optimality_gap: Optional[float] = None
+    model_construction_seconds: float = 0.0
+    solver_execution_seconds: float = 0.0
     worker_utilization_hours: Dict[str, float] = field(default_factory=dict)
     is_valid: bool = True
     validation_violations: List[str] = field(default_factory=list)
@@ -146,7 +150,11 @@ class TaskAllocationResult:
             "total_tasks": self.total_tasks,
             "coverage_percentage": round(self.coverage_percentage, 2),
             "runtime_seconds": round(self.runtime_seconds, 4),
+            "model_construction_seconds": round(self.model_construction_seconds, 4),
+            "solver_execution_seconds": round(self.solver_execution_seconds, 4),
             "objective_value": round(self.objective_value, 4) if self.objective_value is not None else None,
+            "best_lower_bound": round(self.best_lower_bound, 4) if self.best_lower_bound is not None else None,
+            "optimality_gap": round(self.optimality_gap, 4) if self.optimality_gap is not None else None,
             "worker_utilization_hours": {
                 k: round(v, 2) for k, v in self.worker_utilization_hours.items()
             },

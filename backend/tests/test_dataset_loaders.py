@@ -128,7 +128,7 @@ def test_nurse_rostering_loader():
 
 def test_registry_lookup_and_errors():
     datasets = dataset_registry.list_datasets()
-    assert len(datasets) == 4
+    assert len(datasets) == 5
 
     # Unknown dataset
     with pytest.raises(KeyError):
@@ -144,11 +144,12 @@ def test_registry_lookup_and_errors():
 def test_dataset_api_handlers():
     # 1. List all datasets
     datasets = list_datasets()
-    assert len(datasets) == 4
+    assert len(datasets) == 5
     ids = [d.dataset_id for d in datasets]
     assert "synthetic_manufacturing" in ids
     assert "shift_scheduling" in ids
     assert "ptsp" in ids
+    assert "smptsp" in ids
     assert "nurse_rostering" in ids
 
     # 2. Get specific dataset metadata

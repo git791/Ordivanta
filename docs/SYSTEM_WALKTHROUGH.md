@@ -137,7 +137,7 @@ When a scheduled operator calls in sick:
 - **Rescheduling from Scratch is Catastrophic:** In a real factory, re-solving from scratch disrupts everyone's shifts (high churn), creating chaos on the floor.
 - **Ordivanta Recovery MILP:** Solves a stability-preserving perturbation problem:
    $$\min \quad 10^5 \sum u_{js} + \alpha \sum_{(i,j,s) \in \text{Baseline}} (1 - x_{ijs}) + \beta \sum_{(i,j,s) \notin \text{Baseline}} x_{ijs}$$
-- **Result:** Keeps healthy workers in their original assignments, repairing 100% of coverage in **0.018 seconds** with **>80% less churn** than full rescheduling.
+- **Result:** Keeps healthy workers in their original assignments, repairing 100% of coverage in **0.018 seconds** with **up to 80.1% less churn** (mean 68.7% across 10 random seeds) than full rescheduling.
 
 ---
 

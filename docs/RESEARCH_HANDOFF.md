@@ -115,7 +115,7 @@ $$\min \quad 1000 \sum_{w \in W} y_w + 50000 \sum_{j \in T} u_j + 0.01 \sum_{w, 
 
 When unexpected absenteeism occurs ($\text{Absent} \subset I$), the Recovery MILP solves a stability-preserving perturbation problem:
 $$\min \quad 10^5 \sum_{j, s} u_{js} + \alpha \sum_{(i,j,s) \in \text{Baseline}} (1 - x_{ijs}) + \beta \sum_{(i,j,s) \notin \text{Baseline}} x_{ijs}$$
-This locks or heavily penalizes changes to existing assignments of healthy workers, achieving **>80% reduction in schedule churn** compared to rescheduling from scratch.
+This locks or heavily penalizes changes to existing assignments of healthy workers, achieving **up to 80.1% reduction in schedule churn** (mean 68.7% across 10 deterministic random-seed replications) compared to rescheduling from scratch.
 
 ---
 
@@ -127,7 +127,7 @@ The Multi-Activity Shift Scheduling Problem (MATSP / instances1_225) published b
 ### Why PTSP and SMPTSP for Module 2?
 - **PTSP (Krishnamoorthy, Ernst, Baatar 2012):** Captures multi-skilled workers assigned to fixed-time operations on a continuous timeline.
 - **SMPTSP (Smet, Wauters, Mihaylov, Vanden Berghe 2014):** Formulates the Shift Minimisation problem where the explicit objective is to minimize total personnel shifts required.
-- **Truthful Scale Audit:** Neither PTSP nor SMPTSP benchmark suites contain >1,000 workers (SMPTSP has up to 153 workers and 1,577 tasks; PTSP has up to 348 workers and 1,115 tasks). Therefore, Ordivanta truthfully reports published instance sizes and provides an explicit **Synthetic Scalability Extension** (Small: 25w, Medium: 100w, Large: 500w, Very-Large: 1,000w) to scientifically evaluate algorithmic scaling up to 1,000 workers.
+- **Truthful Scale Audit:** Neither PTSP nor SMPTSP benchmark suites contain >1,000 workers (SMPTSP has up to 153 workers and 1,577 tasks; PTSP has up to 422 workers and 2,105 tasks). Therefore, Ordivanta truthfully reports published instance sizes and provides an explicit **Synthetic Scalability Extension** (Small: 25w, Medium: 100w, Large: 500w, Very-Large: 1,000w) to scientifically evaluate algorithmic scaling up to 1,000 workers.
 
 ---
 
@@ -138,12 +138,12 @@ See [`docs/tables/table1_dataset_provenance.md`](file:///c:/Users/moham/Download
 
 ### Table 2: Module 1 Computational Performance (MATSP)
 
-| Instance | Employees | Shifts | Demands | Greedy Runtime | MILP Runtime (HiGHS) | ALNS Runtime | MILP Status | Validation |
+| Instance | Employees | Active Shifts / Slots | Demands | Greedy Runtime | MILP Runtime (HiGHS) | ALNS Runtime | MILP Status | Validation |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1_7_10_1** | 10 | 96 | 96 | 0.010s | 0.160s | 0.200s | **OPTIMAL** | 0 Violations |
-| **2_7_10_1** | 10 | 96 | 96 | 0.020s | 0.220s | 0.120s | **OPTIMAL** | 0 Violations |
-| **7_7_20_1** | 20 | 96 | 96 | 0.020s | 0.260s | 0.490s | **OPTIMAL** | 0 Violations |
-| **6_7_20_1** | 20 | 96 | 96 | 0.020s | 0.650s | 0.450s | **OPTIMAL** | 0 Violations |
+| **1_7_10_1** | 10 | 72 (of 96) | 72 | 0.010s | 0.160s | 0.200s | **OPTIMAL** | 0 Violations |
+| **2_7_10_1** | 10 | 72 (of 96) | 72 | 0.020s | 0.220s | 0.120s | **OPTIMAL** | 0 Violations |
+| **7_7_20_1** | 20 | 72 (of 96) | 72 | 0.020s | 0.260s | 0.490s | **OPTIMAL** | 0 Violations |
+| **6_7_20_1** | 20 | 72 (of 96) | 72 | 0.020s | 0.650s | 0.450s | **OPTIMAL** | 0 Violations |
 
 ### Table 3: Module 2 Task Allocation Performance (PTSP & SMPTSP)
 
@@ -163,20 +163,20 @@ See [`docs/tables/table1_dataset_provenance.md`](file:///c:/Users/moham/Download
 | Problem Tier | Workers | Tasks | Greedy Runtime | ALNS Runtime | MILP Runtime | Active Shifts (ALNS) | Tractability |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Small** | 25 | 60 | 0.001s | 0.023s | 15.05s | 12 | Exact Solvable |
-| **Medium** | 100 | 250 | 0.017s | 0.410s | 15.86s | 41 | Exact Solvable |
-| **Large** | 500 | 1,200 | 0.260s | 4.099s | >30s (Limit) | 184 | ALNS / Heuristic Preferred |
-| **Very-Large**| 1,000 | 2,500 | 1.295s | 25.00s | >30s (Limit) | 381 | ALNS Scalable to Industry |
+| **Medium** | 100 | 250 | 0.004s | 0.085s | 15.86s | 37 | Exact Solvable |
+| **Large** | 500 | 1,200 | 0.014s | 0.512s | NOT_RUN_RESOURCE_LIMIT | 148 | ALNS / Heuristic Preferred |
+| **Very-Large**| 1,000 | 2,500 | 0.038s | 0.812s | NOT_RUN_RESOURCE_LIMIT | 309 | ALNS Scalable to Industry |
 
-### Table 5: Disruption Recovery Stability Comparison
+### Table 5: Disruption Recovery Stability Comparison (10 Random Seed Replications)
 
 | Absent Personnel | Recovery Strategy | Schedule Churn (Disrupted Shifts) | Coverage Repaired | Latency | Churn Reduction |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1 Worker** | Recovery MILP | **2 changes** | 100% | 0.018s | **92.6% Less Churn** |
-| 1 Worker | Full Reschedule | 27 changes | 100% | 0.010s | Baseline |
-| **2 Workers** | Recovery MILP | **5 changes** | 100% | 0.018s | **81.5% Less Churn** |
-| 2 Workers | Full Reschedule | 27 changes | 100% | 0.009s | Baseline |
-| **3 Workers** | Recovery MILP | **8 changes** | 100% | 0.017s | **70.4% Less Churn** |
-| 3 Workers | Full Reschedule | 27 changes | 100% | 0.008s | Baseline |
+| **1 Worker** | Recovery MILP | **2.6 ± 1.1** | 25/25 (100%) | 0.018s | **80.1% Less Churn** (±8.9%) |
+| 1 Worker | Full Reschedule | 14.6 ± 1.8 | 25/25 (100%) | 0.090s | Baseline |
+| **2 Workers** | Recovery MILP | **5.7 ± 1.8** | 21/21 (100%) | 0.018s | **62.9% Less Churn** (±13.7%) |
+| 2 Workers | Full Reschedule | 17.5 ± 2.4 | 21/21 (100%) | 0.092s | Baseline |
+| **3 Workers** | Recovery MILP | **8.0 ± 1.3** | 19/19 (100%) | 0.017s | **63.2% Less Churn** (±7.7%) |
+| 3 Workers | Full Reschedule | 22.4 ± 2.6 | 19/19 (100%) | 0.091s | Baseline |
 
 ---
 
@@ -184,14 +184,14 @@ See [`docs/tables/table1_dataset_provenance.md`](file:///c:/Users/moham/Download
 
 All figures have been rendered at 300 DPI in both high-resolution PNG and publication-grade vector PDF:
 - **Figure 1:** [System Architecture Diagram](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig1_system_architecture.png) (`fig1_system_architecture.png` / `.pdf`)
-- **Figure 2:** [Module 1 Runtime vs Problem Size](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig2_module1_runtime_vs_size.png) (`fig2_module1_runtime_vs_size.png` / `.pdf`)
-- **Figure 3:** [Module 1 Multi-Objective Tradeoffs](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig3_module1_metrics_comparison.png) (`fig3_module1_metrics_comparison.png` / `.pdf`)
-- **Figure 4:** [Module 2 PTSP Algorithm Comparison](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig4_module2_ptsp_comparison.png) (`fig4_module2_ptsp_comparison.png` / `.pdf`)
-- **Figure 5:** [Module 2 SMPTSP Shift Minimisation](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig5_module2_smptsp_shift_minimization.png) (`fig5_module2_smptsp_shift_minimization.png` / `.pdf`)
-- **Figure 6:** [Scalability Scaling Curve up to 1,000 Workers](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig6_scalability_curve_1000workers.png) (`fig6_scalability_curve_1000workers.png` / `.pdf`)
-- **Figure 7:** [Connected Manufacturing Workflow Pipeline](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig7_connected_workflow_pipeline.png) (`fig7_connected_workflow_pipeline.png` / `.pdf`)
-- **Figure 8:** [Operational Coverage Heatmap](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig8_coverage_heatmap.png) (`fig8_coverage_heatmap.png` / `.pdf`)
-- **Figure 9:** [Disruption Recovery Churn vs Runtime](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig9_disruption_recovery_stability.png) (`fig9_disruption_recovery_stability.png` / `.pdf`)
+- **Figure 2:** [Audited Dataset Size and Dimension Characteristics](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig2_verified_dataset_characteristics.png) (`fig2_verified_dataset_characteristics.png` / `.pdf`)
+- **Figure 3:** [Module 1 Runtime Scaling Comparison (Greedy vs MILP vs ALNS)](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig3_module1_runtime_comparison.png) (`fig3_module1_runtime_comparison.png` / `.pdf`)
+- **Figure 4:** [Module 1 Coverage and Workload Fairness Std Dev](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig4_module1_coverage_fairness.png) (`fig4_module1_coverage_fairness.png` / `.pdf`)
+- **Figure 5:** [Module 2 Shift Minimisation Performance (PTSP & SMPTSP)](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig5_module2_task_allocation_comparison.png) (`fig5_module2_task_allocation_comparison.png` / `.pdf`)
+- **Figure 6:** [Module 2 Full vs Reduced Subset Shift Counts and Latency](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig6_module2_full_vs_reduced.png) (`fig6_module2_full_vs_reduced.png` / `.pdf`)
+- **Figure 7:** [Scalability Scaling Curve up to 1,000 Workers](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig7_scalability_1000workers.png) (`fig7_scalability_1000workers.png` / `.pdf`)
+- **Figure 8:** [Worker-to-Task Execution Gantt Chart Timeline](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig8_worker_task_gantt_chart.png) (`fig8_worker_task_gantt_chart.png` / `.pdf`)
+- **Figure 9:** [Fair Disruption Recovery Stability and Churn Reduction](file:///c:/Users/moham/Downloads/Projectss/Ordivanta/docs/figures/fig9_fair_disruption_recovery.png) (`fig9_fair_disruption_recovery.png` / `.pdf`)
 
 ---
 

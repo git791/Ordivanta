@@ -1,16 +1,16 @@
 # Table 4: Scalability Extension Experiments (Up to 1,000 Workers & 2,500 Tasks)
 
-| Problem Tier | Workers | Tasks | Algorithm | Status | Active Shifts | Coverage % | Runtime (s) | Tractability |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Small | 25 | 60 | Greedy Allocator | FEASIBLE | 15 | 100.0% | 0.0009 | Tractable |
-| Small | 25 | 60 | ALNS Metaheuristic | FEASIBLE | 12 | 100.0% | 0.0226 | Tractable |
-| Small | 25 | 60 | Exact MILP | FEASIBLE | 10 | 100.0% | 15.0545 | Bounded Incumbent |
-| Medium | 100 | 250 | Greedy Allocator | FEASIBLE | 45 | 100.0% | 0.0170 | Tractable |
-| Medium | 100 | 250 | ALNS Metaheuristic | FEASIBLE | 41 | 100.0% | 0.4099 | Tractable |
-| Medium | 100 | 250 | Exact MILP | FEASIBLE | 85 | 90.0% | 15.8582 | Bounded Incumbent |
-| Large | 500 | 1200 | Greedy Allocator | FEASIBLE | 209 | 100.0% | 0.2601 | Tractable |
-| Large | 500 | 1200 | ALNS Metaheuristic | FEASIBLE | 184 | 100.0% | 4.0988 | Tractable |
-| Large | 500 | 1200 | Exact MILP | TIME_LIMIT_EXCEEDED | 0 | 0.0% | 30.0000 | Intractable Cutoff |
-| Very-Large | 1000 | 2500 | Greedy Allocator | FEASIBLE | 441 | 100.0% | 1.2949 | Tractable |
-| Very-Large | 1000 | 2500 | ALNS Metaheuristic | FEASIBLE | 381 | 100.0% | 25.0047 | Bounded Incumbent |
-| Very-Large | 1000 | 2500 | Exact MILP | TIME_LIMIT_EXCEEDED | 0 | 0.0% | 30.0000 | Intractable Cutoff |
+| Problem Tier | Seed / Mode | Workers | Tasks | Algorithm | Status | Active Shifts | Coverage % | Runtime (s) | Tractability |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| Small | 101 | 25 | 60 | Exact MILP | OPTIMAL | 9 | 100.0% | 7.6952 | Tractable (<10s) |
+| Small | aggregate_10_seeds | 25 | 60 | Greedy Allocator | PARTIAL | 14.5 | 99.8% | 0.0010 | Tractable (<10s) |
+| Small | aggregate_10_seeds | 25 | 60 | ALNS Metaheuristic | PARTIAL | 12.7 | 99.8% | 0.0314 | Tractable (<10s) |
+| Medium | 101 | 100 | 250 | Exact MILP | FEASIBLE | 81 | 89.6% | 16.5106 | Bounded Incumbent |
+| Medium | aggregate_10_seeds | 100 | 250 | Greedy Allocator | FEASIBLE | 46.9 | 100.0% | 0.0114 | Tractable (<10s) |
+| Medium | aggregate_10_seeds | 100 | 250 | ALNS Metaheuristic | FEASIBLE | 39.8 | 100.0% | 0.7435 | Tractable (<10s) |
+| Large | 101 | 500 | 1200 | Exact MILP | NOT_RUN_RESOURCE_LIMIT | 0 | 0.0% | 0.0000 | Safety Resource Boundary |
+| Large | aggregate_10_seeds | 500 | 1200 | Greedy Allocator | FEASIBLE | 211.7 | 100.0% | 0.2771 | Tractable (<10s) |
+| Large | aggregate_10_seeds | 500 | 1200 | ALNS Metaheuristic | FEASIBLE | 181.4 | 100.0% | 9.9692 | Tractable (<10s) |
+| Very-Large | 101 | 1000 | 2500 | Exact MILP | NOT_RUN_RESOURCE_LIMIT | 0 | 0.0% | 0.0000 | Safety Resource Boundary |
+| Very-Large | aggregate_10_seeds | 1000 | 2500 | Greedy Allocator | FEASIBLE | 451.1 | 100.0% | 1.3377 | Tractable (<10s) |
+| Very-Large | aggregate_10_seeds | 1000 | 2500 | ALNS Metaheuristic | FEASIBLE | 417.3 | 100.0% | 10.0050 | Bounded Incumbent |

@@ -56,7 +56,7 @@ def list_task_benchmarks(dataset_id: Optional[str] = None):
 
 
 @router.get("/tasks/instance/{dataset_id}/{instance_id}")
-def get_task_instance(dataset_id: str, instance_id: str, max_tasks: Optional[int] = 50):
+def get_task_instance(dataset_id: str, instance_id: str, max_tasks: Optional[int] = None):
     """
     Load and return parsed task allocation instance details: tasks timeline and worker qualifications.
     """
@@ -93,10 +93,13 @@ def get_task_instance(dataset_id: str, instance_id: str, max_tasks: Optional[int
         for w in task_scenario.workers
     ]
 
+    is_reduced = "Reduced Subset" in summary.name
+
     return {
         "instance_id": instance_id,
         "dataset_id": dataset_id,
         "name": task_scenario.name,
+        "is_reduced": is_reduced,
         "total_tasks": len(task_scenario.tasks),
         "total_workers": len(task_scenario.workers),
         "tasks": tasks_data,
