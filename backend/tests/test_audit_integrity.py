@@ -166,3 +166,40 @@ def test_provenance_manifest_structure_and_routes():
     assert "Small" in synth["scenario_sizes"]
     assert "1,000w" in synth["scenario_sizes"] or "1000w" in synth["scenario_sizes"]
 
+
+def test_matsp_coverage_calculation_and_metric_separation():
+    import csv
+    m1_csv_path = ROOT / "research" / "final_evidence" / "module1_results.csv"
+    assert m1_csv_path.exists(), "module1_results.csv must exist in research/final_evidence/"
+
+    with open(m1_csv_path, "r", encoding="utf-8") as f:
+        reader = list(csv.DictReader(f))
+
+    assert len(reader) > 0, "module1_results.csv must contain benchmark rows"
+
+    required_columns = [
+        "module", "dataset", "instance_id", "employees", "shifts",
+        "demands", "staffing_demand", "algorithm", "status",
+        "assignments_count", "coverage_pct", "total_scheduled_hours",
+        "workload_fairness_std_dev", "runtime_seconds", "is_valid", "violations_count"
+    ]
+
+    for col in required_columns:
+        assert col in reader[0], f"Column '{col}' must be present as a separate metric"
+
+    for row in reader:
+        cov = float(row["coverage_pct"])
+        assert 0.0 <= cov <= 100.0, f"Coverage % must strictly be <= 100.0%, found {cov} in instance {row['instance_id']}"
+        demands_slots = int(row["demands"])
+        staffing_demand = int(row["staffing_demand"])
+        assignments = int(row["assignments_count"])
+        hours = float(row["total_scheduled_hours"])
+
+        # In MATSP instances, staffing_demand >= demands_slots
+        assert staffing_demand >= demands_slots
+        # Verify valid status
+        assert row["is_valid"] == "True"
+        assert int(row["violations_count"]) == 0
+        assert hours > 0.0
+
+

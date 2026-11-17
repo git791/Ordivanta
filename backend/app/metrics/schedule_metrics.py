@@ -3,6 +3,42 @@ from app.schemas.schedule import MetricsResponse
 import statistics
 
 
+def compute_coverage(
+    assignments: list[Assignment],
+    scenario: Scenario,
+) -> tuple[int, int, float]:
+    """
+    Compute demand coverage metrics.
+
+    Returns:
+        tuple[int, int, float]: (total_filled_positions, total_required_positions, coverage_pct)
+
+    Rules:
+    - total_required_positions = sum(d.required_headcount for d in scenario.demands)
+    - Fulfilled headcount per (unit_id, shift_id) cell is min(assigned, required).
+    - Surplus assignments in one cell never compensate for deficits in another cell.
+    - Coverage percentage cannot exceed 100.0%.
+    - If total_required_positions == 0, coverage_pct is 100.0%.
+    """
+    total_required = sum(d.required_headcount for d in scenario.demands)
+    if total_required == 0:
+        return 0, 0, 100.0
+
+    filled_per_cell: dict[tuple[str, str], int] = {}
+    for a in assignments:
+        key = (a.unit_id, a.shift_id)
+        filled_per_cell[key] = filled_per_cell.get(key, 0) + 1
+
+    total_filled = 0
+    for d in scenario.demands:
+        key = (d.unit_id, d.shift_id)
+        filled = filled_per_cell.get(key, 0)
+        total_filled += min(filled, d.required_headcount)
+
+    coverage_pct = min(100.0, round((total_filled / total_required) * 100.0, 1))
+    return total_filled, total_required, coverage_pct
+
+
 def compute_metrics(
     assignments: list[Assignment],
     scenario: Scenario,
@@ -11,22 +47,8 @@ def compute_metrics(
     violation_count: int,
 ) -> MetricsResponse:
     """Compute schedule quality and operational metrics."""
-    # Coverage calculation
-    total_required = sum(d.required_headcount for d in scenario.demands)
-    filled_per_cell: dict[tuple[str, str], int] = {}
-    for a in assignments:
-        key = (a.unit_id, a.shift_id)
-        filled_per_cell[key] = filled_per_cell.get(key, 0) + 1
-
-    total_filled = 0
-    unfilled = 0
-    for d in scenario.demands:
-        key = (d.unit_id, d.shift_id)
-        filled = filled_per_cell.get(key, 0)
-        actual_filled = min(filled, d.required_headcount)
-        total_filled += actual_filled
-        unfilled += max(0, d.required_headcount - filled)
-
+    total_filled, total_required, coverage_pct = compute_coverage(assignments, scenario)
+    unfilled = max(0, total_required - total_filled)
     coverage_rate = (total_filled / total_required) if total_required > 0 else 1.0
 
     # Employee hours calculation
@@ -47,3 +69,4 @@ def compute_metrics(
         total_required_positions=total_required,
         total_filled_positions=total_filled,
     )
+

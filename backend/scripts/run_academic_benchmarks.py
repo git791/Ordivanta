@@ -29,6 +29,7 @@ from app.optimization.milp_scheduler import MILPScheduler
 from app.optimization.alns_scheduler import ALNSScheduler
 from app.optimization.recovery_milp_scheduler import RecoveryMILPScheduler
 from app.validation.schedule_validator import validate_assignments
+from app.metrics.schedule_metrics import compute_coverage
 from app.optimization.task_allocation import (
     TaskScenario,
     Task,
@@ -81,6 +82,7 @@ def run_module1_benchmarks():
         emp_count = len(scenario.employees)
         shift_count = len(scenario.shifts)
         demand_count = len(scenario.demands)
+        total_staffing_demand = sum(d.required_headcount for d in scenario.demands)
         shift_dur = {s.id: s.duration_hours for s in scenario.shifts}
 
         # 1. Greedy
@@ -90,7 +92,7 @@ def run_module1_benchmarks():
         g_val = validate_assignments(g_out.assignments, scenario)
         g_hours = sum(shift_dur.get(a.shift_id, 0.0) for a in g_out.assignments)
         g_fairness = calculate_workload_std_dev(g_out.assignments, scenario.employees, scenario.shifts)
-        g_cov = round(len(g_out.assignments) / demand_count * 100.0, 1) if demand_count > 0 else 100.0
+        g_filled, g_req, g_cov = compute_coverage(g_out.assignments, scenario)
 
         results.append({
             "module": "Module 1",
@@ -99,6 +101,7 @@ def run_module1_benchmarks():
             "employees": emp_count,
             "shifts": shift_count,
             "demands": demand_count,
+            "staffing_demand": total_staffing_demand,
             "algorithm": "Greedy Baseline",
             "status": g_out.status.value,
             "assignments_count": len(g_out.assignments),
@@ -117,7 +120,7 @@ def run_module1_benchmarks():
         m_val = validate_assignments(m_out.assignments, scenario)
         m_hours = sum(shift_dur.get(a.shift_id, 0.0) for a in m_out.assignments)
         m_fairness = calculate_workload_std_dev(m_out.assignments, scenario.employees, scenario.shifts)
-        m_cov = round(len(m_out.assignments) / demand_count * 100.0, 1) if demand_count > 0 else 100.0
+        m_filled, m_req, m_cov = compute_coverage(m_out.assignments, scenario)
 
         results.append({
             "module": "Module 1",
@@ -126,6 +129,7 @@ def run_module1_benchmarks():
             "employees": emp_count,
             "shifts": shift_count,
             "demands": demand_count,
+            "staffing_demand": total_staffing_demand,
             "algorithm": "Exact MILP",
             "status": m_out.status.value,
             "assignments_count": len(m_out.assignments),
@@ -144,7 +148,7 @@ def run_module1_benchmarks():
         a_val = validate_assignments(a_out.assignments, scenario)
         a_hours = sum(shift_dur.get(a.shift_id, 0.0) for a in a_out.assignments)
         a_fairness = calculate_workload_std_dev(a_out.assignments, scenario.employees, scenario.shifts)
-        a_cov = round(len(a_out.assignments) / demand_count * 100.0, 1) if demand_count > 0 else 100.0
+        a_filled, a_req, a_cov = compute_coverage(a_out.assignments, scenario)
 
         results.append({
             "module": "Module 1",
@@ -153,6 +157,7 @@ def run_module1_benchmarks():
             "employees": emp_count,
             "shifts": shift_count,
             "demands": demand_count,
+            "staffing_demand": total_staffing_demand,
             "algorithm": "ALNS Metaheuristic",
             "status": a_out.status.value,
             "assignments_count": len(a_out.assignments),
@@ -164,9 +169,9 @@ def run_module1_benchmarks():
             "violations_count": len(a_val.errors),
         })
 
-        print(f"  Greedy: {g_time:.3f}s ({g_out.status.value}, std_dev={g_fairness}h)")
-        print(f"  MILP:   {m_time:.3f}s ({m_out.status.value}, std_dev={m_fairness}h)")
-        print(f"  ALNS:   {a_time:.3f}s ({a_out.status.value}, std_dev={a_fairness}h)")
+        print(f"  Greedy: {g_time:.3f}s ({g_out.status.value}, assignments={len(g_out.assignments)}/{total_staffing_demand}, cov={g_cov}%, std_dev={g_fairness}h)")
+        print(f"  MILP:   {m_time:.3f}s ({m_out.status.value}, assignments={len(m_out.assignments)}/{total_staffing_demand}, cov={m_cov}%, std_dev={m_fairness}h)")
+        print(f"  ALNS:   {a_time:.3f}s ({a_out.status.value}, assignments={len(a_out.assignments)}/{total_staffing_demand}, cov={a_cov}%, std_dev={a_fairness}h)")
 
     return results
 

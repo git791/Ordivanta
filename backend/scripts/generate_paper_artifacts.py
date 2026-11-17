@@ -566,10 +566,13 @@ Ordivanta Synthetic & Scalability & Automotive Mfg Cells & 7 & 6--1,000 & 3--2,5
     # Table 2: Module 1 MATSP Results Table
     m1_data = json.loads((BENCH_DIR / "module1_shift_benchmarks.json").read_text(encoding="utf-8"))
     tab2_md = "# Table 2: Module 1 Computational Results on MATSP Benchmark Instances\n\n"
-    tab2_md += "| Instance ID | Staff | Shifts | Demands | Algorithm | Solver Status | Coverage % | Workload Std Dev (h) | Runtime (s) | Valid |\n"
-    tab2_md += "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+    tab2_md += "| Instance ID | Staff | Shifts | Demand Slots | Staffing Demand | Assignments | Algorithm | Solver Status | Coverage % | Scheduled Hours | Workload Std Dev (h) | Runtime (s) | Valid |\n"
+    tab2_md += "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
     for r in m1_data:
-        tab2_md += f"| {r['instance_id']} | {r['employees']} | {r['shifts']} | {r['demands']} | {r['algorithm']} | {r['status']} | {r['coverage_pct']:.1f}% | {r['workload_fairness_std_dev']:.2f}h | {r['runtime_seconds']:.4f} | {r['is_valid']} |\n"
+        staff_req = r.get("staffing_demand", r.get("demands", 0))
+        assign_cnt = r.get("assignments_count", 0)
+        hours = r.get("total_scheduled_hours", 0.0)
+        tab2_md += f"| {r['instance_id']} | {r['employees']} | {r['shifts']} | {r['demands']} | {staff_req} | {assign_cnt} | {r['algorithm']} | {r['status']} | {r['coverage_pct']:.1f}% | {hours:.1f}h | {r['workload_fairness_std_dev']:.2f}h | {r['runtime_seconds']:.4f} | {r['is_valid']} |\n"
     (TAB_DIR / "table2_module1_matsp_comparison.md").write_text(tab2_md, encoding="utf-8")
 
     # Table 3: Module 2 PTSP & SMPTSP Results Table

@@ -256,6 +256,24 @@ Every assignment produced by Greedy, MILP, and ALNS across both modules and scal
 # =====================================================================
 # 4. GENERATE 10 PUBLICATION FIGURES (300 DPI PNG + Vector PDF)
 # =====================================================================
+def save_fig_duo(fig, figs_base: str, docs_base: str | None = None):
+    png_path = FIGS_DIR / f"{figs_base}.png"
+    pdf_path = FIGS_DIR / f"{figs_base}.pdf"
+    fig.savefig(str(png_path))
+    fig.savefig(str(pdf_path))
+    if docs_base:
+        for attempt in range(5):
+            try:
+                shutil.copyfile(str(png_path), str(DOCS_FIGS / f"{docs_base}.png"))
+                shutil.copyfile(str(pdf_path), str(DOCS_FIGS / f"{docs_base}.pdf"))
+                break
+            except OSError:
+                if attempt == 4:
+                    raise
+                time.sleep(0.3)
+    plt.close(fig)
+
+
 def generate_10_figures():
     print("Generating 10 publication figures...")
 
@@ -287,11 +305,7 @@ def generate_10_figures():
     ax.annotate("", xy=(0.50, 0.18), xytext=(0.50, 0.23), arrowprops=dict(arrowstyle="->", lw=1.8, color="#15803d"))
     plt.suptitle("Ordivanta Integrated Two-Module Optimization System Architecture", fontsize=12, y=0.98, weight="bold")
     plt.tight_layout()
-    fig1.savefig(FIGS_DIR / "fig1_two_module_architecture.png")
-    fig1.savefig(FIGS_DIR / "fig1_two_module_architecture.pdf")
-    fig1.savefig(DOCS_FIGS / "fig1_system_architecture.png")
-    fig1.savefig(DOCS_FIGS / "fig1_system_architecture.pdf")
-    plt.close(fig1)
+    save_fig_duo(fig1, "fig1_two_module_architecture", "fig1_system_architecture")
 
     # Figure 2: Dataset Comparison
     fig2, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.2))
@@ -316,11 +330,7 @@ def generate_10_figures():
 
     plt.suptitle("Audited Benchmark Dataset Scale & Dimension Comparison", fontsize=12, y=1.02, weight="bold")
     plt.tight_layout()
-    fig2.savefig(FIGS_DIR / "fig2_dataset_comparison.png")
-    fig2.savefig(FIGS_DIR / "fig2_dataset_comparison.pdf")
-    fig2.savefig(DOCS_FIGS / "fig2_verified_dataset_characteristics.png")
-    fig2.savefig(DOCS_FIGS / "fig2_verified_dataset_characteristics.pdf")
-    plt.close(fig2)
+    save_fig_duo(fig2, "fig2_dataset_comparison", "fig2_verified_dataset_characteristics")
 
     # Figure 3: Module 1 Algorithm Comparison (Runtime & Fairness)
     m1_path = BENCH_DIR / "module1_shift_benchmarks.json"
@@ -361,11 +371,7 @@ def generate_10_figures():
 
         plt.suptitle("Module 1 (MATSP) Computational Performance & Workload Balance", fontsize=12, y=1.02, weight="bold")
         plt.tight_layout()
-        fig3.savefig(FIGS_DIR / "fig3_module1_algorithm_comparison.png")
-        fig3.savefig(FIGS_DIR / "fig3_module1_algorithm_comparison.pdf")
-        fig3.savefig(DOCS_FIGS / "fig3_module1_runtime_comparison.png")
-        fig3.savefig(DOCS_FIGS / "fig3_module1_runtime_comparison.pdf")
-        plt.close(fig3)
+        save_fig_duo(fig3, "fig3_module1_algorithm_comparison", "fig3_module1_runtime_comparison")
 
     # Figure 4: Module 2 Algorithm Comparison (Shifts & Coverage)
     m2_path = BENCH_DIR / "module2_task_benchmarks.json"
@@ -401,11 +407,7 @@ def generate_10_figures():
             ax.text(x[i] + w, a_s[i] + 0.4, str(a_s[i]), ha="center", color=C_ALNS, fontsize=8.5)
 
         plt.tight_layout()
-        fig4.savefig(FIGS_DIR / "fig4_module2_algorithm_comparison.png")
-        fig4.savefig(FIGS_DIR / "fig4_module2_algorithm_comparison.pdf")
-        fig4.savefig(DOCS_FIGS / "fig5_module2_task_allocation_comparison.png")
-        fig4.savefig(DOCS_FIGS / "fig5_module2_task_allocation_comparison.pdf")
-        plt.close(fig4)
+        save_fig_duo(fig4, "fig4_module2_algorithm_comparison", "fig5_module2_task_allocation_comparison")
 
     # Figure 5: Runtime Scaling up to 1,000 Workers (Matched Seed 101)
     fig5, ax = plt.subplots(figsize=(8.5, 4.5))
@@ -437,11 +439,7 @@ def generate_10_figures():
                 arrowprops=dict(facecolor=C_MILP, shrink=0.08, width=1.0, headwidth=5), fontsize=8.2, weight="bold", color=C_MILP)
     ax.legend(loc="upper left")
     plt.tight_layout()
-    fig5.savefig(FIGS_DIR / "fig5_runtime_scaling_500_1000workers.png")
-    fig5.savefig(FIGS_DIR / "fig5_runtime_scaling_500_1000workers.pdf")
-    fig5.savefig(DOCS_FIGS / "fig7_scalability_1000workers.png")
-    fig5.savefig(DOCS_FIGS / "fig7_scalability_1000workers.pdf")
-    plt.close(fig5)
+    save_fig_duo(fig5, "fig5_runtime_scaling_500_1000workers", "fig7_scalability_1000workers")
 
     # Figure 6: Active Workers / Shifts Comparison
     fig6, ax = plt.subplots(figsize=(8.5, 4.2))
@@ -468,9 +466,7 @@ def generate_10_figures():
         ax.text(x[i] + w, a_shifts[i] + 5, str(a_shifts[i]), ha="center", color=C_ALNS, fontsize=8.5)
 
     plt.tight_layout()
-    fig6.savefig(FIGS_DIR / "fig6_active_workers_comparison.png")
-    fig6.savefig(FIGS_DIR / "fig6_active_workers_comparison.pdf")
-    plt.close(fig6)
+    save_fig_duo(fig6, "fig6_active_workers_comparison")
 
     # Figure 7: MILP Model-Size Growth (Variables & Maximal Cliques)
     fig7, ax1 = plt.subplots(figsize=(8.5, 4.2))
@@ -486,9 +482,7 @@ def generate_10_figures():
     ax1.grid(True, which="both", linestyle="--", alpha=0.5)
     ax1.legend(loc="upper left")
     plt.tight_layout()
-    fig7.savefig(FIGS_DIR / "fig7_milp_model_size_growth.png")
-    fig7.savefig(FIGS_DIR / "fig7_milp_model_size_growth.pdf")
-    plt.close(fig7)
+    save_fig_duo(fig7, "fig7_milp_model_size_growth")
 
     # Figure 8: Roster Heatmap
     fig8, ax = plt.subplots(figsize=(9.5, 4.2))
@@ -505,9 +499,7 @@ def generate_10_figures():
     ax.set_title("Module 1 Shift Roster Assignment Matrix (Instance MATSP 1_7_10_1)")
     plt.colorbar(cbar, ax=ax, label="Assignment State (0=Off, 1=Regular, 2=Overtime)")
     plt.tight_layout()
-    fig8.savefig(FIGS_DIR / "fig8_roster_heatmap.png")
-    fig8.savefig(FIGS_DIR / "fig8_roster_heatmap.pdf")
-    plt.close(fig8)
+    save_fig_duo(fig8, "fig8_roster_heatmap")
 
     # Figure 9: Worker-Task Gantt Chart
     gantt_path = BENCH_DIR / "sample_gantt_assignments.json"
@@ -535,11 +527,7 @@ def generate_10_figures():
         ax.set_title("Continuous Timeline Workstation Task Allocation Gantt Chart (Instance data_2_24_40_33, 0 Errors)")
         ax.grid(axis="x", linestyle="--", alpha=0.5)
         plt.tight_layout()
-        fig9.savefig(FIGS_DIR / "fig9_worker_task_gantt_chart.png")
-        fig9.savefig(FIGS_DIR / "fig9_worker_task_gantt_chart.pdf")
-        fig9.savefig(DOCS_FIGS / "fig8_worker_task_gantt_chart.png")
-        fig9.savefig(DOCS_FIGS / "fig8_worker_task_gantt_chart.pdf")
-        plt.close(fig9)
+        save_fig_duo(fig9, "fig9_worker_task_gantt_chart", "fig8_worker_task_gantt_chart")
 
     # Figure 10: Recovery Before/After Comparison & Churn Reduction
     rec_path = BENCH_DIR / "disruption_recovery_benchmarks.json"
@@ -579,11 +567,7 @@ def generate_10_figures():
 
         plt.suptitle("Disruption Recovery Robustness: Recovery MILP vs Fair Full Rescheduling", fontsize=12, y=1.02, weight="bold")
         plt.tight_layout()
-        fig10.savefig(FIGS_DIR / "fig10_recovery_before_after.png")
-        fig10.savefig(FIGS_DIR / "fig10_recovery_before_after.pdf")
-        fig10.savefig(DOCS_FIGS / "fig9_fair_disruption_recovery.png")
-        fig10.savefig(DOCS_FIGS / "fig9_fair_disruption_recovery.pdf")
-        plt.close(fig10)
+        save_fig_duo(fig10, "fig10_recovery_before_after", "fig9_fair_disruption_recovery")
 
     print("All 10 figures successfully generated.")
 
