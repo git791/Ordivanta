@@ -1,0 +1,107 @@
+=== AUTHENTIC HIGHS C++ ENGINE EXECUTION LOG ===
+Instance: Scalability Small (25w, 60t) Seed 101
+Timestamp: 2026-11-17 12:58:35 UTC
+Configured Solver Time Limit: 15s
+Workers: 25 | Tasks: 60
+Pre-Solve Process Working Set: 59.19 MB
+============================================================
+
+======================================================================
+ORDIVANTA AUTHENTIC SOLVER EXECUTION & LOG CAPTURE
+======================================================================
+
+[Small] Starting authentic MILP execution (Time limit: 15s)...
+[MILP Build] Variables: 460, Constraints: 319, Build time: 0.03s
+[MILP Solve] Calling solver with time_limit=15s...
+Running HiGHS 1.15.1 (git hash: 04024d7): Copyright (c) 2026 under MIT licence terms
+Includes third-party software components, see THIRD_PARTY_NOTICES.md for full details
+MIP has 319 rows; 460 cols; 1503 nonzeros; 460 integer variables (460 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 5e+02]
+  Cost    [1e-02, 5e+04]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+00, 1e+00]
+Assessing feasibility of MIP using primal feasibility and integrality tolerance of       1e-06
+Solution has               num          max          sum
+Col     infeasibilities      0            0            0
+Integer infeasibilities      0            0            0
+Row     infeasibilities      0            0            0
+Row     residuals            0            0            0
+Presolving model
+318 rows, 459 cols, 1501 nonzeros 0s
+314 rows, 458 cols, 1487 nonzeros 0s
+Presolve reductions: rows 314(-5); columns 458(-2); nonzeros 1487(-16) 
+
+MIP start solution is feasible, objective value is 13000.6
+
+Solving MIP model with:
+   314 rows
+   458 cols (397 binary, 0 integer, 0 implied int., 0 continuous, 61 domain fixed)
+   1487 nonzeros
+   Thread count 8 (of 16 threads). Using 1 max workers. Parallel search off
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+         0       0         0   0.00%   1000.01         13000.6           92.31%        0      0      0         0     0.0s
+         0       0         0   0.00%   8000.6          13000.6           38.46%        0      0      5       857     0.0s
+ L       0       0         0   0.00%   8000.6          9000.6            11.11%     4432     41     29      3023     0.8s
+
+0.3% inactive integer columns, restarting
+Model after restart has 311 rows, 396 cols (396 bin., 0 int., 0 impl., 0 cont., 0 dom.fix.), and 1419 nonzeros
+
+         0       0         0   0.00%   8000.6          9000.6            11.11%       29      0      0      3312     0.9s
+         0       0         0   0.00%   8000.6          9000.6            11.11%       29      8      9      3543     0.9s
+         6       0         2  31.25%   8000.6          9000.6            11.11%     3757     24     74     84940     6.8s
+        23       0        12 100.00%   9000.6          9000.6             0.00%     3820     24    170    118673     9.4s
+
+Solving report
+  Status            Optimal
+  Primal bound      9000.6
+  Dual bound        9000.6
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      1.28831774861
+  Solution status   feasible
+                    9000.6 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            9.44
+                    0.03 (Presolve)
+                        MIP    time [calls] = 0.00 [1]
+                        subMIP time [calls] = 0.02 [5]
+                    9.42 (Solve)
+                        MIP    time [calls] = 9.09 [1]
+                        subMIP time [calls] = 0.32 [5]
+                    0.00 (Postsolve)
+                        MIP    time [calls] = 0.00 [1]
+                        subMIP time [calls] = 0.00 [5]
+  Max sub-MIP depth 4
+  Nodes             23
+  Repair LPs        0
+  LP iterations     118673
+                    105750 (strong br.)
+                    5391 (separation)
+                    1611 (heuristics)
+[MILP Solve] Solver finished in 9.48s
+
+============================================================
+ORDIVANTA POST-SOLVE EXECUTION SUMMARY
+============================================================
+Termination Status: OPTIMAL
+Active Shifts / Headcount: 9
+Task Coverage: 60/60 (100.00%)
+Decision Variables: 460
+Maximal Clique Constraints: 319
+Model Construction Time (Python/PuLP): 0.0252s
+Solver Time (HiGHS API Call): 9.4755s
+Total Wall-Clock Runtime: 9.5039s
+Peak Python Heap (tracemalloc): 0.49 MB
+Process Working Set (psutil RSS): 69.58 MB
+Independent Validation: PASSED (0 errors)
+============================================================

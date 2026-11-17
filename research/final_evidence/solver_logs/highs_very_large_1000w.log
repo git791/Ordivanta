@@ -1,0 +1,77 @@
+=== AUTHENTIC HIGHS C++ ENGINE EXECUTION LOG ===
+Instance: Scalability VeryLarge (1000w, 2500t) Seed 101
+Timestamp: 2026-11-17 13:00:35 UTC
+Configured Solver Time Limit: 60s
+Workers: 1000 | Tasks: 2500
+Pre-Solve Process Working Set: 158.97 MB
+============================================================
+
+[Large] Finished in 83.65s (Build: 32.84s, Solve: 50.29s). Status: FEASIBLE, Shifts: 207, Valid: True, Log size: 4145 bytes.
+
+[VeryLarge] Starting authentic MILP execution (Time limit: 60s)...
+[MILP Build] Variables: 628500, Constraints: 297772, Build time: 187.41s
+[MILP Solve] Calling solver with time_limit=60s...
+Running HiGHS 1.15.1 (git hash: 04024d7): Copyright (c) 2026 under MIT licence terms
+Includes third-party software components, see THIRD_PARTY_NOTICES.md for full details
+MIP has 297772 rows; 628500 cols; 12358149 nonzeros; 628500 integer variables (628500 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 5e+02]
+  Cost    [1e-02, 5e+04]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+00, 1e+00]
+Assessing feasibility of MIP using primal feasibility and integrality tolerance of       1e-06
+Solution has               num          max          sum
+Col     infeasibilities      0            0            0
+Integer infeasibilities      0            0            0
+Row     infeasibilities      0            0            0
+Row     residuals            0            0            0
+Presolving model
+Presolve reductions: rows 297772(-0); columns 628500(-0); nonzeros 12358149(-0) - Not reduced
+Presolve: Time limit reached
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+         0       0         0   0.00%   -inf            inf                  inf        0      0      0         0    62.5s
+
+Solving report
+  Status            Time limit reached
+  Primal bound      inf
+  Dual bound        -inf
+  Gap               inf
+  P-D integral      0
+  Solution status   feasible
+                    449025 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            62.47
+                    62.41 (Presolve)
+                    0.00 (Solve)
+                    0.00 (Postsolve)
+  Max sub-MIP depth 0
+  Nodes             0
+  Repair LPs        0
+  LP iterations     0
+[MILP Solve] Solver finished in 178.25s
+
+============================================================
+ORDIVANTA POST-SOLVE EXECUTION SUMMARY
+============================================================
+Termination Status: FEASIBLE
+Active Shifts / Headcount: 449
+Task Coverage: 2500/2500 (100.00%)
+Decision Variables: 628500
+Maximal Clique Constraints: 297772
+Model Construction Time (Python/PuLP): 187.4055s
+Solver Time (HiGHS API Call): 178.2462s
+Total Wall-Clock Runtime: 368.0727s
+Peak Python Heap (tracemalloc): 1054.54 MB
+Process Working Set (psutil RSS): 171.02 MB
+Independent Validation: PASSED (0 errors)
+============================================================

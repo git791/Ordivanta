@@ -1,0 +1,125 @@
+=== AUTHENTIC HIGHS C++ ENGINE EXECUTION LOG ===
+Problem: Module 1 Workforce Shift Planning (MATSP)
+Instance: 146_14_150_5 (150 Employees, 360 Demands)
+Timestamp: 2026-11-17 13:13:32 UTC
+Configured Time Limit: 30s
+============================================================
+
+Running HiGHS 1.15.1 (git hash: 04024d7): Copyright (c) 2026 under MIT licence terms
+Includes third-party software components, see THIRD_PARTY_NOTICES.md for full details
+MIP has 11610 rows; 54150 cols; 270300 nonzeros; 54000 integer variables (54000 binary)
+Coefficient ranges:
+  Matrix  [2e-01, 1e+00]
+  Cost    [2e-01, 2e-01]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+00, 8e+01]
+Presolving model
+11310 rows, 54000 cols, 162000 nonzeros 0s
+11310 rows, 54000 cols, 162000 nonzeros 1s
+Presolve reductions: rows 11310(-300); columns 54000(-150); nonzeros 162000(-108300) 
+Objective function is integral with scale 4
+
+Solving MIP model with:
+   11310 rows
+   54000 cols (54000 binary, 0 integer, 0 implied int., 0 continuous, 0 domain fixed)
+   162000 nonzeros
+   Thread count 8 (of 16 threads). Using 1 max workers. Parallel search off
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            367                Large        0      0      0         0     3.8s
+         1       0         1 100.00%   367             367                0.00%        0      0      0      1025     4.2s
+
+Solving report
+  Status            Optimal
+  Primal bound      367
+  Dual bound        367
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.291646100002
+  Solution status   feasible
+                    367 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            4.22
+                    1.52 (Presolve)
+                    2.69 (Solve)
+                    0.00 (Postsolve)
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     1025
+                    0 (strong br.)
+                    0 (separation)
+                    0 (heuristics)
+Running HiGHS 1.15.1 (git hash: 04024d7): Copyright (c) 2026 under MIT licence terms
+Includes third-party software components, see THIRD_PARTY_NOTICES.md for full details
+MIP has 11611 rows; 54150 cols; 324300 nonzeros; 54000 integer variables (54000 binary)
+Coefficient ranges:
+  Matrix  [2e-01, 1e+00]
+  Cost    [3e-05, 1e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+00, 4e+02]
+WARNING: Problem has some excessively small costs
+Presolving model
+11611 rows, 54150 cols, 324300 nonzeros 0s
+11611 rows, 54150 cols, 324300 nonzeros 1s
+Presolve reductions: rows 11611(-0); columns 54150(-0); nonzeros 324300(-0) - Not reduced
+
+Solving MIP model with:
+   11611 rows
+   54150 cols (54000 binary, 0 integer, 0 implied int., 150 continuous, 0 domain fixed)
+   324300 nonzeros
+   Thread count 8 (of 16 threads). Using 1 max workers. Parallel search off
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            363.6433667        Large        0      0      0         0     8.8s
+         0       0         0   0.00%   0.0367          363.6433667       99.99%        0      0      6      3244    14.2s
+ C       0       0         0   0.00%   12.62336667     27.85003333       54.67%      856    303     11      6639    28.9s
+ H       0       0         0   0.00%   12.62336667     12.62336667        0.00%      856    303     11      6639    29.0s
+         1       0         1 100.00%   12.62336667     12.62336667        0.00%      856    303     11      6639    29.0s
+
+Solving report
+  Status            Optimal
+  Primal bound      12.6233666667
+  Dual bound        12.6233666667
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      19.5828117392
+  Solution status   feasible
+                    12.6233666667 (objective)
+                    0 (bound viol.)
+                    3.27920365062e-14 (int. viol.)
+                    0 (row viol.)
+  Timing            29.05
+                    1.24 (Presolve)
+                    27.81 (Solve)
+                    0.00 (Postsolve)
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     6639
+                    0 (strong br.)
+                    3395 (separation)
+                    0 (heuristics)
+
+============================================================
+MATSP SOLVE RESULT SUMMARY
+Status: OPTIMAL
+Assignments: 1468
+Fairness Std Dev: 0.10h
+Wall-Clock Time: 36.4358s
+Validation: PASSED (0 errors)
+============================================================

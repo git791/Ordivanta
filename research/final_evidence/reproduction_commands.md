@@ -2,26 +2,32 @@
 
 To independently reproduce all computational benchmarks, validation suites, and publication artifacts:
 
-### 1. Execute All Academic Benchmarks
+### 1. Execute Authentic Solver Runs (Direct C++ HiGHS Redirection)
 ```powershell
-# Run full benchmark pipeline (Module 1, Module 2, Scalability, and Recovery)
-backend\.venv\Scripts\python.exe backend\scripts\run_academic_benchmarks.py --suite all
+# Solves Small, Medium, Large (500w), Very-Large (1,000w), MATSP (150w), and Recovery MILP
+backend\.venv\Scripts\python.exe backend\scripts\run_authentic_solver_experiments.py
 ```
 
-### 2. Generate Evidence Package & 10 Publication Figures
+### 2. Capture Live Web Application Screenshots
 ```powershell
-# Rebuild figures, tables, scenarios, and solver logs
+# Starts backend & frontend and captures full-resolution screenshots via headless Chrome
+backend\.venv\Scripts\python.exe backend\scripts\capture_live_screenshots.py
+```
+
+### 3. Generate Final Research Evidence Package & 10 Publication Figures
+```powershell
+# Rebuilds figures, tables, scenarios, and verifies authentic logs
 backend\.venv\Scripts\python.exe backend\scripts\generate_final_research_package.py
 ```
 
-### 3. Run Backend Verification Tests
+### 4. Run Backend Verification Tests
 ```powershell
-# Run 115 unit and methodology audit tests
+# Run unit and domain validator tests
 backend\.venv\Scripts\pytest.exe backend\tests -q --ignore=backend/tests/test_api_routes.py
 ```
 
-### 4. Verify Frontend TypeScript Compilation
+### 5. Verify Frontend TypeScript Compilation
 ```powershell
-# Type check the Next.js application
+# Type check Next.js application
 pnpm --prefix frontend exec tsc --noEmit
 ```

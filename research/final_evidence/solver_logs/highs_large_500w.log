@@ -1,0 +1,91 @@
+=== AUTHENTIC HIGHS C++ ENGINE EXECUTION LOG ===
+Instance: Scalability Large (500w, 1200t) Seed 101
+Timestamp: 2026-11-17 12:59:01 UTC
+Configured Solver Time Limit: 30s
+Workers: 500 | Tasks: 1200
+Pre-Solve Process Working Set: 87.04 MB
+============================================================
+
+[Medium] Finished in 16.59s (Build: 0.89s, Solve: 15.67s). Status: FEASIBLE, Shifts: 43, Valid: True, Log size: 4480 bytes.
+
+[Large] Starting authentic MILP execution (Time limit: 30s)...
+[MILP Build] Variables: 151700, Constraints: 74254, Build time: 32.84s
+[MILP Solve] Calling solver with time_limit=30s...
+Running HiGHS 1.15.1 (git hash: 04024d7): Copyright (c) 2026 under MIT licence terms
+Includes third-party software components, see THIRD_PARTY_NOTICES.md for full details
+MIP has 74254 rows; 151700 cols; 1687664 nonzeros; 151700 integer variables (151700 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 5e+02]
+  Cost    [1e-02, 5e+04]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+00, 1e+00]
+Assessing feasibility of MIP using primal feasibility and integrality tolerance of       1e-06
+Solution has               num          max          sum
+Col     infeasibilities      0            0            0
+Integer infeasibilities      0            0            0
+Row     infeasibilities      0            0            0
+Row     residuals            0            0            0
+Presolving model
+74254 rows, 151700 cols, 1687664 nonzeros 6s
+74254 rows, 151700 cols, 1687664 nonzeros 12s
+Presolve reductions: rows 74254(-0); columns 151700(-0); nonzeros 1687664(-0) - Not reduced
+
+MIP start solution is feasible, objective value is 207012
+Objective function is integral with scale 100
+
+Solving MIP model with:
+   74254 rows
+   151700 cols (151700 binary, 0 integer, 0 implied int., 0 continuous, 0 domain fixed)
+   1687664 nonzeros
+   Thread count 8 (of 16 threads). Using 1 max workers. Parallel search off
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+         0       0         0   0.00%   0               207012           100.00%        0      0      0         0    25.2s
+         0       0         0   0.00%   0               207012           100.00%        0      0      3      2530    30.2s
+
+Solving report
+  Status            Time limit reached
+  Primal bound      207012
+  Dual bound        0
+  Gap               100% (tolerance: 0.01%)
+  P-D integral      4.9904823
+  Solution status   feasible
+                    207012 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            30.18
+                    12.52 (Presolve)
+                    17.65 (Solve)
+                    0.00 (Postsolve)
+  Max sub-MIP depth 0
+  Nodes             0
+  Repair LPs        0
+  LP iterations     2530
+                    0 (strong br.)
+                    0 (separation)
+                    0 (heuristics)
+[MILP Solve] Solver finished in 50.29s
+
+============================================================
+ORDIVANTA POST-SOLVE EXECUTION SUMMARY
+============================================================
+Termination Status: FEASIBLE
+Active Shifts / Headcount: 207
+Task Coverage: 1200/1200 (100.00%)
+Decision Variables: 151700
+Maximal Clique Constraints: 74254
+Model Construction Time (Python/PuLP): 32.8409s
+Solver Time (HiGHS API Call): 50.2888s
+Total Wall-Clock Runtime: 83.6455s
+Peak Python Heap (tracemalloc): 188.62 MB
+Process Working Set (psutil RSS): 94.16 MB
+Independent Validation: PASSED (0 errors)
+============================================================
