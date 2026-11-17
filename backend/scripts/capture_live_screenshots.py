@@ -111,6 +111,7 @@ def main():
             ("http://localhost:3000/tasks", SHOTS_DIR / "screenshot_module2_task_allocation.png"),
             ("http://localhost:3000/demo", SHOTS_DIR / "screenshot_disruption_recovery.png"),
             ("http://localhost:3000/dashboard", SHOTS_DIR / "screenshot_dashboard_overview.png"),
+            ("http://localhost:3000/provenance", SHOTS_DIR / "screenshot_provenance_page.png"),
         ]
 
         for url, out_file in targets:

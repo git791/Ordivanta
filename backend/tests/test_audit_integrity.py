@@ -137,3 +137,32 @@ def test_fair_disruption_recovery_results():
         assert r["status"] == "OPTIMAL", "Both recovery strategies must be OPTIMAL for fair comparison"
         assert r["coverage_repaired"] > 0, "Neither recovery strategy should have 0 coverage"
         assert r["is_valid"] is True, "Both rosters must be validated as strictly feasible"
+
+
+def test_provenance_manifest_structure_and_routes():
+    from app.api.routes.datasets import get_dataset_manifest
+    
+    response = get_dataset_manifest()
+    assert response.status_code == 200
+    data = json.loads(response.body)
+
+    expected_datasets = ["shift_scheduling", "ptsp", "smptsp", "nurse_rostering", "synthetic_manufacturing"]
+    ds_map = {d["dataset_id"]: d for d in data["datasets"]}
+    for d_id in expected_datasets:
+        assert d_id in ds_map, f"Dataset {d_id} must be in manifest"
+        d = ds_map[d_id]
+        assert "name" in d and len(d["name"]) > 0
+        assert "module" in d or "module_alignment" in d
+        assert "source_url" in d and len(d["source_url"]) > 0
+        assert "file_format" in d or "original_file_format" in d
+        assert "total_instances" in d or "total_benchmark_instances" in d
+        assert "tested_instances" in d and len(d["tested_instances"]) > 0
+
+    synth = ds_map["synthetic_manufacturing"]
+    assert "generator_location" in synth
+    assert "scenario_sizes" in synth
+    assert "seeds" in synth
+    assert "reproduction_instructions" in synth
+    assert "Small" in synth["scenario_sizes"]
+    assert "1,000w" in synth["scenario_sizes"] or "1000w" in synth["scenario_sizes"]
+
