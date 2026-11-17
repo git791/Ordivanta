@@ -12,7 +12,7 @@
     "coverage_pct": 125.0,
     "total_scheduled_hours": 22.5,
     "workload_fairness_std_dev": 1.47,
-    "runtime_seconds": 0.0167,
+    "runtime_seconds": 0.0134,
     "is_valid": true,
     "violations_count": 0
   },
@@ -29,7 +29,7 @@
     "coverage_pct": 125.0,
     "total_scheduled_hours": 22.5,
     "workload_fairness_std_dev": 0.0,
-    "runtime_seconds": 0.1414,
+    "runtime_seconds": 0.1519,
     "is_valid": true,
     "violations_count": 0
   },
@@ -46,7 +46,7 @@
     "coverage_pct": 125.0,
     "total_scheduled_hours": 22.5,
     "workload_fairness_std_dev": 1.47,
-    "runtime_seconds": 0.1623,
+    "runtime_seconds": 0.1429,
     "is_valid": true,
     "violations_count": 0
   },
@@ -63,7 +63,7 @@
     "coverage_pct": 106.9,
     "total_scheduled_hours": 19.2,
     "workload_fairness_std_dev": 1.26,
-    "runtime_seconds": 0.0151,
+    "runtime_seconds": 0.0154,
     "is_valid": true,
     "violations_count": 0
   },
@@ -80,7 +80,7 @@
     "coverage_pct": 106.9,
     "total_scheduled_hours": 19.2,
     "workload_fairness_std_dev": 0.11,
-    "runtime_seconds": 0.3052,
+    "runtime_seconds": 0.276,
     "is_valid": true,
     "violations_count": 0
   },
@@ -97,7 +97,7 @@
     "coverage_pct": 106.9,
     "total_scheduled_hours": 19.2,
     "workload_fairness_std_dev": 1.26,
-    "runtime_seconds": 0.1855,
+    "runtime_seconds": 0.1922,
     "is_valid": true,
     "violations_count": 0
   },
@@ -114,7 +114,7 @@
     "coverage_pct": 268.1,
     "total_scheduled_hours": 48.2,
     "workload_fairness_std_dev": 1.58,
-    "runtime_seconds": 0.0225,
+    "runtime_seconds": 0.0218,
     "is_valid": true,
     "violations_count": 0
   },
@@ -131,7 +131,7 @@
     "coverage_pct": 268.1,
     "total_scheduled_hours": 48.2,
     "workload_fairness_std_dev": 0.12,
-    "runtime_seconds": 0.4734,
+    "runtime_seconds": 0.4774,
     "is_valid": true,
     "violations_count": 0
   },
@@ -148,7 +148,7 @@
     "coverage_pct": 268.1,
     "total_scheduled_hours": 48.2,
     "workload_fairness_std_dev": 1.58,
-    "runtime_seconds": 0.6662,
+    "runtime_seconds": 0.6206,
     "is_valid": true,
     "violations_count": 0
   },
@@ -165,7 +165,7 @@
     "coverage_pct": 265.3,
     "total_scheduled_hours": 47.8,
     "workload_fairness_std_dev": 0.8,
-    "runtime_seconds": 0.0228,
+    "runtime_seconds": 0.0248,
     "is_valid": true,
     "violations_count": 0
   },
@@ -182,7 +182,7 @@
     "coverage_pct": 265.3,
     "total_scheduled_hours": 47.8,
     "workload_fairness_std_dev": 0.12,
-    "runtime_seconds": 0.6661,
+    "runtime_seconds": 0.6294,
     "is_valid": true,
     "violations_count": 0
   },
@@ -199,7 +199,58 @@
     "coverage_pct": 265.3,
     "total_scheduled_hours": 47.8,
     "workload_fairness_std_dev": 0.8,
-    "runtime_seconds": 0.4922,
+    "runtime_seconds": 0.4587,
+    "is_valid": true,
+    "violations_count": 0
+  },
+  {
+    "module": "Module 1",
+    "dataset": "MATSP",
+    "instance_id": "146_14_150_5",
+    "employees": 150,
+    "shifts": 72,
+    "demands": 360,
+    "algorithm": "Greedy Baseline",
+    "status": "FEASIBLE",
+    "assignments_count": 1468,
+    "coverage_pct": 407.8,
+    "total_scheduled_hours": 367.0,
+    "workload_fairness_std_dev": 1.45,
+    "runtime_seconds": 0.3757,
+    "is_valid": true,
+    "violations_count": 0
+  },
+  {
+    "module": "Module 1",
+    "dataset": "MATSP",
+    "instance_id": "146_14_150_5",
+    "employees": 150,
+    "shifts": 72,
+    "demands": 360,
+    "algorithm": "Exact MILP",
+    "status": "FEASIBLE",
+    "assignments_count": 1468,
+    "coverage_pct": 407.8,
+    "total_scheduled_hours": 367.0,
+    "workload_fairness_std_dev": 0.43,
+    "runtime_seconds": 29.1772,
+    "is_valid": true,
+    "violations_count": 0
+  },
+  {
+    "module": "Module 1",
+    "dataset": "MATSP",
+    "instance_id": "146_14_150_5",
+    "employees": 150,
+    "shifts": 72,
+    "demands": 360,
+    "algorithm": "ALNS Metaheuristic",
+    "status": "FEASIBLE",
+    "assignments_count": 1468,
+    "coverage_pct": 407.8,
+    "total_scheduled_hours": 367.0,
+    "workload_fairness_std_dev": 1.45,
+    "runtime_seconds": 14.7675,
     "is_valid": true,
     "violations_count": 0
   }

@@ -13,6 +13,7 @@ import time
 import json
 import csv
 import random
+import tracemalloc
 from pathlib import Path
 
 backend_dir = Path(__file__).resolve().parents[1]
@@ -56,7 +57,7 @@ def run_module1_benchmarks():
     print("MODULE 1: Workforce Shift Planning & Optimization (MATSP)")
     print("=" * 70)
 
-    test_instances = ["1_7_10_1", "2_7_10_1", "7_7_20_1", "6_7_20_1"]
+    test_instances = ["1_7_10_1", "2_7_10_1", "7_7_20_1", "6_7_20_1", "146_14_150_5"]
     results = []
 
     config = ObjectiveConfig(
@@ -182,6 +183,7 @@ def run_module2_benchmarks():
         ("data_1_23_40_66", None, False, "Full Benchmark"),
         ("data_2_24_40_33", None, False, "Full Benchmark"),
         ("data_3_25_40_66", None, False, "Full Benchmark"),
+        ("data_122_422_1358_66", None, False, "PTSP Full Benchmark (Large)"),
         ("data_10_51_111_66", 60, True, "PTSP reduced subset (60 tasks)"),
     ]
 
@@ -268,6 +270,7 @@ def run_module2_benchmarks():
         ("data_1_50_258_20_90_100_200_300", None, False, "SMPTSP Full Benchmark"),
         ("data_2_44_510_20_90_0_100_200", None, False, "SMPTSP Full Benchmark"),
         ("data_3_102_525_30_90_100_200_300", None, False, "SMPTSP Full Benchmark"),
+        ("data_10_153_1577_20_90_0_100_200", None, False, "SMPTSP Full Benchmark (Large)"),
         ("data_1_50_258_20_90_100_200_300", 50, True, "SMPTSP reduced subset (50 tasks)"),
         ("data_2_44_510_20_90_0_100_200", 50, True, "SMPTSP reduced subset (50 tasks)"),
     ]
@@ -416,51 +419,48 @@ def run_scalability_benchmarks():
             )
 
             # 1. Greedy
+            tracemalloc.start()
             g_res = GreedyTaskSolver().solve(sc)
+            _, g_peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
             g_runtimes.append(g_res.runtime_seconds)
             g_shifts.append(g_res.active_workers_count)
             g_covs.append(g_res.coverage_percentage)
 
             # 2. ALNS
+            tracemalloc.start()
             a_res = ALNSTaskSolver(max_iterations=80, time_limit=10).solve(sc)
+            _, a_peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
             a_runtimes.append(a_res.runtime_seconds)
             a_shifts.append(a_res.active_workers_count)
             a_covs.append(a_res.coverage_percentage)
 
-            # 3. MILP (Evaluated on seed 101 for Small & Medium; safety boundary on Large/Very-Large)
+            # 3. MILP (Executed on seed 101 for all tiers with warm start)
             if s_idx == 0:
-                if num_workers <= 100:
-                    m_res = MILPTaskSolver(time_limit=15).solve(sc)
-                    m_status = m_res.status
-                    m_shifts = m_res.active_workers_count
-                    m_assigned = m_res.total_assigned
-                    m_cov = m_res.coverage_percentage
-                    m_time = m_res.runtime_seconds
-                    m_valid = m_res.is_valid
-                else:
-                    # Truthful recording: Model size exceeds safe variable threshold (50k variables)
-                    est_vars = sum(len(w.qualified_task_ids) for w in workers)
-                    m_status = "NOT_RUN_RESOURCE_LIMIT"
-                    m_shifts = 0
-                    m_assigned = 0
-                    m_cov = 0.0
-                    m_time = 0.0
-                    m_valid = False
-
+                milp_limit = 15 if num_workers <= 100 else (30 if num_workers <= 500 else 60)
+                m_res = MILPTaskSolver(time_limit=milp_limit, warm_start=True).solve(sc)
                 results.append({
                     "tier": tier_name,
                     "seed": seed,
                     "workers": num_workers,
                     "tasks": num_tasks,
                     "algorithm": "Exact MILP",
-                    "status": m_status,
-                    "active_shifts": m_shifts,
-                    "assigned_tasks": m_assigned,
-                    "coverage_pct": round(m_cov, 1),
-                    "runtime_seconds": round(m_time, 4),
-                    "is_valid": m_valid,
+                    "status": m_res.status,
+                    "active_shifts": m_res.active_workers_count,
+                    "assigned_tasks": m_res.total_assigned,
+                    "coverage_pct": round(m_res.coverage_percentage, 1),
+                    "runtime_seconds": round(m_res.runtime_seconds, 4),
+                    "model_construction_seconds": round(m_res.model_construction_seconds, 4),
+                    "solver_execution_seconds": round(m_res.solver_execution_seconds, 4),
+                    "peak_memory_mb": round(m_res.peak_memory_mb, 2),
+                    "variables": m_res.variable_count,
+                    "constraints": m_res.constraint_count,
+                    "best_bound": m_res.best_lower_bound,
+                    "optimality_gap": m_res.optimality_gap,
+                    "is_valid": m_res.is_valid,
                 })
-                print(f"  [Seed {seed}] MILP:   {m_time:.3f}s (status={m_status})")
+                print(f"  [Seed {seed}] MILP:   {m_res.runtime_seconds:.3f}s (shifts={m_res.active_workers_count}, cov={m_res.coverage_percentage:.1f}%, RAM={m_res.peak_memory_mb:.1f}MB, status={m_res.status})")
 
         # Record aggregate metrics for Greedy and ALNS
         results.append({
@@ -475,6 +475,9 @@ def run_scalability_benchmarks():
             "coverage_pct": round(sum(g_covs) / len(g_covs), 1),
             "runtime_seconds": round(sum(g_runtimes) / len(g_runtimes), 4),
             "runtime_std_dev": round((sum((t - sum(g_runtimes)/len(g_runtimes))**2 for t in g_runtimes)/len(g_runtimes))**0.5, 4),
+            "peak_memory_mb": round(g_peak / 1e6, 2),
+            "variables": 0,
+            "constraints": 0,
             "is_valid": True,
         })
 
@@ -490,6 +493,9 @@ def run_scalability_benchmarks():
             "coverage_pct": round(sum(a_covs) / len(a_covs), 1),
             "runtime_seconds": round(sum(a_runtimes) / len(a_runtimes), 4),
             "runtime_std_dev": round((sum((t - sum(a_runtimes)/len(a_runtimes))**2 for t in a_runtimes)/len(a_runtimes))**0.5, 4),
+            "peak_memory_mb": round(a_peak / 1e6, 2),
+            "variables": 0,
+            "constraints": 0,
             "is_valid": True,
         })
 
@@ -657,28 +663,38 @@ def export_results(data: list[dict], base_name: str):
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Ordivanta Academic Benchmark Pipeline")
+    parser.add_argument("--suite", choices=["all", "module1", "module2", "scalability", "recovery"], default="all", help="Suite to execute")
+    args = parser.parse_args()
+
     print("=" * 70)
     print("ORDIVANTA ACADEMIC BENCHMARK PIPELINE (PEER-REVIEW VERIFIED)")
+    print(f"Executing suite: {args.suite}")
     print("=" * 70)
 
     # 1. Module 1
-    m1_data = run_module1_benchmarks()
-    export_results(m1_data, "module1_shift_benchmarks")
+    if args.suite in ["all", "module1"]:
+        m1_data = run_module1_benchmarks()
+        export_results(m1_data, "module1_shift_benchmarks")
 
     # 2. Module 2
-    m2_data = run_module2_benchmarks()
-    export_results(m2_data, "module2_task_benchmarks")
+    if args.suite in ["all", "module2"]:
+        m2_data = run_module2_benchmarks()
+        export_results(m2_data, "module2_task_benchmarks")
 
     # 3. Scalability
-    scale_data = run_scalability_benchmarks()
-    export_results(scale_data, "scalability_scaling_benchmarks")
+    if args.suite in ["all", "scalability"]:
+        scale_data = run_scalability_benchmarks()
+        export_results(scale_data, "scalability_scaling_benchmarks")
 
     # 4. Disruption Recovery
-    rec_data = run_recovery_benchmarks()
-    export_results(rec_data, "disruption_recovery_benchmarks")
+    if args.suite in ["all", "recovery"]:
+        rec_data = run_recovery_benchmarks()
+        export_results(rec_data, "disruption_recovery_benchmarks")
 
     print("\n" + "=" * 70)
-    print("ALL ACADEMIC BENCHMARK EXPERIMENTS COMPLETED SUCCESSFULLY!")
+    print("ACADEMIC BENCHMARK EXPERIMENTS COMPLETED SUCCESSFULLY!")
     print("=" * 70)
 
 

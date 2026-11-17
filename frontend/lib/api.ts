@@ -63,4 +63,13 @@ export const api = {
     apiFetch<any>('/api/tasks/solve', { method: 'POST', body: JSON.stringify(body) }),
   bridgeWorkflow: (body: { facility_id?: string; shift_name?: string; task_count?: number }) =>
     apiFetch<any>('/api/tasks/workflow/bridge', { method: 'POST', body: JSON.stringify(body) }),
+
+  startLargeScaleBenchmark: (body: { workers: number; tasks: number; algorithm: string; time_limit: number; seed?: number }) =>
+    apiFetch<any>('/api/tasks/large-scale/start', { method: 'POST', body: JSON.stringify(body) }),
+  getLargeScaleJobStatus: (jobId: string) =>
+    apiFetch<any>(`/api/tasks/large-scale/jobs/${jobId}`),
+  cancelLargeScaleJob: (jobId: string) =>
+    apiFetch<any>(`/api/tasks/large-scale/jobs/${jobId}/cancel`, { method: 'POST' }),
+  exportLargeScaleJobUrl: (jobId: string, format: string = 'csv') =>
+    `${BASE}/api/tasks/large-scale/jobs/${jobId}/export?format=${format}`,
 };

@@ -1,4 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+import uuid
+import threading
+import time
+import random
+import csv
+import io
+from fastapi import APIRouter, HTTPException, status, Query
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional, Any
 from app.datasets.registry import dataset_registry
@@ -9,8 +16,13 @@ from app.optimization.task_allocation import (
     MILPTaskSolver,
     ALNSTaskSolver,
 )
+from app.optimization.task_allocation.task_models import Task, TaskWorker
 
 router = APIRouter()
+
+# Global in-memory job registry for non-blocking asynchronous large-scale runs
+active_benchmark_jobs: Dict[str, Dict[str, Any]] = {}
+job_cancel_events: Dict[str, threading.Event] = {}
 
 
 class TaskSolveRequest(BaseModel):
@@ -280,3 +292,280 @@ def bridge_shift_roster_to_tasks(req: WorkflowBridgeRequest):
             for w in workers
         ],
     }
+
+
+# ==============================================================================
+# LARGE-SCALE BENCHMARK ASYNC JOB RUNNER & ENDPOINTS (500 & 1,000 WORKERS)
+# ==============================================================================
+
+class LargeScaleBenchmarkRequest(BaseModel):
+    workers: int = Field(default=500, description="Worker pool count: 500 or 1000")
+    tasks: int = Field(default=1200, description="Workload task count: 1200 or 2500")
+    algorithm: str = Field(default="ALL", description="'GREEDY', 'ALNS', 'MILP', or 'ALL'")
+    time_limit: int = Field(default=60, ge=5, le=300, description="Solver time limit in seconds")
+    seed: int = Field(default=101, description="Deterministic random seed")
+
+
+def _run_large_scale_job_worker(job_id: str, req: LargeScaleBenchmarkRequest):
+    cancel_evt = job_cancel_events.get(job_id)
+    job = active_benchmark_jobs.get(job_id)
+    if not job or not cancel_evt:
+        return
+
+    try:
+        job["status"] = "running"
+        job["current_step"] = f"Generating deterministic synthetic scenario ({req.workers} workers, {req.tasks} tasks)..."
+        job["progress_pct"] = 10
+
+        rng = random.Random(req.seed)
+        tasks: List[Task] = []
+        for i in range(req.tasks):
+            start = rng.randint(0, 1200)
+            dur = rng.choice([30, 45, 60, 90, 120])
+            tasks.append(
+                Task(
+                    id=f"synth_t_{i}",
+                    name=f"Workstation Task {i}",
+                    start_minute=start,
+                    end_minute=start + dur,
+                    duration_minutes=dur,
+                )
+            )
+
+        all_task_ids = [t.id for t in tasks]
+        workers: List[TaskWorker] = []
+        for w in range(req.workers):
+            k = max(5, int(req.tasks * 0.25))
+            q_tasks = set(rng.sample(all_task_ids, k))
+            workers.append(
+                TaskWorker(
+                    id=f"synth_w_{w}",
+                    name=f"Personnel Operator {w}",
+                    qualified_task_ids=q_tasks,
+                    max_hours=8.0,
+                )
+            )
+
+        scenario = TaskScenario(
+            id=f"large_scale_{req.workers}w_{req.tasks}t_s{req.seed}",
+            name=f"Large-Scale Scenario ({req.workers} Workers, {req.tasks} Tasks)",
+            tasks=tasks,
+            workers=workers,
+            objective_type="shift_minimization",
+        )
+
+        algo = req.algorithm.upper()
+        results: Dict[str, Any] = {}
+
+        if cancel_evt.is_set():
+            job["status"] = "cancelled"
+            job["current_step"] = "Job cancelled by user"
+            return
+
+        # 1. Greedy Heuristic
+        if algo in ("GREEDY", "ALL"):
+            job["current_step"] = "Executing Greedy heuristic baseline..."
+            job["progress_pct"] = 25
+            g_res = GreedyTaskSolver().solve(scenario)
+            results["greedy"] = g_res.to_dict()
+
+        if cancel_evt.is_set():
+            job["status"] = "cancelled"
+            job["current_step"] = "Job cancelled by user"
+            return
+
+        # 2. ALNS Metaheuristic
+        if algo in ("ALNS", "ALL"):
+            job["current_step"] = "Executing ALNS metaheuristic search..."
+            job["progress_pct"] = 50
+            alns_limit = min(float(req.time_limit), 30.0)
+            a_res = ALNSTaskSolver(max_iterations=80, time_limit=alns_limit).solve(scenario)
+            results["alns"] = a_res.to_dict()
+
+        if cancel_evt.is_set():
+            job["status"] = "cancelled"
+            job["current_step"] = "Job cancelled by user"
+            return
+
+        # 3. Exact MILP
+        if algo in ("MILP", "ALL"):
+            job["current_step"] = f"Building sparse maximal clique MILP & solving with HiGHS ({req.time_limit}s limit)..."
+            job["progress_pct"] = 75
+            m_res = MILPTaskSolver(time_limit=req.time_limit, warm_start=True).solve(scenario)
+            results["milp"] = m_res.to_dict()
+
+        comparison_summary = [
+            {
+                "algorithm": r["algorithm"],
+                "status": r["status"],
+                "active_workers_shifts": r["active_workers_count"],
+                "tasks_assigned": f"{r['total_assigned']}/{r['total_tasks']}",
+                "coverage_pct": r["coverage_percentage"],
+                "runtime_seconds": r["runtime_seconds"],
+                "model_construction_seconds": r.get("model_construction_seconds", 0.0),
+                "solver_execution_seconds": r.get("solver_execution_seconds", 0.0),
+                "peak_memory_mb": r.get("peak_memory_mb", 0.0),
+                "variables": r.get("variable_count", 0),
+                "constraints": r.get("constraint_count", 0),
+                "is_valid": r["is_valid"],
+            }
+            for r in results.values()
+        ]
+
+        job["progress_pct"] = 100
+        job["status"] = "completed"
+        job["current_step"] = "Execution finished successfully."
+        job["end_time"] = time.time()
+        job["elapsed_seconds"] = round(job["end_time"] - job["start_time"], 2)
+        job["results"] = results
+        job["comparison_summary"] = comparison_summary
+        job["scenario_info"] = {
+            "workers": req.workers,
+            "tasks": req.tasks,
+            "seed": req.seed,
+            "algorithm": req.algorithm,
+            "time_limit": req.time_limit,
+        }
+
+    except Exception as e:
+        job["status"] = "failed"
+        job["current_step"] = f"Job failed: {str(e)}"
+        job["error"] = str(e)
+
+
+@router.post("/tasks/large-scale/start")
+def start_large_scale_job(req: LargeScaleBenchmarkRequest):
+    """
+    Spawns an asynchronous background job for large-scale (500 or 1,000 workers) benchmarks.
+    Returns immediately with a job_id so the browser never blocks or times out.
+    """
+    job_id = f"job_{uuid.uuid4().hex[:8]}"
+    cancel_evt = threading.Event()
+    job_cancel_events[job_id] = cancel_evt
+
+    active_benchmark_jobs[job_id] = {
+        "job_id": job_id,
+        "status": "pending",
+        "progress_pct": 0,
+        "current_step": "Job submitted to queue...",
+        "start_time": time.time(),
+        "end_time": None,
+        "elapsed_seconds": 0.0,
+        "req": req.model_dump(),
+        "results": None,
+        "comparison_summary": None,
+        "error": None,
+    }
+
+    t = threading.Thread(
+        target=_run_large_scale_job_worker,
+        args=(job_id, req),
+        daemon=True,
+    )
+    t.start()
+
+    return {
+        "job_id": job_id,
+        "status": "pending",
+        "message": f"Large-scale benchmark job {job_id} launched in background.",
+    }
+
+
+@router.get("/tasks/large-scale/jobs/{job_id}")
+def get_large_scale_job_status(job_id: str):
+    """
+    Polls live progress, elapsed runtime, and completed metrics for a background benchmark job.
+    """
+    job = active_benchmark_jobs.get(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Benchmark job '{job_id}' not found.",
+        )
+
+    # Compute live elapsed seconds if still running
+    elapsed = round(time.time() - job["start_time"], 2) if job["status"] == "running" else job.get("elapsed_seconds", 0.0)
+
+    return {
+        "job_id": job["job_id"],
+        "status": job["status"],
+        "progress_pct": job["progress_pct"],
+        "current_step": job["current_step"],
+        "elapsed_seconds": elapsed,
+        "results": job["results"],
+        "comparison_summary": job["comparison_summary"],
+        "scenario_info": job.get("scenario_info"),
+        "error": job.get("error"),
+    }
+
+
+@router.post("/tasks/large-scale/jobs/{job_id}/cancel")
+def cancel_large_scale_job(job_id: str):
+    """
+    Safely triggers cancellation of an active large-scale benchmark job.
+    """
+    cancel_evt = job_cancel_events.get(job_id)
+    job = active_benchmark_jobs.get(job_id)
+    if not job or not cancel_evt:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Benchmark job '{job_id}' not found.",
+        )
+
+    cancel_evt.set()
+    job["status"] = "cancelling"
+    job["current_step"] = "Cancellation requested..."
+    return {"job_id": job_id, "status": "cancelling"}
+
+
+@router.get("/tasks/large-scale/jobs/{job_id}/export")
+def export_large_scale_job_results(job_id: str, format: str = Query(default="json", pattern="^(json|csv)$")):
+    """
+    Exports completed benchmark results in JSON or CSV format.
+    """
+    job = active_benchmark_jobs.get(job_id)
+    if not job or not job.get("results"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Completed results for job '{job_id}' not available.",
+        )
+
+    if format == "json":
+        return JSONResponse(content=job["results"])
+
+    # CSV format
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "algorithm", "status", "workers", "tasks", "active_shifts",
+        "coverage_pct", "runtime_seconds", "model_construction_seconds",
+        "solver_execution_seconds", "peak_memory_mb", "variables", "constraints", "is_valid"
+    ])
+
+    sc_info = job.get("scenario_info", {})
+    workers = sc_info.get("workers", 0)
+    tasks = sc_info.get("tasks", 0)
+
+    for algo_key, res in job["results"].items():
+        writer.writerow([
+            res.get("algorithm"),
+            res.get("status"),
+            workers,
+            tasks,
+            res.get("active_workers_count"),
+            res.get("coverage_percentage"),
+            res.get("runtime_seconds"),
+            res.get("model_construction_seconds", 0.0),
+            res.get("solver_execution_seconds", 0.0),
+            res.get("peak_memory_mb", 0.0),
+            res.get("variable_count", 0),
+            res.get("constraint_count", 0),
+            res.get("is_valid"),
+        ])
+
+    csv_data = output.getvalue()
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=benchmark_{job_id}.csv"},
+    )

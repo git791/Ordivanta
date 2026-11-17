@@ -69,8 +69,9 @@ def test_no_fabricated_timeout_results():
     # Assert fabricated pattern is gone
     assert 'm_status = "TIME_LIMIT_EXCEEDED"\n            m_shifts = 0\n            m_assigned = 0\n            m_cov = 0.0\n            m_time = 30.0' not in bench_script
     
-    # Assert legitimate resource limit is used
-    assert 'm_status = "NOT_RUN_RESOURCE_LIMIT"' in bench_script
+    # Assert MILP is genuinely solved using MILPTaskSolver across tiers
+    assert "MILPTaskSolver(" in bench_script
+    assert "m_res = MILPTaskSolver" in bench_script
 
 
 def test_no_hardcoded_experimental_figures():

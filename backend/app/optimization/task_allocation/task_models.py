@@ -124,6 +124,9 @@ class TaskAllocationResult:
     optimality_gap: Optional[float] = None
     model_construction_seconds: float = 0.0
     solver_execution_seconds: float = 0.0
+    peak_memory_mb: float = 0.0
+    variable_count: int = 0
+    constraint_count: int = 0
     worker_utilization_hours: Dict[str, float] = field(default_factory=dict)
     is_valid: bool = True
     validation_violations: List[str] = field(default_factory=list)
@@ -152,6 +155,9 @@ class TaskAllocationResult:
             "runtime_seconds": round(self.runtime_seconds, 4),
             "model_construction_seconds": round(self.model_construction_seconds, 4),
             "solver_execution_seconds": round(self.solver_execution_seconds, 4),
+            "peak_memory_mb": round(self.peak_memory_mb, 2),
+            "variable_count": self.variable_count,
+            "constraint_count": self.constraint_count,
             "objective_value": round(self.objective_value, 4) if self.objective_value is not None else None,
             "best_lower_bound": round(self.best_lower_bound, 4) if self.best_lower_bound is not None else None,
             "optimality_gap": round(self.optimality_gap, 4) if self.optimality_gap is not None else None,

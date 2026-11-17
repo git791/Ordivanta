@@ -160,12 +160,14 @@ See [`docs/tables/table1_dataset_provenance.md`](file:///c:/Users/moham/Download
 
 ### Table 4: Scalability Extension Results (Up to 1,000 Workers & 2,500 Tasks)
 
-| Problem Tier | Workers | Tasks | Greedy Runtime | ALNS Runtime | MILP Runtime | Active Shifts (ALNS) | Tractability |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Small** | 25 | 60 | 0.001s | 0.023s | 15.05s | 12 | Exact Solvable |
-| **Medium** | 100 | 250 | 0.004s | 0.085s | 15.86s | 37 | Exact Solvable |
-| **Large** | 500 | 1,200 | 0.014s | 0.512s | NOT_RUN_RESOURCE_LIMIT | 148 | ALNS / Heuristic Preferred |
-| **Very-Large**| 1,000 | 2,500 | 0.038s | 0.812s | NOT_RUN_RESOURCE_LIMIT | 309 | ALNS Scalable to Industry |
+| Problem Tier | Workers | Tasks | Greedy Runtime (10-seed mean) | ALNS Runtime (10-seed mean) | Exact MILP Runtime | Active Shifts (MILP / ALNS / Greedy) | Peak RAM (MILP) | MILP Status & Tractability |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Small** | 25 | 60 | 0.003s | 0.137s | 6.052s | **9** / 12.7 / 14.5 | 0.5 MB | **OPTIMAL** (Proven Global Optimum) |
+| **Medium** | 100 | 250 | 0.033s | 2.525s | 15.770s | **43** / 39.8 / 46.9 | 5.9 MB | **FEASIBLE** (Bounded Incumbent) |
+| **Large** | 500 | 1,200 | 1.062s | 10.005s | 59.823s | **207** / 193.3 / 211.7 | 160.2 MB | **FEASIBLE** (151,700 vars, 51,676 cliques) |
+| **Very-Large**| 1,000 | 2,500 | 4.402s | 10.019s | 324.150s | **449** / 442.3 / 451.1 | 891.4 MB | **FEASIBLE** (628,500 vars, 223,203 cliques) |
+
+*Key finding: With the sparse $O(N \log N)$ interval maximal clique formulation, Exact MILP scales to 1,000 workers and 2,500 tasks using 891.4 MB RAM without memory exhaustion. Greedy executes instantaneously (<4.5s), ALNS metaheuristic finds high-quality solutions within 10s, and MILP provides mathematically verified lower bounds and feasible incumbents.*
 
 ### Table 5: Disruption Recovery Stability Comparison (10 Random Seed Replications)
 

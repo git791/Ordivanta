@@ -1,13 +1,13 @@
-tier,seed,workers,tasks,algorithm,status,active_shifts,assigned_tasks,coverage_pct,runtime_seconds,is_valid,runtime_std_dev
-Small,101,25,60,Exact MILP,OPTIMAL,9,60,100.0,7.6952,True,
-Small,aggregate_10_seeds,25,60,Greedy Allocator,PARTIAL,14.5,60,99.8,0.001,True,0.0
-Small,aggregate_10_seeds,25,60,ALNS Metaheuristic,PARTIAL,12.7,60,99.8,0.0314,True,0.0064
-Medium,101,100,250,Exact MILP,FEASIBLE,81,224,89.6,16.5106,True,
-Medium,aggregate_10_seeds,100,250,Greedy Allocator,FEASIBLE,46.9,250,100.0,0.0114,True,0.001
-Medium,aggregate_10_seeds,100,250,ALNS Metaheuristic,FEASIBLE,39.8,250,100.0,0.7435,True,0.1815
-Large,101,500,1200,Exact MILP,NOT_RUN_RESOURCE_LIMIT,0,0,0.0,0.0,False,
-Large,aggregate_10_seeds,500,1200,Greedy Allocator,FEASIBLE,211.7,1200,100.0,0.2771,True,0.0184
-Large,aggregate_10_seeds,500,1200,ALNS Metaheuristic,FEASIBLE,181.4,1200,100.0,9.9692,True,0.1005
-Very-Large,101,1000,2500,Exact MILP,NOT_RUN_RESOURCE_LIMIT,0,0,0.0,0.0,False,
-Very-Large,aggregate_10_seeds,1000,2500,Greedy Allocator,FEASIBLE,451.1,2500,100.0,1.3377,True,0.0465
-Very-Large,aggregate_10_seeds,1000,2500,ALNS Metaheuristic,FEASIBLE,417.3,2500,100.0,10.005,True,0.002
+tier,seed,workers,tasks,algorithm,status,active_shifts,assigned_tasks,coverage_pct,runtime_seconds,model_construction_seconds,solver_execution_seconds,peak_memory_mb,variables,constraints,best_bound,optimality_gap,is_valid
+Small,101,25,60,Exact MILP,OPTIMAL,9,60,100.0,6.052,0.021,6.031,0.5,460,319,9000.6,0.0,True
+Small,aggregate_10_seeds,25,60,Greedy Allocator,PARTIAL,14.5,60,99.8,0.0033,,,0.02,0,0,,,True
+Small,aggregate_10_seeds,25,60,ALNS Metaheuristic,PARTIAL,12.7,60,99.8,0.1366,,,0.05,0,0,,,True
+Medium,101,100,250,Exact MILP,FEASIBLE,43,250,100.0,15.77,0.36,15.41,5.94,6550,3418,,,True
+Medium,aggregate_10_seeds,100,250,Greedy Allocator,FEASIBLE,46.9,250,100.0,0.033,,,0.09,0,0,,,True
+Medium,aggregate_10_seeds,100,250,ALNS Metaheuristic,FEASIBLE,39.8,250,100.0,2.5247,,,0.23,0,0,,,True
+Large,101,500,1200,Exact MILP,FEASIBLE,207,1200,100.0,59.8227,12.5412,47.2816,160.17,151700,51676,,,True
+Large,aggregate_10_seeds,500,1200,Greedy Allocator,FEASIBLE,211.7,1200,100.0,1.0619,,,0.39,0,0,,,True
+Large,aggregate_10_seeds,500,1200,ALNS Metaheuristic,FEASIBLE,193.3,1200,100.0,10.0053,,,2.04,0,0,,,True
+Very-Large,101,1000,2500,Exact MILP,FEASIBLE,449,2500,100.0,324.1503,164.6952,159.4551,891.41,628500,223203,,,True
+Very-Large,aggregate_10_seeds,1000,2500,Greedy Allocator,FEASIBLE,451.1,2500,100.0,4.4018,,,0.91,0,0,,,True
+Very-Large,aggregate_10_seeds,1000,2500,ALNS Metaheuristic,FEASIBLE,442.3,2500,100.0,10.0185,,,7.03,0,0,,,True
