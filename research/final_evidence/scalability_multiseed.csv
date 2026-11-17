@@ -1,0 +1,9 @@
+tier,seed_count,workers,tasks,algorithm,status,active_shifts_mean,active_shifts_std,assigned_tasks_mean,coverage_pct_mean,runtime_mean_seconds,runtime_std_seconds,peak_memory_mb,is_valid
+Small,10,25,60,Greedy Allocator,FEASIBLE,14.5,0.85,59.9,99.8,0.0033,0.0006,0.02,True
+Small,10,25,60,ALNS Metaheuristic,FEASIBLE,12.7,0.67,59.9,99.8,0.1366,0.0326,0.05,True
+Medium,10,100,250,Greedy Allocator,FEASIBLE,46.9,1.37,250.0,100.0,0.033,0.0017,0.09,True
+Medium,10,100,250,ALNS Metaheuristic,FEASIBLE,39.8,1.14,250.0,100.0,2.5247,0.5859,0.23,True
+Large,10,500,1200,Greedy Allocator,FEASIBLE,211.7,3.42,1200.0,100.0,1.0619,0.0709,0.39,True
+Large,10,500,1200,ALNS Metaheuristic,FEASIBLE,193.3,2.85,1200.0,100.0,10.0053,0.0059,2.04,True
+Very-Large,10,1000,2500,Greedy Allocator,FEASIBLE,451.1,4.96,2500.0,100.0,4.4018,0.3024,0.91,True
+Very-Large,10,1000,2500,ALNS Metaheuristic,FEASIBLE,442.3,4.12,2500.0,100.0,10.0185,0.0076,7.03,True

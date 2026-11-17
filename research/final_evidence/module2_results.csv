@@ -1,0 +1,28 @@
+module,dataset,instance_id,is_reduced_subset,experiment_type,total_workers,total_tasks,algorithm,status,shifts_count,assigned_tasks,coverage_pct,runtime_seconds,is_valid,objective_value,model_construction_seconds,solver_execution_seconds
+Module 2,PTSP,data_1_23_40_66,False,Full Benchmark,23,40,Greedy Allocator,FEASIBLE,21,40,100.0,0.001,True,2136.268,,
+Module 2,PTSP,data_1_23_40_66,False,Full Benchmark,23,40,Exact MILP Allocator,OPTIMAL,20,40,100.0,0.5468,True,1001.9999999999982,0.2213,0.3255
+Module 2,PTSP,data_1_23_40_66,False,Full Benchmark,23,40,ALNS Metaheuristic,FEASIBLE,20,40,100.0,0.1435,True,20000.0,,
+Module 2,PTSP,data_2_24_40_33,False,Full Benchmark,24,40,Greedy Allocator,FEASIBLE,22,40,100.0,0.0006,True,2236.353,,
+Module 2,PTSP,data_2_24_40_33,False,Full Benchmark,24,40,Exact MILP Allocator,OPTIMAL,20,40,100.0,0.44,True,1001.9999999999982,0.059,0.381
+Module 2,PTSP,data_2_24_40_33,False,Full Benchmark,24,40,ALNS Metaheuristic,FEASIBLE,20,40,100.0,0.1175,True,20000.0,,
+Module 2,PTSP,data_3_25_40_66,False,Full Benchmark,25,40,Greedy Allocator,FEASIBLE,21,40,100.0,0.0009,True,2136.406,,
+Module 2,PTSP,data_3_25_40_66,False,Full Benchmark,25,40,Exact MILP Allocator,OPTIMAL,20,40,100.0,0.6941,True,1001.9999999999982,0.2228,0.4713
+Module 2,PTSP,data_3_25_40_66,False,Full Benchmark,25,40,ALNS Metaheuristic,FEASIBLE,20,40,100.0,0.1302,True,20000.0,,
+Module 2,PTSP,data_10_51_111_66,True,PTSP reduced subset (60 tasks),51,60,Greedy Allocator,FEASIBLE,33,60,100.0,0.0025,True,3347.253,,
+Module 2,PTSP,data_10_51_111_66,True,PTSP reduced subset (60 tasks),51,60,Exact MILP Allocator,OPTIMAL,33,60,100.0,2.9072,True,1652.9999999999973,1.0367,1.8705
+Module 2,PTSP,data_10_51_111_66,True,PTSP reduced subset (60 tasks),51,60,ALNS Metaheuristic,FEASIBLE,33,60,100.0,0.3112,True,33000.0,,
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,False,SMPTSP Full Benchmark,50,258,Greedy Allocator,PARTIAL,50,256,99.2,0.0081,True,7085.307,,
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,False,SMPTSP Full Benchmark,50,258,Exact MILP Allocator,FEASIBLE,41,177,68.6,17.3222,True,4091001.7699999604,0.7095,16.6127
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,False,SMPTSP Full Benchmark,50,258,ALNS Metaheuristic,PARTIAL,50,257,99.6,0.5894,True,100000.0,,
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,False,SMPTSP Full Benchmark,44,510,Greedy Allocator,PARTIAL,44,480,94.1,0.0201,True,34481.449,,
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,False,SMPTSP Full Benchmark,44,510,Exact MILP Allocator,FEASIBLE,44,339,66.5,16.716,True,8594003.389999924,1.2006,15.5155
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,False,SMPTSP Full Benchmark,44,510,ALNS Metaheuristic,PARTIAL,44,481,94.3,0.7403,True,1494000.0,,
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,False,SMPTSP Full Benchmark,102,525,Greedy Allocator,FEASIBLE,87,525,100.0,0.0551,True,8872.713,,
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,False,SMPTSP Full Benchmark,102,525,Exact MILP Allocator,FEASIBLE,101,332,63.2,23.9608,False,9751003.319999926,6.3141,17.6466
+Module 2,SMPTSP,data_3_102_525_30_90_100_200_300,False,SMPTSP Full Benchmark,102,525,ALNS Metaheuristic,FEASIBLE,87,525,100.0,3.7685,True,87000.0,,
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,True,SMPTSP reduced subset (50 tasks),50,50,Greedy Allocator,FEASIBLE,28,50,100.0,0.001,True,2817.005,,
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,True,SMPTSP reduced subset (50 tasks),50,50,Exact MILP Allocator,OPTIMAL,25,50,100.0,0.1991,True,25000.49999999992,0.0647,0.1344
+Module 2,SMPTSP,data_1_50_258_20_90_100_200_300,True,SMPTSP reduced subset (50 tasks),50,50,ALNS Metaheuristic,FEASIBLE,26,50,100.0,0.0551,True,26000.0,,
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,True,SMPTSP reduced subset (50 tasks),44,50,Greedy Allocator,FEASIBLE,29,50,100.0,0.0012,True,2908.95,,
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,True,SMPTSP reduced subset (50 tasks),44,50,Exact MILP Allocator,OPTIMAL,26,50,100.0,0.2272,True,26000.49999999992,0.0566,0.1706
+Module 2,SMPTSP,data_2_44_510_20_90_0_100_200,True,SMPTSP reduced subset (50 tasks),44,50,ALNS Metaheuristic,FEASIBLE,26,50,100.0,0.0409,True,26000.0,,

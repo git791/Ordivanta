@@ -1,0 +1,5 @@
+Dataset,Module,Publication_Source,Verified_Instances,Max_Workers,Max_Tasks,Time_Resolution,Primary_Constraints,Ordivanta_Adaptation,Full_vs_Reduced
+MATSP,Module 1,"Côté, Gendreau, & Rousseau (2011)",225,150,360,15-minute,"Operating slot demand, max hours, consecutive shifts",Normalized to Scenario format with discrete slots,Full Instances (1_7_10_1 up to 146_14_150_5)
+PTSP,Module 2,"Krishnamoorthy, Ernst, Baatar (2012)",137,422,2105,1-minute,"Fixed-time non-overlap, multi-skilling, max hours",Normalized to continuous timeline TaskScenario,Full Instances (24w up to 422w)
+SMPTSP,Module 2 (Supplementary),"Smet, Wauters, Mihaylov, Vanden Berghe (2014)",16,153,1577,1-minute,"Shift count minimization, temporal non-overlap, skills",Converted from PSmet OR-Library format,Full (153w/1577t) & Reduced Subsets (capped at 50t)
+Synthetic Scaling,Scalability Extension,Ordivanta Deterministic Multi-Seed Generator,40 (4 tiers x 10 seeds),1000,2500,1-minute,"Sweep-line maximal cliques, 25% qualification density",Scientific benchmark for extreme industrial scale,"Synthetic Multi-Tier (25w, 100w, 500w, 1000w)"

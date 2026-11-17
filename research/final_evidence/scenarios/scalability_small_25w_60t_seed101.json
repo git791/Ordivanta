@@ -1,0 +1,982 @@
+{
+  "tier": "Small",
+  "seed": 101,
+  "workers_count": 25,
+  "tasks_count": 60,
+  "qualification_density": 0.25,
+  "time_horizon_minutes": 1320,
+  "tasks": [
+    {
+      "id": "synth_t_0",
+      "name": "Task 0",
+      "start_minute": 1190,
+      "end_minute": 1235,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_1",
+      "name": "Task 1",
+      "start_minute": 1104,
+      "end_minute": 1164,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_2",
+      "name": "Task 2",
+      "start_minute": 956,
+      "end_minute": 986,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_3",
+      "name": "Task 3",
+      "start_minute": 1031,
+      "end_minute": 1076,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_4",
+      "name": "Task 4",
+      "start_minute": 454,
+      "end_minute": 514,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_5",
+      "name": "Task 5",
+      "start_minute": 994,
+      "end_minute": 1039,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_6",
+      "name": "Task 6",
+      "start_minute": 673,
+      "end_minute": 763,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_7",
+      "name": "Task 7",
+      "start_minute": 144,
+      "end_minute": 204,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_8",
+      "name": "Task 8",
+      "start_minute": 395,
+      "end_minute": 440,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_9",
+      "name": "Task 9",
+      "start_minute": 181,
+      "end_minute": 271,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_10",
+      "name": "Task 10",
+      "start_minute": 1100,
+      "end_minute": 1160,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_11",
+      "name": "Task 11",
+      "start_minute": 392,
+      "end_minute": 482,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_12",
+      "name": "Task 12",
+      "start_minute": 667,
+      "end_minute": 712,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_13",
+      "name": "Task 13",
+      "start_minute": 827,
+      "end_minute": 917,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_14",
+      "name": "Task 14",
+      "start_minute": 426,
+      "end_minute": 456,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_15",
+      "name": "Task 15",
+      "start_minute": 880,
+      "end_minute": 970,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_16",
+      "name": "Task 16",
+      "start_minute": 623,
+      "end_minute": 668,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_17",
+      "name": "Task 17",
+      "start_minute": 226,
+      "end_minute": 346,
+      "duration_minutes": 120
+    },
+    {
+      "id": "synth_t_18",
+      "name": "Task 18",
+      "start_minute": 672,
+      "end_minute": 732,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_19",
+      "name": "Task 19",
+      "start_minute": 808,
+      "end_minute": 898,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_20",
+      "name": "Task 20",
+      "start_minute": 469,
+      "end_minute": 559,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_21",
+      "name": "Task 21",
+      "start_minute": 157,
+      "end_minute": 247,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_22",
+      "name": "Task 22",
+      "start_minute": 856,
+      "end_minute": 886,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_23",
+      "name": "Task 23",
+      "start_minute": 950,
+      "end_minute": 995,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_24",
+      "name": "Task 24",
+      "start_minute": 1095,
+      "end_minute": 1125,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_25",
+      "name": "Task 25",
+      "start_minute": 707,
+      "end_minute": 737,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_26",
+      "name": "Task 26",
+      "start_minute": 759,
+      "end_minute": 819,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_27",
+      "name": "Task 27",
+      "start_minute": 19,
+      "end_minute": 79,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_28",
+      "name": "Task 28",
+      "start_minute": 1155,
+      "end_minute": 1200,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_29",
+      "name": "Task 29",
+      "start_minute": 70,
+      "end_minute": 160,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_30",
+      "name": "Task 30",
+      "start_minute": 370,
+      "end_minute": 430,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_31",
+      "name": "Task 31",
+      "start_minute": 134,
+      "end_minute": 179,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_32",
+      "name": "Task 32",
+      "start_minute": 828,
+      "end_minute": 888,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_33",
+      "name": "Task 33",
+      "start_minute": 1165,
+      "end_minute": 1255,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_34",
+      "name": "Task 34",
+      "start_minute": 340,
+      "end_minute": 430,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_35",
+      "name": "Task 35",
+      "start_minute": 1045,
+      "end_minute": 1105,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_36",
+      "name": "Task 36",
+      "start_minute": 371,
+      "end_minute": 491,
+      "duration_minutes": 120
+    },
+    {
+      "id": "synth_t_37",
+      "name": "Task 37",
+      "start_minute": 12,
+      "end_minute": 42,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_38",
+      "name": "Task 38",
+      "start_minute": 135,
+      "end_minute": 165,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_39",
+      "name": "Task 39",
+      "start_minute": 1178,
+      "end_minute": 1238,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_40",
+      "name": "Task 40",
+      "start_minute": 1094,
+      "end_minute": 1184,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_41",
+      "name": "Task 41",
+      "start_minute": 243,
+      "end_minute": 363,
+      "duration_minutes": 120
+    },
+    {
+      "id": "synth_t_42",
+      "name": "Task 42",
+      "start_minute": 943,
+      "end_minute": 988,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_43",
+      "name": "Task 43",
+      "start_minute": 366,
+      "end_minute": 411,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_44",
+      "name": "Task 44",
+      "start_minute": 1120,
+      "end_minute": 1210,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_45",
+      "name": "Task 45",
+      "start_minute": 285,
+      "end_minute": 315,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_46",
+      "name": "Task 46",
+      "start_minute": 307,
+      "end_minute": 367,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_47",
+      "name": "Task 47",
+      "start_minute": 691,
+      "end_minute": 781,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_48",
+      "name": "Task 48",
+      "start_minute": 138,
+      "end_minute": 168,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_49",
+      "name": "Task 49",
+      "start_minute": 1123,
+      "end_minute": 1243,
+      "duration_minutes": 120
+    },
+    {
+      "id": "synth_t_50",
+      "name": "Task 50",
+      "start_minute": 717,
+      "end_minute": 807,
+      "duration_minutes": 90
+    },
+    {
+      "id": "synth_t_51",
+      "name": "Task 51",
+      "start_minute": 117,
+      "end_minute": 162,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_52",
+      "name": "Task 52",
+      "start_minute": 570,
+      "end_minute": 630,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_53",
+      "name": "Task 53",
+      "start_minute": 185,
+      "end_minute": 245,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_54",
+      "name": "Task 54",
+      "start_minute": 315,
+      "end_minute": 375,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_55",
+      "name": "Task 55",
+      "start_minute": 954,
+      "end_minute": 999,
+      "duration_minutes": 45
+    },
+    {
+      "id": "synth_t_56",
+      "name": "Task 56",
+      "start_minute": 870,
+      "end_minute": 900,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_57",
+      "name": "Task 57",
+      "start_minute": 1073,
+      "end_minute": 1133,
+      "duration_minutes": 60
+    },
+    {
+      "id": "synth_t_58",
+      "name": "Task 58",
+      "start_minute": 500,
+      "end_minute": 530,
+      "duration_minutes": 30
+    },
+    {
+      "id": "synth_t_59",
+      "name": "Task 59",
+      "start_minute": 574,
+      "end_minute": 619,
+      "duration_minutes": 45
+    }
+  ],
+  "workers": [
+    {
+      "id": "synth_w_0",
+      "name": "Worker 0",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_15",
+        "synth_t_17",
+        "synth_t_2",
+        "synth_t_21",
+        "synth_t_25",
+        "synth_t_29",
+        "synth_t_30",
+        "synth_t_36",
+        "synth_t_39",
+        "synth_t_40",
+        "synth_t_41",
+        "synth_t_42",
+        "synth_t_54",
+        "synth_t_59"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_1",
+      "name": "Worker 1",
+      "qualified_task_ids": [
+        "synth_t_1",
+        "synth_t_12",
+        "synth_t_18",
+        "synth_t_20",
+        "synth_t_21",
+        "synth_t_22",
+        "synth_t_23",
+        "synth_t_25",
+        "synth_t_34",
+        "synth_t_35",
+        "synth_t_37",
+        "synth_t_40",
+        "synth_t_43",
+        "synth_t_47",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_2",
+      "name": "Worker 2",
+      "qualified_task_ids": [
+        "synth_t_1",
+        "synth_t_13",
+        "synth_t_14",
+        "synth_t_21",
+        "synth_t_23",
+        "synth_t_28",
+        "synth_t_3",
+        "synth_t_33",
+        "synth_t_4",
+        "synth_t_42",
+        "synth_t_47",
+        "synth_t_51",
+        "synth_t_53",
+        "synth_t_7",
+        "synth_t_9"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_3",
+      "name": "Worker 3",
+      "qualified_task_ids": [
+        "synth_t_12",
+        "synth_t_13",
+        "synth_t_23",
+        "synth_t_29",
+        "synth_t_32",
+        "synth_t_35",
+        "synth_t_40",
+        "synth_t_42",
+        "synth_t_43",
+        "synth_t_52",
+        "synth_t_55",
+        "synth_t_56",
+        "synth_t_58",
+        "synth_t_59",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_4",
+      "name": "Worker 4",
+      "qualified_task_ids": [
+        "synth_t_13",
+        "synth_t_15",
+        "synth_t_16",
+        "synth_t_19",
+        "synth_t_2",
+        "synth_t_20",
+        "synth_t_27",
+        "synth_t_29",
+        "synth_t_34",
+        "synth_t_35",
+        "synth_t_43",
+        "synth_t_47",
+        "synth_t_51",
+        "synth_t_54",
+        "synth_t_56"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_5",
+      "name": "Worker 5",
+      "qualified_task_ids": [
+        "synth_t_13",
+        "synth_t_17",
+        "synth_t_2",
+        "synth_t_21",
+        "synth_t_28",
+        "synth_t_29",
+        "synth_t_3",
+        "synth_t_35",
+        "synth_t_37",
+        "synth_t_39",
+        "synth_t_42",
+        "synth_t_45",
+        "synth_t_47",
+        "synth_t_55",
+        "synth_t_59"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_6",
+      "name": "Worker 6",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_17",
+        "synth_t_26",
+        "synth_t_28",
+        "synth_t_3",
+        "synth_t_31",
+        "synth_t_39",
+        "synth_t_40",
+        "synth_t_42",
+        "synth_t_47",
+        "synth_t_49",
+        "synth_t_53",
+        "synth_t_57",
+        "synth_t_59",
+        "synth_t_9"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_7",
+      "name": "Worker 7",
+      "qualified_task_ids": [
+        "synth_t_17",
+        "synth_t_2",
+        "synth_t_21",
+        "synth_t_28",
+        "synth_t_33",
+        "synth_t_38",
+        "synth_t_39",
+        "synth_t_4",
+        "synth_t_40",
+        "synth_t_44",
+        "synth_t_46",
+        "synth_t_5",
+        "synth_t_55",
+        "synth_t_58",
+        "synth_t_7"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_8",
+      "name": "Worker 8",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_12",
+        "synth_t_13",
+        "synth_t_14",
+        "synth_t_15",
+        "synth_t_16",
+        "synth_t_22",
+        "synth_t_26",
+        "synth_t_30",
+        "synth_t_34",
+        "synth_t_41",
+        "synth_t_45",
+        "synth_t_55",
+        "synth_t_6",
+        "synth_t_9"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_9",
+      "name": "Worker 9",
+      "qualified_task_ids": [
+        "synth_t_10",
+        "synth_t_11",
+        "synth_t_12",
+        "synth_t_2",
+        "synth_t_28",
+        "synth_t_33",
+        "synth_t_37",
+        "synth_t_41",
+        "synth_t_42",
+        "synth_t_45",
+        "synth_t_46",
+        "synth_t_47",
+        "synth_t_50",
+        "synth_t_51",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_10",
+      "name": "Worker 10",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_14",
+        "synth_t_21",
+        "synth_t_30",
+        "synth_t_32",
+        "synth_t_33",
+        "synth_t_36",
+        "synth_t_37",
+        "synth_t_42",
+        "synth_t_43",
+        "synth_t_50",
+        "synth_t_56",
+        "synth_t_58",
+        "synth_t_6",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_11",
+      "name": "Worker 11",
+      "qualified_task_ids": [
+        "synth_t_17",
+        "synth_t_2",
+        "synth_t_25",
+        "synth_t_28",
+        "synth_t_36",
+        "synth_t_38",
+        "synth_t_39",
+        "synth_t_45",
+        "synth_t_5",
+        "synth_t_53",
+        "synth_t_57",
+        "synth_t_58",
+        "synth_t_59",
+        "synth_t_7",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_12",
+      "name": "Worker 12",
+      "qualified_task_ids": [
+        "synth_t_10",
+        "synth_t_15",
+        "synth_t_18",
+        "synth_t_19",
+        "synth_t_24",
+        "synth_t_3",
+        "synth_t_33",
+        "synth_t_41",
+        "synth_t_43",
+        "synth_t_44",
+        "synth_t_46",
+        "synth_t_56",
+        "synth_t_58",
+        "synth_t_6",
+        "synth_t_7"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_13",
+      "name": "Worker 13",
+      "qualified_task_ids": [
+        "synth_t_15",
+        "synth_t_19",
+        "synth_t_2",
+        "synth_t_21",
+        "synth_t_24",
+        "synth_t_35",
+        "synth_t_40",
+        "synth_t_44",
+        "synth_t_45",
+        "synth_t_48",
+        "synth_t_50",
+        "synth_t_54",
+        "synth_t_55",
+        "synth_t_58",
+        "synth_t_9"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_14",
+      "name": "Worker 14",
+      "qualified_task_ids": [
+        "synth_t_1",
+        "synth_t_10",
+        "synth_t_12",
+        "synth_t_15",
+        "synth_t_17",
+        "synth_t_26",
+        "synth_t_28",
+        "synth_t_30",
+        "synth_t_31",
+        "synth_t_38",
+        "synth_t_50",
+        "synth_t_55",
+        "synth_t_57",
+        "synth_t_58",
+        "synth_t_9"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_15",
+      "name": "Worker 15",
+      "qualified_task_ids": [
+        "synth_t_12",
+        "synth_t_14",
+        "synth_t_16",
+        "synth_t_19",
+        "synth_t_2",
+        "synth_t_21",
+        "synth_t_24",
+        "synth_t_33",
+        "synth_t_48",
+        "synth_t_49",
+        "synth_t_50",
+        "synth_t_54",
+        "synth_t_58",
+        "synth_t_59",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_16",
+      "name": "Worker 16",
+      "qualified_task_ids": [
+        "synth_t_16",
+        "synth_t_23",
+        "synth_t_29",
+        "synth_t_3",
+        "synth_t_37",
+        "synth_t_39",
+        "synth_t_41",
+        "synth_t_42",
+        "synth_t_43",
+        "synth_t_46",
+        "synth_t_49",
+        "synth_t_50",
+        "synth_t_51",
+        "synth_t_52",
+        "synth_t_53"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_17",
+      "name": "Worker 17",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_1",
+        "synth_t_11",
+        "synth_t_14",
+        "synth_t_19",
+        "synth_t_2",
+        "synth_t_22",
+        "synth_t_23",
+        "synth_t_24",
+        "synth_t_3",
+        "synth_t_30",
+        "synth_t_42",
+        "synth_t_5",
+        "synth_t_51",
+        "synth_t_59"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_18",
+      "name": "Worker 18",
+      "qualified_task_ids": [
+        "synth_t_11",
+        "synth_t_17",
+        "synth_t_24",
+        "synth_t_25",
+        "synth_t_26",
+        "synth_t_28",
+        "synth_t_31",
+        "synth_t_42",
+        "synth_t_44",
+        "synth_t_46",
+        "synth_t_47",
+        "synth_t_53",
+        "synth_t_55",
+        "synth_t_6",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_19",
+      "name": "Worker 19",
+      "qualified_task_ids": [
+        "synth_t_10",
+        "synth_t_13",
+        "synth_t_18",
+        "synth_t_19",
+        "synth_t_23",
+        "synth_t_25",
+        "synth_t_31",
+        "synth_t_33",
+        "synth_t_38",
+        "synth_t_42",
+        "synth_t_43",
+        "synth_t_46",
+        "synth_t_48",
+        "synth_t_52",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_20",
+      "name": "Worker 20",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_14",
+        "synth_t_2",
+        "synth_t_26",
+        "synth_t_3",
+        "synth_t_31",
+        "synth_t_33",
+        "synth_t_44",
+        "synth_t_45",
+        "synth_t_49",
+        "synth_t_54",
+        "synth_t_55",
+        "synth_t_56",
+        "synth_t_58",
+        "synth_t_6"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_21",
+      "name": "Worker 21",
+      "qualified_task_ids": [
+        "synth_t_15",
+        "synth_t_18",
+        "synth_t_23",
+        "synth_t_24",
+        "synth_t_28",
+        "synth_t_29",
+        "synth_t_30",
+        "synth_t_39",
+        "synth_t_4",
+        "synth_t_40",
+        "synth_t_49",
+        "synth_t_53",
+        "synth_t_56",
+        "synth_t_59",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_22",
+      "name": "Worker 22",
+      "qualified_task_ids": [
+        "synth_t_10",
+        "synth_t_17",
+        "synth_t_22",
+        "synth_t_24",
+        "synth_t_29",
+        "synth_t_3",
+        "synth_t_30",
+        "synth_t_34",
+        "synth_t_35",
+        "synth_t_39",
+        "synth_t_4",
+        "synth_t_43",
+        "synth_t_48",
+        "synth_t_59",
+        "synth_t_6"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_23",
+      "name": "Worker 23",
+      "qualified_task_ids": [
+        "synth_t_11",
+        "synth_t_14",
+        "synth_t_26",
+        "synth_t_3",
+        "synth_t_32",
+        "synth_t_34",
+        "synth_t_44",
+        "synth_t_45",
+        "synth_t_47",
+        "synth_t_48",
+        "synth_t_49",
+        "synth_t_50",
+        "synth_t_54",
+        "synth_t_55",
+        "synth_t_59"
+      ],
+      "max_hours": 8.0
+    },
+    {
+      "id": "synth_w_24",
+      "name": "Worker 24",
+      "qualified_task_ids": [
+        "synth_t_0",
+        "synth_t_10",
+        "synth_t_16",
+        "synth_t_18",
+        "synth_t_23",
+        "synth_t_33",
+        "synth_t_35",
+        "synth_t_37",
+        "synth_t_45",
+        "synth_t_46",
+        "synth_t_47",
+        "synth_t_53",
+        "synth_t_57",
+        "synth_t_6",
+        "synth_t_8"
+      ],
+      "max_hours": 8.0
+    }
+  ]
+}
