@@ -466,7 +466,7 @@ def start_large_scale_job(req: LargeScaleBenchmarkRequest):
 
     return {
         "job_id": job_id,
-        "status": "pending",
+        "status": "PENDING",
         "message": f"Large-scale benchmark job {job_id} launched in background.",
     }
 
@@ -484,15 +484,18 @@ def get_large_scale_job_status(job_id: str):
         )
 
     # Compute live elapsed seconds if still running
-    elapsed = round(time.time() - job["start_time"], 2) if job["status"] == "running" else job.get("elapsed_seconds", 0.0)
+    elapsed = round(time.time() - job["start_time"], 2) if job["status"] in ("running", "RUNNING") else job.get("elapsed_seconds", 0.0)
+
+    raw_results = job.get("results")
+    formatted_results = list(raw_results.values()) if isinstance(raw_results, dict) else raw_results
 
     return {
         "job_id": job["job_id"],
-        "status": job["status"],
+        "status": str(job["status"]).upper(),
         "progress_pct": job["progress_pct"],
         "current_step": job["current_step"],
         "elapsed_seconds": elapsed,
-        "results": job["results"],
+        "results": formatted_results,
         "comparison_summary": job["comparison_summary"],
         "scenario_info": job.get("scenario_info"),
         "error": job.get("error"),
