@@ -128,7 +128,7 @@ export default function NotificationDropdown() {
         <div
           role="dialog"
           aria-label="Notifications Tray"
-          className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
+          className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150"
         >
           {/* Header */}
           <div className="p-3.5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">

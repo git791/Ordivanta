@@ -50,7 +50,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-canvas text-ink flex flex-col font-sans antialiased w-full max-w-full overflow-x-hidden">
       {/* ─── Truck&Co Inspired Floating / Pill Top Navigation ─────────────── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-2xs w-full overflow-hidden">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border/80 shadow-2xs w-full">
         <div className="w-full max-w-7xl 2xl:max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 h-16 flex items-center justify-between gap-2 lg:gap-3">
           
           {/* Left: Brand Identity with Official Logo */}

@@ -159,15 +159,17 @@ export default function DashboardPage() {
     <div className="space-y-8 max-w-full overflow-x-hidden">
       {error && <ErrorBanner message={error} />}
 
-      {/* Header with Plant & Period Selectors (Truck&Co style) */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-border/70 pb-6 gap-4">
-        <div>
-          <PageHeader
-            title="Manufacturing Operations Command Center"
-            description="Real-time shift coverage, specialist bottleneck tracking, lifecycle approvals, and overtime controls."
-          />
+      {/* Header with Plant & Period Selectors */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between border-b border-border/70 pb-5 gap-4">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 font-sans">
+            Manufacturing Operations Command Center
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed max-w-2xl">
+            Real-time shift coverage, specialist bottleneck tracking, lifecycle approvals, and overtime controls.
+          </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           {/* Dynamic Scenario / Plant Dropdown */}
           <select
             value={selectedScenarioId}
@@ -197,7 +199,7 @@ export default function DashboardPage() {
                 }
               }
             }}
-            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[280px] truncate"
+            className="px-3.5 py-1.5 bg-surface border border-border/80 rounded-full text-xs font-medium text-slate-800 shadow-2xs focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer max-w-[260px] truncate"
             title="Select Manufacturing Plant Scenario"
           >
             <option value="default">Detroit Assembly Plant #1 (Synthetic Manufacturing)</option>
@@ -232,7 +234,7 @@ export default function DashboardPage() {
             )}
           </select>
 
-          <span className="px-3.5 py-1.5 bg-slate-100 border border-slate-200/80 rounded-full text-xs font-mono text-slate-600 shadow-2xs">
+          <span className="px-3 py-1.5 bg-slate-100 border border-slate-200/80 rounded-full text-xs font-mono text-slate-600 shadow-2xs shrink-0">
             {schedulePeriod}
           </span>
         </div>
