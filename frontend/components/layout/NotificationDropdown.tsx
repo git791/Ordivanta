@@ -70,6 +70,28 @@ export default function NotificationDropdown() {
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const handleNotificationAction = (n: AppNotification) => {
+    setIsOpen(false);
+    if (n.type === 'absence' || n.id.includes('absence')) {
+      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard') {
+        window.dispatchEvent(new CustomEvent('ordivanta-open-replacement-modal'));
+        const el = document.getElementById('action-queue');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        router.push('/dashboard?openModal=replacement#action-queue');
+      }
+    } else if (n.type === 'shortage' || n.id.includes('shortage')) {
+      if (typeof window !== 'undefined' && window.location.pathname === '/dashboard') {
+        const el = document.getElementById('bottleneck-matrix');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        router.push('/dashboard#bottleneck-matrix');
+      }
+    } else if (n.actionUrl) {
+      router.push(n.actionUrl);
+    }
+  };
+
   const getSeverityIcon = (severity: AppNotification['severity']) => {
     switch (severity) {
       case 'danger':
@@ -186,19 +208,17 @@ export default function NotificationDropdown() {
 
                       {n.actionUrl && (
                         <div className="mt-2">
-                          <Link
-                            href={n.actionUrl}
-                            onClick={() => {
-                              setIsOpen(false);
-                            }}
+                          <button
+                            type="button"
+                            onClick={() => handleNotificationAction(n)}
                             className={clsx(
-                              'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded border transition-colors',
+                              'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all hover:scale-105 cursor-pointer shadow-2xs',
                               getSeverityBadge(n.severity)
                             )}
                           >
                             <span>{n.actionLabel || 'Inspect'}</span>
                             <span aria-hidden="true">&rarr;</span>
-                          </Link>
+                          </button>
                         </div>
                       )}
                     </div>

@@ -78,6 +78,28 @@ export default function DashboardPage() {
     return () => window.removeEventListener('storage', syncWorkerState);
   }, []);
 
+  // Listen for direct notification deep-links (e.g. from Notification Dropdown)
+  useEffect(() => {
+    const handleOpenReplacementModal = () => {
+      setReplacementModalOpen(true);
+      const el = document.getElementById('action-queue');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.addEventListener('ordivanta-open-replacement-modal', handleOpenReplacementModal);
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('openModal') === 'replacement' || window.location.hash === '#action-queue') {
+        setTimeout(handleOpenReplacementModal, 150);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('ordivanta-open-replacement-modal', handleOpenReplacementModal);
+    };
+  }, []);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -303,7 +325,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Cell Operations Status Summary */}
-          <div className="lg:col-span-7 flex flex-col justify-between space-y-4">
+          <div id="bottleneck-matrix" className="lg:col-span-7 flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -520,7 +542,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Urgent Supervisor Action Panel */}
-        <div className="bg-surface border border-border/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
+        <div id="action-queue" className="bg-surface border border-border/80 rounded-3xl p-6 flex flex-col justify-between shadow-sm">
           <div>
             <h2 className="text-base font-bold text-slate-900 mb-1">Supervisory Action Queue</h2>
             <p className="text-xs text-slate-500 mb-4">

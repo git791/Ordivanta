@@ -105,6 +105,14 @@ export default function WorkerPortalPage() {
     } catch {
       // ignore
     }
+
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const wId = params.get('worker');
+      if (wId && DEFAULT_WORKERS[wId]) {
+        setSelectedWorkerId(wId);
+      }
+    }
   }, []);
 
   const currentWorker = workersState[selectedWorkerId] || DEFAULT_WORKERS.emp_david;
