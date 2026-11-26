@@ -6,6 +6,13 @@ import PageHeader from '@/components/ui/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { addNotification } from '@/lib/notifications';
 import {
+  getWorkersSyncState,
+  saveWorkersSyncState,
+  subscribeWorkersSync,
+  DEFAULT_WORKERS_DATA,
+  WorkerProfile,
+} from '@/lib/workerSync';
+import {
   ClockIcon,
   ShieldCheckIcon,
   CheckCircleIcon,
@@ -18,118 +25,41 @@ import {
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 
-interface WorkerProfile {
-  id: string;
-  name: string;
-  role: string;
-  base_wage: number;
-  skills: string[];
-  certifications: string[];
-  overtime_opt_in: boolean;
-  max_overtime_hours: number;
-  is_absent: boolean;
-  absence_reason?: string;
-  assigned_shifts: Array<{
-    shift_name: string;
-    day: string;
-    hours: number;
-    unit_name: string;
-    time: string;
-    rest_interval_hours: number;
-  }>;
-}
-
-const DEFAULT_WORKERS: Record<string, WorkerProfile> = {
-  emp_david: {
-    id: 'emp_david',
-    name: 'David Kim',
-    role: 'Senior Welding Specialist',
-    base_wage: 32.50,
-    skills: ['welding', 'robotic_welding', 'inspection'],
-    certifications: ['ISO 9001:2015', 'AWS D1.1 Structural Welding', 'Safety Level 2'],
-    overtime_opt_in: true,
-    max_overtime_hours: 8.0,
-    is_absent: false,
-    assigned_shifts: [
-      { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Afternoon', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 24.0 },
-      { shift_name: 'Afternoon', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 01 (Machining)', time: '15:00–23:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Thursday, Nov 06', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-    ],
-  },
-  emp_alice: {
-    id: 'emp_alice',
-    name: 'Alice Martin',
-    role: 'Assembly Operations Lead',
-    base_wage: 28.00,
-    skills: ['assembly', 'packaging', 'stamping'],
-    certifications: ['Lean Six Sigma Yellow Belt', 'First Aid Certified'],
-    overtime_opt_in: false,
-    max_overtime_hours: 0.0,
-    is_absent: false,
-    assigned_shifts: [
-      { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 04 (Final QC)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Friday, Nov 07', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 24.0 },
-    ],
-  },
-  emp_004: {
-    id: 'emp_004',
-    name: 'Marcus Vance (Worker 004)',
-    role: 'Robotic Welding Technician',
-    base_wage: 31.00,
-    skills: ['welding', 'robotic_welding'],
-    certifications: ['ISO 9001:2015', 'Welding Level 4'],
-    overtime_opt_in: false,
-    max_overtime_hours: 4.0,
-    is_absent: true,
-    absence_reason: 'Medical Leave (Nov 03 - Nov 07)',
-    assigned_shifts: [],
-  },
-};
-
 export default function WorkerPortalPage() {
   const [selectedWorkerId, setSelectedWorkerId] = useState<string>('emp_david');
-  const [workersState, setWorkersState] = useState<Record<string, WorkerProfile>>(DEFAULT_WORKERS);
+  const [workersState, setWorkersState] = useState<Record<string, WorkerProfile>>(DEFAULT_WORKERS_DATA);
   const [syncToast, setSyncToast] = useState<string | null>(null);
   const [newCertInput, setNewCertInput] = useState<string>('');
 
-  // Load from localStorage if present
+  // Load and subscribe to worker sync state
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('ordivanta_worker_sync_state');
-      if (saved) {
-        setWorkersState(JSON.parse(saved));
-      }
-    } catch {
-      // ignore
-    }
+    setWorkersState(getWorkersSyncState());
+
+    const unsubscribe = subscribeWorkersSync((updated) => {
+      setWorkersState(updated);
+    });
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const wId = params.get('worker');
-      if (wId && DEFAULT_WORKERS[wId]) {
+      if (wId && DEFAULT_WORKERS_DATA[wId]) {
         setSelectedWorkerId(wId);
       }
     }
+
+    return () => unsubscribe();
   }, []);
 
-  const currentWorker = workersState[selectedWorkerId] || DEFAULT_WORKERS.emp_david;
+  const currentWorker = workersState[selectedWorkerId] || DEFAULT_WORKERS_DATA.emp_david;
 
   const updateCurrentWorker = (updater: (prev: WorkerProfile) => WorkerProfile, feedbackMsg: string) => {
-    setWorkersState((prev) => {
-      const updated = {
-        ...prev,
-        [selectedWorkerId]: updater(prev[selectedWorkerId] || DEFAULT_WORKERS.emp_david),
-      };
-      try {
-        localStorage.setItem('ordivanta_worker_sync_state', JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
-      return updated;
-    });
+    const updatedProfile = updater(workersState[selectedWorkerId] || DEFAULT_WORKERS_DATA.emp_david);
+    const updated = {
+      ...workersState,
+      [selectedWorkerId]: updatedProfile,
+    };
+    saveWorkersSyncState(updated);
+    setWorkersState(updated);
     setSyncToast(feedbackMsg);
     setTimeout(() => setSyncToast(null), 4000);
   };
@@ -335,6 +265,11 @@ export default function WorkerPortalPage() {
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold">
                         {s.shift_name} Shift
                       </span>
+                      {s.is_replacement && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                          ★ Dispatched Replacement (Cell 03)
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-slate-600 font-medium">
                       Station: <strong className="text-slate-800">{s.unit_name}</strong>

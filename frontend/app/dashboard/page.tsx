@@ -12,6 +12,14 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorBanner from '@/components/ui/ErrorBanner';
 import WorkforceTimelinePlanner from '@/components/schedule/WorkforceTimelinePlanner';
 import {
+  getWorkersSyncState,
+  setWorkerAbsence,
+  dispatchReplacementToWorker,
+  revokeReplacementFromWorker,
+  subscribeWorkersSync,
+  WorkerProfile,
+} from '@/lib/workerSync';
+import {
   SparklesIcon,
   ExclamationTriangleIcon,
   ShieldCheckIcon,
@@ -56,26 +64,19 @@ export default function DashboardPage() {
   const [schedulePeriod, setSchedulePeriod] = useState('Current Week (Nov 01 - Nov 07, 2026)');
 
   // Worker Portal Real-Time Synchronization State
-  const [workerSyncState, setWorkerSyncState] = useState<{
-    emp_david?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
-    emp_alice?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
-    emp_004?: { overtime_opt_in: boolean; max_overtime_hours: number; skills: string[]; certifications: string[]; is_absent: boolean };
-  } | null>(null);
+  const [workerSyncState, setWorkerSyncState] = useState<Record<string, WorkerProfile> | null>(null);
 
   useEffect(() => {
-    const syncWorkerState = () => {
-      try {
-        const raw = localStorage.getItem('ordivanta_worker_sync_state');
-        if (raw) {
-          setWorkerSyncState(JSON.parse(raw));
-        }
-      } catch {
-        // ignore
-      }
+    const syncWorkerState = (state?: Record<string, WorkerProfile>) => {
+      const current = state || getWorkersSyncState();
+      setWorkerSyncState(current);
+      const isDavidCovering = current.emp_david?.assigned_shifts.some((s) => s.is_replacement);
+      setReplacementAssigned(Boolean(isDavidCovering));
     };
+
     syncWorkerState();
-    window.addEventListener('storage', syncWorkerState);
-    return () => window.removeEventListener('storage', syncWorkerState);
+    const unsubscribe = subscribeWorkersSync(syncWorkerState);
+    return () => unsubscribe();
   }, []);
 
   // Listen for direct notification deep-links (e.g. from Notification Dropdown)
@@ -563,8 +564,21 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   <p className="text-xs text-emerald-800">
-                    Worker 004 marked active in Worker Self-Service Portal. Cell 03 is fully staffed with 0 line stoppage risk.
+                    Marcus Vance (Worker 004) is on active duty. Cell 03 is fully staffed with 0 line stoppage risk.
                   </p>
+                  <div className="mt-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWorkerAbsence('emp_004', true, 'Unplanned Medical Leave');
+                        setDispatchToast('Marcus Vance reported absent. Immediate Cell 03 shortage triggered.');
+                        setTimeout(() => setDispatchToast(null), 4000);
+                      }}
+                      className="text-[11px] text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1 rounded-full font-semibold transition-colors cursor-pointer"
+                    >
+                      Report Call-Out / Absence (Marcus Vance)
+                    </button>
+                  </div>
                 </div>
               ) : replacementAssigned ? (
                 <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
@@ -591,6 +605,7 @@ export default function DashboardPage() {
                     <button
                       type="button"
                       onClick={() => {
+                        revokeReplacementFromWorker('emp_david');
                         setReplacementAssigned(false);
                         setDispatchToast('Replacement assignment undone. Cell 03 shortage reopened.');
                         setTimeout(() => setDispatchToast(null), 4000);
@@ -605,12 +620,12 @@ export default function DashboardPage() {
                 <div className="p-3.5 bg-red-50/70 border border-red-200/90 rounded-2xl">
                   <div className="flex items-center justify-between text-xs font-bold text-red-900 mb-1">
                     <span>Robotic Welding (Cell 03)</span>
-                    <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded-full text-red-800 font-bold">Critical</span>
+                    <span className="text-[10px] bg-red-100 px-2 py-0.5 rounded-full text-red-800 font-bold">Critical Shortage</span>
                   </div>
                   <p className="text-xs text-red-700">
-                    Worker 004 absent. Only 1 candidate holds ISO 9001 + Welding L4.
+                    Marcus Vance (Worker 004) absent. Only 1 candidate holds ISO 9001 + Welding L4.
                   </p>
-                  <div className="mt-2.5 flex gap-2">
+                  <div className="mt-2.5 flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setReplacementModalOpen(true)}
@@ -618,6 +633,17 @@ export default function DashboardPage() {
                     >
                       <UserPlusIcon className="w-3.5 h-3.5" />
                       <span>Assign Replacement</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWorkerAbsence('emp_004', false);
+                        setDispatchToast('Marcus Vance restored to Active Duty. Medical leave cleared.');
+                        setTimeout(() => setDispatchToast(null), 4000);
+                      }}
+                      className="text-[11px] text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-2.5 py-1.5 rounded-full font-medium cursor-pointer"
+                    >
+                      Clear Absence (Return to Duty)
                     </button>
                   </div>
                 </div>
@@ -781,6 +807,14 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      dispatchReplacementToWorker('emp_david', {
+                        shift_name: 'Afternoon (Replacement)',
+                        day: 'Tuesday, Nov 04',
+                        hours: 8.0,
+                        unit_name: 'Cell 03 (Robotic Welding)',
+                        time: '15:00–23:00',
+                        rest_interval_hours: 14.5,
+                      });
                       setReplacementAssigned(true);
                       setAssignedCandidateName('David Kim');
                       setReplacementModalOpen(false);
