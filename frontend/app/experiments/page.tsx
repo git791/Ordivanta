@@ -1052,23 +1052,23 @@ export default function ExperimentsPage() {
                     <tr>
                       <td className="px-4 py-3 font-medium text-ink">Coverage Rate</td>
                       <td className="px-4 py-3 font-mono">
-                        {milpRun ? (
+                        {milpRun?.metrics?.coverage_rate != null ? (
                           <span className="font-semibold text-primary">
-                            {(milpRun.metrics.coverage_rate * 100).toFixed(1)}% ({milpRun.metrics.total_filled_positions} / {milpRun.metrics.total_required_positions})
+                            {(Number(milpRun.metrics.coverage_rate) * 100).toFixed(1)}% ({milpRun.metrics.total_filled_positions} / {milpRun.metrics.total_required_positions})
                           </span>
                         ) : '—'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {greedyRun ? (
+                        {greedyRun?.metrics?.coverage_rate != null ? (
                           <span>
-                            {(greedyRun.metrics.coverage_rate * 100).toFixed(1)}% ({greedyRun.metrics.total_filled_positions} / {greedyRun.metrics.total_required_positions})
+                            {(Number(greedyRun.metrics.coverage_rate) * 100).toFixed(1)}% ({greedyRun.metrics.total_filled_positions} / {greedyRun.metrics.total_required_positions})
                           </span>
                         ) : '—'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {alnsRun ? (
+                        {alnsRun?.metrics?.coverage_rate != null ? (
                           <span>
-                            {(alnsRun.metrics.coverage_rate * 100).toFixed(1)}% ({alnsRun.metrics.total_filled_positions} / {alnsRun.metrics.total_required_positions})
+                            {(Number(alnsRun.metrics.coverage_rate) * 100).toFixed(1)}% ({alnsRun.metrics.total_filled_positions} / {alnsRun.metrics.total_required_positions})
                           </span>
                         ) : '—'}
                       </td>
@@ -1104,13 +1104,13 @@ export default function ExperimentsPage() {
                     <tr>
                       <td className="px-4 py-3 font-medium text-ink">Runtime (Wall Clock)</td>
                       <td className="px-4 py-3 font-mono">
-                        {milpRun ? `${milpRun.runtime_seconds.toFixed(3)}s` : '—'}
+                        {milpRun?.runtime_seconds != null ? `${Number(milpRun.runtime_seconds).toFixed(3)}s` : '—'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {greedyRun ? `${greedyRun.runtime_seconds.toFixed(3)}s` : '—'}
+                        {greedyRun?.runtime_seconds != null ? `${Number(greedyRun.runtime_seconds).toFixed(3)}s` : '—'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {alnsRun ? `${alnsRun.runtime_seconds.toFixed(3)}s` : '—'}
+                        {alnsRun?.runtime_seconds != null ? `${Number(alnsRun.runtime_seconds).toFixed(3)}s` : '—'}
                       </td>
                     </tr>
 
@@ -1118,13 +1118,13 @@ export default function ExperimentsPage() {
                     <tr>
                       <td className="px-4 py-3 font-medium text-ink">Objective Value</td>
                       <td className="px-4 py-3 font-mono">
-                        {milpRun && milpRun.objective_value !== null ? milpRun.objective_value.toFixed(2) : 'N/A'}
+                        {milpRun && milpRun.objective_value !== null && milpRun.objective_value !== undefined ? Number(milpRun.objective_value).toFixed(2) : 'N/A'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {greedyRun && greedyRun.objective_value !== null ? greedyRun.objective_value.toFixed(2) : 'N/A'}
+                        {greedyRun && greedyRun.objective_value !== null && greedyRun.objective_value !== undefined ? Number(greedyRun.objective_value).toFixed(2) : 'N/A'}
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {alnsRun && alnsRun.objective_value !== null ? alnsRun.objective_value.toFixed(2) : 'N/A'}
+                        {alnsRun && alnsRun.objective_value !== null && alnsRun.objective_value !== undefined ? Number(alnsRun.objective_value).toFixed(2) : 'N/A'}
                       </td>
                     </tr>
 

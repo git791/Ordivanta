@@ -18,7 +18,7 @@ export default function WorkloadChart({ metrics }: { metrics: MetricsResponse })
         <BarChart data={data} layout="vertical" margin={{ left: 8, right: 8 }}>
           <XAxis type="number" tick={{ fontSize: 12 }} unit="h" />
           <YAxis type="category" dataKey="id" tick={{ fontSize: 11 }} width={80} />
-          <Tooltip formatter={(v: unknown) => [`${Number(v).toFixed(1)}h`, 'Hours']} />
+          <Tooltip formatter={(v: unknown) => [`${Number(v ?? 0).toFixed(1)}h`, 'Hours']} />
           <Bar dataKey="hours" fill="#245A81" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>

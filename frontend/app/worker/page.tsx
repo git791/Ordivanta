@@ -208,7 +208,7 @@ export default function WorkerPortalPage() {
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">{currentWorker.role} &bull; Base Wage: ${currentWorker.base_wage.toFixed(2)}/h</p>
+              <p className="text-xs text-slate-500 mt-0.5">{currentWorker.role} &bull; Base Wage: ${Number(currentWorker.base_wage ?? 25.0).toFixed(2)}/h</p>
             </div>
           </div>
 
@@ -265,7 +265,7 @@ export default function WorkerPortalPage() {
           <div className="p-4 bg-slate-50/70 border border-slate-200/80 rounded-2xl">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Scheduled Workload</span>
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-bold font-mono text-slate-900">{totalWeeklyHours.toFixed(1)}h</span>
+              <span className="text-2xl font-bold font-mono text-slate-900">{Number(totalWeeklyHours ?? 0).toFixed(1)}h</span>
               <span className="text-xs text-slate-500">/ 40.0h regular</span>
             </div>
             <div className="mt-2 w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
@@ -290,7 +290,7 @@ export default function WorkerPortalPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Estimated Gross Pay</span>
             <div className="mt-1 flex items-baseline gap-2">
               <span className="text-2xl font-bold font-mono text-slate-900">
-                ${estimatedGrossPay.toFixed(2)}
+                ${Number(estimatedGrossPay ?? 0).toFixed(2)}
               </span>
               <span className="text-xs text-slate-500">this cycle</span>
             </div>

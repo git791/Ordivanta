@@ -46,7 +46,7 @@ export default function RosterTable({
     {
       key: 'hours',
       header: 'Hours',
-      render: (a: Assignment) => <span className="font-mono">{a.hours.toFixed(1)}</span>,
+      render: (a: Assignment) => <span className="font-mono">{Number(a?.hours ?? 8.0).toFixed(1)}</span>,
       className: 'text-right',
     },
   ];

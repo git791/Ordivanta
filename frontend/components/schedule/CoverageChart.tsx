@@ -18,7 +18,7 @@ export default function CoverageChart({ metrics }: Props) {
   return (
     <div>
       <p className="text-sm font-medium text-ink mb-1">
-        Coverage: {(rate * 100).toFixed(1)}% ({metrics.total_filled_positions} / {metrics.total_required_positions} positions)
+        Coverage: {(Number(rate ?? 0) * 100).toFixed(1)}% ({metrics?.total_filled_positions ?? 0} / {metrics?.total_required_positions ?? 0} positions)
       </p>
       <div className="h-32">
         <ResponsiveContainer width="100%" height="100%">

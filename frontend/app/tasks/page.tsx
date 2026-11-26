@@ -513,9 +513,23 @@ export default function TaskAllocationPage() {
   const activeData = React.useMemo(() => {
     if (isRunning) return null;
     if (isCompleted && lsJob?.results) {
-      const rawList = Array.isArray(lsJob.results)
+      const items = Array.isArray(lsJob.results)
         ? lsJob.results
-        : (lsJob.comparison_summary || Object.values(lsJob.results));
+        : (lsJob.comparison_summary || Object.values(lsJob.results || {}));
+      const rawList = items.map((r: any) => ({
+        ...r,
+        algorithm: r?.algorithm || 'Algorithm',
+        status: r?.status || 'FEASIBLE',
+        shifts_count: Number(r?.shifts_count ?? r?.active_workers_shifts ?? r?.active_workers_count ?? 0),
+        assigned_tasks: Number(r?.assigned_tasks ?? (typeof r?.tasks_assigned === 'string' ? r.tasks_assigned.split('/')[0] : r?.total_assigned) ?? 0),
+        total_tasks: Number(r?.total_tasks ?? (typeof r?.tasks_assigned === 'string' ? r.tasks_assigned.split('/')[1] : r?.total_tasks) ?? 0),
+        coverage_pct: Number(r?.coverage_pct ?? r?.coverage_percentage ?? 100.0),
+        runtime_seconds: Number(r?.runtime_seconds ?? 0),
+        model_construction_seconds: Number(r?.model_construction_seconds ?? 0),
+        solver_execution_seconds: Number(r?.solver_execution_seconds ?? 0),
+        peak_memory_mb: Number(r?.peak_memory_mb ?? 0),
+        is_valid: Boolean(r?.is_valid ?? true),
+      }));
       return {
         workers: lsJob.scenario_info?.workers || lsWorkers,
         tasks: lsJob.scenario_info?.tasks || lsTasks,
@@ -1053,7 +1067,7 @@ export default function TaskAllocationPage() {
                 <div className="bg-white border border-border rounded-xl p-4 shadow-2xs">
                   <span className="text-xs text-slate-500 font-medium">Peak Memory (RAM)</span>
                   <p className="text-2xl font-bold text-indigo-700 mt-1">
-                    {Math.max(...activeData.results.map((r: any) => r.peak_memory_mb || 0)).toFixed(1)} MB
+                    {Math.max(...activeData.results.map((r: any) => Number(r?.peak_memory_mb || 0)), 0).toFixed(1)} MB
                   </p>
                   <span className="text-[11px] text-slate-500 font-medium mt-0.5 block">
                     Real tracemalloc measurement
@@ -1150,23 +1164,23 @@ export default function TaskAllocationPage() {
                               {row.assigned_tasks} / {row.total_tasks}
                             </td>
                             <td className="p-3 font-semibold text-emerald-700">
-                              {row.coverage_pct.toFixed(1)}%
+                              {Number(row.coverage_pct ?? 100).toFixed(1)}%
                             </td>
                             <td className="p-3 font-bold text-slate-900">
-                              {row.runtime_seconds.toFixed(4)}s
+                              {Number(row.runtime_seconds ?? 0).toFixed(4)}s
                             </td>
                             <td className="p-3 text-slate-600">
-                              {row.model_construction_seconds > 0
-                                ? `${row.model_construction_seconds.toFixed(2)}s`
+                              {Number(row.model_construction_seconds ?? 0) > 0
+                                ? `${Number(row.model_construction_seconds).toFixed(2)}s`
                                 : '0.00s'}
                             </td>
                             <td className="p-3 text-slate-600">
-                              {row.solver_execution_seconds > 0
-                                ? `${row.solver_execution_seconds.toFixed(2)}s`
-                                : `${row.runtime_seconds.toFixed(4)}s`}
+                              {Number(row.solver_execution_seconds ?? 0) > 0
+                                ? `${Number(row.solver_execution_seconds).toFixed(2)}s`
+                                : `${Number(row.runtime_seconds ?? 0).toFixed(4)}s`}
                             </td>
                             <td className="p-3 text-indigo-700 font-semibold">
-                              {row.peak_memory_mb.toFixed(2)} MB
+                              {Number(row.peak_memory_mb ?? 0).toFixed(2)} MB
                             </td>
                             <td className="p-3 font-sans">
                               {row.is_valid ? (
@@ -1494,7 +1508,9 @@ export default function TaskAllocationPage() {
                       <p className="text-xs text-emerald-700 font-semibold mt-1 flex items-center gap-1">
                         <span>⭐ Best-in-Class:</span>
                         <span>
-                          {greedy ? `${greedy.active_workers_count - milp.active_workers_count} fewer shifts than Greedy (-${(((greedy.active_workers_count - milp.active_workers_count) / greedy.active_workers_count) * 100).toFixed(1)}%)` : 'Proven Minimal Shifts'}
+                          {greedy && milp && greedy.active_workers_count != null && milp.active_workers_count != null
+                            ? `${greedy.active_workers_count - milp.active_workers_count} fewer shifts than Greedy (-${(((greedy.active_workers_count - milp.active_workers_count) / Math.max(1, greedy.active_workers_count)) * 100).toFixed(1)}%)`
+                            : 'Proven Minimal Shifts'}
                         </span>
                       </p>
                     </div>
@@ -1535,10 +1551,10 @@ export default function TaskAllocationPage() {
                       <p className="text-xs text-purple-700 font-semibold mt-1 flex items-center gap-1">
                         <span>⚡ Rapid Search:</span>
                         <span>
-                          {milp.runtime_seconds > 0 && alns.runtime_seconds > 0
-                            ? `${(milp.runtime_seconds / Math.max(0.0001, alns.runtime_seconds)).toFixed(1)}x faster than MILP`
+                          {milp?.runtime_seconds != null && alns?.runtime_seconds != null && milp.runtime_seconds > 0 && alns.runtime_seconds > 0
+                            ? `${(Number(milp.runtime_seconds) / Math.max(0.0001, Number(alns.runtime_seconds))).toFixed(1)}x faster than MILP`
                             : 'Near-Optimal Speed'}
-                          {alns.active_workers_count === milp.active_workers_count ? ' (Matches Optimal!)' : ''}
+                          {alns?.active_workers_count != null && milp?.active_workers_count != null && alns.active_workers_count === milp.active_workers_count ? ' (Matches Optimal!)' : ''}
                         </span>
                       </p>
                     </div>
@@ -1754,10 +1770,14 @@ export default function TaskAllocationPage() {
                         <tr className="hover:bg-slate-50/80">
                           <td className="p-2.5 font-semibold text-slate-700">Headcount Shift Reduction vs. Greedy</td>
                           <td className="p-2.5 bg-indigo-50/20 text-emerald-700 font-bold">
-                            -{greedy.active_workers_count - milp.active_workers_count} shifts (-{(((greedy.active_workers_count - milp.active_workers_count) / greedy.active_workers_count) * 100).toFixed(1)}%)
+                            {greedy && milp && greedy.active_workers_count != null && milp.active_workers_count != null
+                              ? `-${greedy.active_workers_count - milp.active_workers_count} shifts (-${(((greedy.active_workers_count - milp.active_workers_count) / Math.max(1, greedy.active_workers_count)) * 100).toFixed(1)}%)`
+                              : '—'}
                           </td>
                           <td className="p-2.5 bg-purple-50/20 text-purple-700 font-bold">
-                            -{greedy.active_workers_count - alns.active_workers_count} shifts (-{(((greedy.active_workers_count - alns.active_workers_count) / greedy.active_workers_count) * 100).toFixed(1)}%)
+                            {greedy && alns && greedy.active_workers_count != null && alns.active_workers_count != null
+                              ? `-${greedy.active_workers_count - alns.active_workers_count} shifts (-${(((greedy.active_workers_count - alns.active_workers_count) / Math.max(1, greedy.active_workers_count)) * 100).toFixed(1)}%)`
+                              : '—'}
                           </td>
                           <td className="p-2.5 bg-amber-50/20 text-slate-400 font-medium">0 (Baseline Reference)</td>
                         </tr>

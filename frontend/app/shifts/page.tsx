@@ -126,7 +126,7 @@ export default function ShiftsPage() {
     {
       key: 'duration_hours',
       header: 'Duration',
-      render: (s: Shift) => <span className="font-mono tabular-nums">{s.duration_hours.toFixed(1)}h</span>,
+      render: (s: Shift) => <span className="font-mono tabular-nums">{Number(s?.duration_hours ?? 8.0).toFixed(1)}h</span>,
       className: 'text-right',
     },
   ];

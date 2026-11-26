@@ -134,19 +134,19 @@ export default function ScheduleRunDetailsPage() {
             <span>•</span>
             <span>
               Solver Time:{' '}
-              <strong className="text-slate-900 font-mono font-semibold">{run.runtime_seconds.toFixed(3)}s</strong>
+              <strong className="text-slate-900 font-mono font-semibold">{Number(run?.runtime_seconds ?? 0).toFixed(3)}s</strong>
             </span>
             <span>•</span>
             <span>
               Executed:{' '}
-              <strong className="text-slate-900 font-medium">{new Date(run.created_at).toLocaleString()}</strong>
+              <strong className="text-slate-900 font-medium">{run?.created_at ? new Date(run.created_at).toLocaleString() : '—'}</strong>
             </span>
-            {run.objective_value !== null && (
+            {run?.objective_value !== null && run?.objective_value !== undefined && (
               <>
                 <span>•</span>
                 <span>
                   Objective:{' '}
-                  <strong className="text-purple-700 font-mono font-bold">{run.objective_value.toFixed(2)}</strong>
+                  <strong className="text-purple-700 font-mono font-bold">{Number(run.objective_value).toFixed(2)}</strong>
                 </span>
               </>
             )}
@@ -193,7 +193,7 @@ export default function ScheduleRunDetailsPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900">Coverage & Headcount Rate</h2>
             <span className="font-mono font-bold text-lg text-purple-700">
-              {(run.metrics.coverage_rate * 100).toFixed(1)}%
+              {(Number(run?.metrics?.coverage_rate ?? 0) * 100).toFixed(1)}%
             </span>
           </div>
 
@@ -219,9 +219,9 @@ export default function ScheduleRunDetailsPage() {
         <div className="bg-surface border border-border/80 rounded-3xl p-6 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900">Employee Workload Distribution</h2>
-            {run.metrics.workload_spread !== null && (
+            {run?.metrics?.workload_spread !== null && run?.metrics?.workload_spread !== undefined && (
               <span className="text-xs text-slate-500 font-mono">
-                Spread: {run.metrics.workload_spread.toFixed(1)}h
+                Spread: {Number(run.metrics.workload_spread).toFixed(1)}h
               </span>
             )}
           </div>
