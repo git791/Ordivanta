@@ -27,6 +27,25 @@ export interface WorkerProfile {
   assigned_shifts: AssignedShift[];
 }
 
+export const BASELINE_SHIFTS: Record<string, AssignedShift[]> = {
+  emp_david: [
+    { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Afternoon', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 24.0 },
+    { shift_name: 'Afternoon', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 01 (Machining)', time: '15:00–23:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Morning', day: 'Thursday, Nov 06', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
+  ],
+  emp_alice: [
+    { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Morning', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Morning', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 04 (Final QC)', time: '07:00–15:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Morning', day: 'Friday, Nov 07', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 24.0 },
+  ],
+  emp_004: [
+    { shift_name: 'Afternoon', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 16.0 },
+    { shift_name: 'Afternoon', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 16.0 },
+  ],
+};
+
 export const DEFAULT_WORKERS_DATA: Record<string, WorkerProfile> = {
   emp_david: {
     id: 'emp_david',
@@ -38,12 +57,7 @@ export const DEFAULT_WORKERS_DATA: Record<string, WorkerProfile> = {
     overtime_opt_in: true,
     max_overtime_hours: 8.0,
     is_absent: false,
-    assigned_shifts: [
-      { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Afternoon', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 24.0 },
-      { shift_name: 'Afternoon', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 01 (Machining)', time: '15:00–23:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Thursday, Nov 06', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-    ],
+    assigned_shifts: BASELINE_SHIFTS.emp_david,
   },
   emp_alice: {
     id: 'emp_alice',
@@ -55,12 +69,7 @@ export const DEFAULT_WORKERS_DATA: Record<string, WorkerProfile> = {
     overtime_opt_in: false,
     max_overtime_hours: 0.0,
     is_absent: false,
-    assigned_shifts: [
-      { shift_name: 'Morning', day: 'Monday, Nov 03', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 04 (Final QC)', time: '07:00–15:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Morning', day: 'Friday, Nov 07', hours: 8.0, unit_name: 'Cell 02 (CNC Stamping)', time: '07:00–15:00', rest_interval_hours: 24.0 },
-    ],
+    assigned_shifts: BASELINE_SHIFTS.emp_alice,
   },
   emp_004: {
     id: 'emp_004',
@@ -121,17 +130,8 @@ export function setWorkerAbsence(
     ...worker,
     is_absent: isAbsent,
     absence_reason: isAbsent ? reason : undefined,
+    assigned_shifts: isAbsent ? [] : BASELINE_SHIFTS[workerId] || [],
   };
-
-  // If worker returned to active duty and was Marcus Vance, give back his original shifts
-  if (!isAbsent && workerId === 'emp_004') {
-    updated.assigned_shifts = [
-      { shift_name: 'Afternoon', day: 'Tuesday, Nov 04', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 16.0 },
-      { shift_name: 'Afternoon', day: 'Wednesday, Nov 05', hours: 8.0, unit_name: 'Cell 03 (Robotic Welding)', time: '15:00–23:00', rest_interval_hours: 16.0 },
-    ];
-  } else if (isAbsent && workerId === 'emp_004') {
-    updated.assigned_shifts = [];
-  }
 
   const newState = {
     ...current,

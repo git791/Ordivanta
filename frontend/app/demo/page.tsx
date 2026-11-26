@@ -1,10 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from '@/components/ui/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import KpiCard from '@/components/ui/KpiCard';
 import { addNotification } from '@/lib/notifications';
-import { setWorkerAbsence, dispatchReplacementToWorker } from '@/lib/workerSync';
+import { setWorkerAbsence, dispatchReplacementToWorker, getWorkersSyncState } from '@/lib/workerSync';
 import {
   SparklesIcon,
   ArrowPathIcon,
@@ -68,6 +68,7 @@ const BENCHMARKS: BenchmarkInfo[] = [
 export default function RealismDemoPage() {
   const [selectedBenchmark, setSelectedBenchmark] = useState(BENCHMARKS[1].id);
   const [disruptionMode, setDisruptionMode] = useState<'single_worker' | 'facility_rate'>('single_worker');
+  const [selectedAbsentWorkerId, setSelectedAbsentWorkerId] = useState<'emp_david' | 'emp_004' | 'emp_alice'>('emp_david');
   const [absenteeism, setAbsenteeism] = useState<number>(10);
   const [demandSurge, setDemandSurge] = useState<number>(20);
   const [voluntaryOt, setVoluntaryOt] = useState<boolean>(true);
@@ -80,6 +81,18 @@ export default function RealismDemoPage() {
   const [runCount, setRunCount] = useState<number>(0);
   const [lastRunTime, setLastRunTime] = useState<string | null>(null);
   const [appliedToLive, setAppliedToLive] = useState<boolean>(false);
+
+  // Sync with current portal state on mount
+  useEffect(() => {
+    const sync = getWorkersSyncState();
+    if (sync.emp_david?.is_absent) {
+      setSelectedAbsentWorkerId('emp_david');
+    } else if (sync.emp_004?.is_absent) {
+      setSelectedAbsentWorkerId('emp_004');
+    } else if (sync.emp_alice?.is_absent) {
+      setSelectedAbsentWorkerId('emp_alice');
+    }
+  }, []);
 
   // Dynamic calculated results state
   const [metricsResult, setMetricsResult] = useState<{
@@ -117,41 +130,92 @@ export default function RealismDemoPage() {
       const bList: string[] = [];
 
       if (disruptionMode === 'single_worker') {
-        // Specific Marcus Vance Disruption on Cell 03
-        if (algorithm === 'recovery_milp') {
-          cov = 100.0;
-          unfilled = 0;
-          otHours = voluntaryOt ? 8.0 : 0.0;
-          churn = 1;
-          churnPct = '94.4%';
-          stat = 'OPTIMAL';
-          bList.push(
-            'Cell 03 (Robotic Welding): Marcus Vance reported absent. Lexicographic Stage 1-3 identified David Kim (14.5h rest gap, ISO 9001 + Welding L4 certified) as optimal replacement.',
-            `Overtime Policy: Consenting OT ${voluntaryOt ? 'enabled (8.0h assigned within 8.0h cap)' : 'disabled (David Kim assigned regular capacity shift rebalance)'}.`,
-            'Schedule Churn: Minimal 1-shift reassignment (94.4% reduction vs. cold rescheduling which reorders 18 shifts).'
-          );
-        } else if (algorithm === 'greedy') {
-          cov = 96.2;
-          unfilled = 1;
-          otHours = 0.0;
-          churn = 5;
-          churnPct = '33.3%';
-          stat = 'INFEASIBLE';
-          bList.push(
-            'Greedy Heuristic Failure: Could not satisfy both Level 4 welding qualification and 11h mandatory rest without lookahead.',
-            'Cell 03 left understaffed or violated minimum rest interval constraint.'
-          );
+        if (selectedAbsentWorkerId === 'emp_david') {
+          // David Kim Absent Scenario (Senior Welder)
+          if (algorithm === 'recovery_milp') {
+            cov = 100.0;
+            unfilled = 0;
+            otHours = voluntaryOt ? 8.0 : 0.0;
+            churn = 1;
+            churnPct = '94.4%';
+            stat = 'OPTIMAL';
+            bList.push(
+              'Cell 03 (Robotic Welding): David Kim reported absent. Lexicographic Stage 1-3 identified Marcus Vance (Welding Level 4 + ISO 9001 certified) as optimal replacement.',
+              'Cell 01 (Machining): Workstation load rebalanced across available certified technicians without 11h rest violation.',
+              `Overtime Consent: ${voluntaryOt ? 'Consenting OT utilized (8.0h within cap).' : 'Overtime disallowed; capacity rebalanced over regular hours.'}`,
+              'Schedule Churn: Minimal 1-shift reassignment (94.4% stability improvement vs. cold reschedule).'
+            );
+          } else if (algorithm === 'greedy') {
+            cov = 93.8;
+            unfilled = 1;
+            otHours = 0.0;
+            churn = 4;
+            churnPct = '42.0%';
+            stat = 'INFEASIBLE';
+            bList.push(
+              'Greedy Heuristic Failure: Failed to satisfy both strict Level 4 welding qualification and 11h rest gap.',
+              'Cell 03 suffered unstaffed gap causing partial assembly line stoppage.'
+            );
+          } else {
+            cov = 0.0;
+            unfilled = 2;
+            otHours = 0.0;
+            churn = 16;
+            churnPct = '0.0%';
+            stat = 'INFEASIBLE';
+            bList.push(
+              'Standard Baseline MILP proven INFEASIBLE: Exact model rejects roster due to hard coverage constraint without explicit slack variables.',
+              'Requires Lexicographic Recovery formulation with bounded shortage variables.'
+            );
+          }
+        } else if (selectedAbsentWorkerId === 'emp_004') {
+          // Marcus Vance Absent Scenario
+          if (algorithm === 'recovery_milp') {
+            cov = 100.0;
+            unfilled = 0;
+            otHours = voluntaryOt ? 8.0 : 0.0;
+            churn = 1;
+            churnPct = '94.4%';
+            stat = 'OPTIMAL';
+            bList.push(
+              'Cell 03 (Robotic Welding): Marcus Vance reported absent. Lexicographic Stage 1-3 identified David Kim (14.5h rest gap, ISO 9001 + Welding L4 certified) as optimal replacement.',
+              `Overtime Policy: Consenting OT ${voluntaryOt ? 'enabled (8.0h assigned within 8.0h cap)' : 'disabled (David Kim assigned regular capacity shift rebalance)'}.`,
+              'Schedule Churn: Minimal 1-shift reassignment (94.4% reduction vs. cold rescheduling which reorders 18 shifts).'
+            );
+          } else if (algorithm === 'greedy') {
+            cov = 96.2;
+            unfilled = 1;
+            otHours = 0.0;
+            churn = 5;
+            churnPct = '33.3%';
+            stat = 'INFEASIBLE';
+            bList.push(
+              'Greedy Heuristic Failure: Could not satisfy both Level 4 welding qualification and 11h mandatory rest without lookahead.',
+              'Cell 03 left understaffed or violated minimum rest interval constraint.'
+            );
+          } else {
+            cov = 0.0;
+            unfilled = 1;
+            otHours = 0.0;
+            churn = 18;
+            churnPct = '0.0%';
+            stat = 'INFEASIBLE';
+            bList.push(
+              'Standard Baseline MILP proven INFEASIBLE: Exact model rejects schedule due to hard coverage constraint without explicit slack relaxation.',
+              'Requires Lexicographic Recovery formulation with bounded shortage variables.'
+            );
+          }
         } else {
-          // standard_milp
-          cov = 0.0;
-          unfilled = 1;
-          otHours = 0.0;
-          churn = 18;
-          churnPct = '0.0%';
-          stat = 'INFEASIBLE';
+          // Alice Martin Absent Scenario
+          cov = algorithm === 'recovery_milp' ? 100.0 : 88.5;
+          unfilled = algorithm === 'recovery_milp' ? 0 : 2;
+          otHours = voluntaryOt ? 8.0 : 0.0;
+          churn = 2;
+          churnPct = '89.5%';
+          stat = algorithm === 'recovery_milp' ? 'OPTIMAL' : 'INFEASIBLE';
           bList.push(
-            'Standard Baseline MILP proven INFEASIBLE: Exact model rejects schedule due to hard coverage constraint without explicit slack relaxation.',
-            'Requires Lexicographic Recovery formulation with bounded shortage variables.'
+            'Cell 02 (CNC Stamping): Alice Martin reported absent. Assembly lines reallocated to qualified Level 3 operators.',
+            'Cell 04 (Final QC): Redundant certified lead assigned with 16h rest gap.'
           );
         }
       } else {
@@ -225,7 +289,9 @@ export default function RealismDemoPage() {
             : `Simulation Solved (Run #${runCount + 1})`,
         message:
           disruptionMode === 'single_worker'
-            ? `Marcus Vance disruption solved: David Kim dispatched to Cell 03 (${cov.toFixed(1)}% coverage, 1 shift churned).`
+            ? selectedAbsentWorkerId === 'emp_david'
+              ? `David Kim disruption solved: Marcus Vance dispatched to Cell 03 (${cov.toFixed(1)}% coverage, 1 shift churned).`
+              : `Marcus Vance disruption solved: David Kim dispatched to Cell 03 (${cov.toFixed(1)}% coverage, 1 shift churned).`
             : `Macro shock evaluated: ${cov.toFixed(1)}% coverage under ${absenteeism}% absence with ${demandSurge}% surge.`,
         type: 'recovery',
         severity: stat === 'OPTIMAL' ? 'success' : 'warning',
@@ -236,29 +302,49 @@ export default function RealismDemoPage() {
   };
 
   const handleApplyToLiveSystem = () => {
-    // 1. Mark Marcus Vance as absent
-    setWorkerAbsence('emp_004', true, 'Medical Leave (Cell 03 Afternoon)');
-
-    // 2. Dispatch David Kim as replacement
-    dispatchReplacementToWorker('emp_david', {
-      shift_name: 'Afternoon (Replacement)',
-      day: 'Tuesday, Nov 04',
-      hours: 8.0,
-      unit_name: 'Cell 03 (Robotic Welding)',
-      time: '15:00–23:00',
-      rest_interval_hours: 14.5,
-    });
+    if (selectedAbsentWorkerId === 'emp_david') {
+      setWorkerAbsence('emp_david', true, 'Medical Leave (Simulated Disruption)');
+      addNotification({
+        title: 'David Kim Absence Synchronized',
+        message:
+          'David Kim marked on medical leave. Cell 03 & Cell 01 shifts vacated and flagged across Supervisor & Worker portals.',
+        type: 'absence',
+        severity: 'danger',
+        actionUrl: '/dashboard',
+        actionLabel: 'Open Dashboard Command Center',
+      });
+    } else if (selectedAbsentWorkerId === 'emp_004') {
+      setWorkerAbsence('emp_004', true, 'Medical Leave (Cell 03 Afternoon)');
+      dispatchReplacementToWorker('emp_david', {
+        shift_name: 'Afternoon (Replacement)',
+        day: 'Tuesday, Nov 04',
+        hours: 8.0,
+        unit_name: 'Cell 03 (Robotic Welding)',
+        time: '15:00–23:00',
+        rest_interval_hours: 14.5,
+      });
+      addNotification({
+        title: 'Disruption Synchronized to Production',
+        message:
+          'Marcus Vance marked absent on Cell 03. David Kim dispatched as certified replacement. Synchronized to Supervisor Dashboard and Worker Portal.',
+        type: 'absence',
+        severity: 'success',
+        actionUrl: '/dashboard',
+        actionLabel: 'Open Dashboard Command Center',
+      });
+    } else {
+      setWorkerAbsence('emp_alice', true, 'Personal Leave (Cell 02)');
+      addNotification({
+        title: 'Alice Martin Absence Synchronized',
+        message: 'Alice Martin marked absent on Cell 02. Stamping assembly line rebalanced.',
+        type: 'absence',
+        severity: 'warning',
+        actionUrl: '/dashboard',
+        actionLabel: 'Open Dashboard',
+      });
+    }
 
     setAppliedToLive(true);
-    addNotification({
-      title: 'Disruption Synchronized to Production',
-      message:
-        'Marcus Vance marked absent on Cell 03. David Kim dispatched as certified replacement. Synchronized to Supervisor Dashboard and Worker Portal.',
-      type: 'absence',
-      severity: 'success',
-      actionUrl: '/dashboard',
-      actionLabel: 'Open Dashboard Command Center',
-    });
   };
 
   const activeBench = BENCHMARKS.find((b) => b.id === selectedBenchmark) || BENCHMARKS[0];
@@ -387,13 +473,23 @@ export default function RealismDemoPage() {
                     <div className="text-right">
                       {disruptionMode === 'single_worker' ? (
                         algorithm === 'recovery_milp' ? (
-                          <div className="flex items-center gap-2">
-                            <span className="line-through text-rose-500 font-medium">Marcus Vance (Absent)</span>
-                            <span className="text-slate-400">→</span>
-                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
-                              ★ David Kim Dispatched (+8.0h OT • 14.5h Rest Gap)
-                            </span>
-                          </div>
+                          selectedAbsentWorkerId === 'emp_david' ? (
+                            <div className="flex items-center gap-2">
+                              <span className="line-through text-rose-500 font-medium">David Kim (Absent)</span>
+                              <span className="text-slate-400">→</span>
+                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                                ★ Marcus Vance Dispatched (Welding L4 Verified)
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="line-through text-rose-500 font-medium">Marcus Vance (Absent)</span>
+                              <span className="text-slate-400">→</span>
+                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                                ★ David Kim Dispatched (+8.0h OT • 14.5h Rest Gap)
+                              </span>
+                            </div>
+                          )
                         ) : (
                           <span className="text-rose-700 font-bold bg-rose-100 px-2.5 py-1 rounded-full">
                             UNSTAFFED GAP (Critical Bottleneck)
@@ -412,7 +508,19 @@ export default function RealismDemoPage() {
                       <strong className="text-slate-800 block">Cell 01 (Machining / Stamping)</strong>
                       <span className="text-slate-500 text-[11px]">Requirement: Machining Level 3</span>
                     </div>
-                    <span className="text-slate-700 font-medium">Fully Staffed (No disruption)</span>
+                    <div className="text-right">
+                      {disruptionMode === 'single_worker' && selectedAbsentWorkerId === 'emp_david' ? (
+                        <div className="flex items-center gap-2">
+                          <span className="line-through text-rose-500 font-medium">David Kim (Absent)</span>
+                          <span className="text-slate-400">→</span>
+                          <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+                            ★ Rebalanced to Secondary Line Specialist
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-700 font-medium">Fully Staffed (No disruption)</span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="p-3 bg-white flex items-center justify-between">
@@ -489,7 +597,13 @@ export default function RealismDemoPage() {
                     <UserMinusIcon className="w-3.5 h-3.5 text-rose-600" />
                     <span>Single Call-Out</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-normal block">Marcus Vance (Cell 03)</span>
+                  <span className="text-[10px] text-slate-500 font-normal block truncate">
+                    {selectedAbsentWorkerId === 'emp_david'
+                      ? 'David Kim'
+                      : selectedAbsentWorkerId === 'emp_004'
+                      ? 'Marcus Vance'
+                      : 'Alice Martin'}
+                  </span>
                 </button>
 
                 <button
@@ -511,15 +625,52 @@ export default function RealismDemoPage() {
             </div>
 
             {disruptionMode === 'single_worker' ? (
-              <div className="p-3 bg-rose-50/70 border border-rose-200/90 rounded-xl text-xs space-y-1.5">
+              <div className="p-3 bg-rose-50/70 border border-rose-200/90 rounded-xl text-xs space-y-2">
                 <div className="flex items-center justify-between font-bold text-rose-900">
                   <span>Targeted Absent Worker:</span>
-                  <span className="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">Medical Leave</span>
+                  <span className="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold">
+                    Medical Leave
+                  </span>
                 </div>
-                <div className="text-slate-800">
-                  <strong>Marcus Vance (Worker 004)</strong>
-                  <div className="text-[11px] text-slate-600">Cell 03 (Robotic Welding) • Afternoon Shift</div>
-                  <div className="text-[11px] text-slate-600">Qualification: Welding Level 4 + ISO 9001</div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                    Select Absent Employee:
+                  </label>
+                  <select
+                    value={selectedAbsentWorkerId}
+                    onChange={(e) => {
+                      setSelectedAbsentWorkerId(e.target.value as any);
+                      setAppliedToLive(false);
+                    }}
+                    className="w-full bg-white border border-rose-200 rounded-lg p-2 text-xs font-semibold text-slate-900 outline-none cursor-pointer"
+                  >
+                    <option value="emp_david">David Kim — Senior Welder (Cell 03 & Cell 01)</option>
+                    <option value="emp_004">Marcus Vance — Robotic Welder (Cell 03)</option>
+                    <option value="emp_alice">Alice Martin — Assembly Lead (Cell 02 & Cell 04)</option>
+                  </select>
+                </div>
+                <div className="pt-1 text-[11px] text-slate-600 border-t border-rose-200/60">
+                  {selectedAbsentWorkerId === 'emp_david' && (
+                    <div>
+                      <strong className="text-slate-800 block">David Kim (#W412)</strong>
+                      <div>Primary Cell: Robotic Welding (Cell 03) & Machining (Cell 01)</div>
+                      <div>Certs: ISO 9001:2015, AWS D1.1, Safety L2</div>
+                    </div>
+                  )}
+                  {selectedAbsentWorkerId === 'emp_004' && (
+                    <div>
+                      <strong className="text-slate-800 block">Marcus Vance (Worker 004)</strong>
+                      <div>Primary Cell: Robotic Welding (Cell 03) Afternoon</div>
+                      <div>Certs: ISO 9001:2015, Welding Level 4</div>
+                    </div>
+                  )}
+                  {selectedAbsentWorkerId === 'emp_alice' && (
+                    <div>
+                      <strong className="text-slate-800 block">Alice Martin (#A201)</strong>
+                      <div>Primary Cell: CNC Stamping (Cell 02) & Final QC (Cell 04)</div>
+                      <div>Certs: Lean Six Sigma Yellow Belt</div>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

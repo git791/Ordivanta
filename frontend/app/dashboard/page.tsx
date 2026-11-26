@@ -172,6 +172,7 @@ export default function DashboardPage() {
   const cell03FullyCovered = replacementAssigned || !isMarcusAbsent;
 
   const davidSync = workerSyncState?.emp_david;
+  const isDavidAbsent = davidSync?.is_absent ?? false;
   const davidOtConsent = davidSync !== undefined ? davidSync.overtime_opt_in : true;
   const davidMaxOt = davidSync?.max_overtime_hours ?? 8.0;
   const davidCerts = davidSync?.certifications ?? ['ISO 9001:2015', 'AWS D1.1 Structural Welding', 'Safety Level 2'];
@@ -551,6 +552,37 @@ export default function DashboardPage() {
             </p>
 
             <div className="space-y-3">
+              {/* Alert 0: David Kim Portal Absence Alert */}
+              {isDavidAbsent && (
+                <div className="p-3.5 bg-rose-50/90 border border-rose-300 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs font-bold text-rose-950 mb-1">
+                    <span className="flex items-center gap-1.5">
+                      <ExclamationTriangleIcon className="w-4 h-4 text-rose-600" />
+                      Senior Specialist Absence: David Kim
+                    </span>
+                    <span className="text-[10px] bg-rose-100 px-2 py-0.5 rounded-full text-rose-800 font-bold border border-rose-200">
+                      Medical Leave
+                    </span>
+                  </div>
+                  <p className="text-xs text-rose-800">
+                    David Kim marked absent in Worker Portal. Cell 03 & Cell 01 shifts vacated. Cannot be assigned as replacement.
+                  </p>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setWorkerAbsence('emp_david', false);
+                        setDispatchToast('David Kim restored to Active Duty. Medical leave cleared.');
+                        setTimeout(() => setDispatchToast(null), 4000);
+                      }}
+                      className="text-[11px] text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 px-3 py-1 rounded-full font-semibold transition-colors cursor-pointer"
+                    >
+                      Clear Leave (Restore David Kim to Duty)
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Alert 1: Specialist Replacement Workflow */}
               {!isMarcusAbsent ? (
                 <div className="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl animate-in fade-in duration-300 shadow-2xs">
@@ -758,8 +790,12 @@ export default function DashboardPage() {
                 Ranked Eligible Candidates (2 Found):
               </div>
 
-              {/* Candidate 1: David Kim (Recommended) */}
-              <div className="p-4 bg-purple-50/50 border border-purple-200/90 rounded-2xl space-y-2.5">
+              {/* Candidate 1: David Kim */}
+              <div className={`p-4 rounded-2xl space-y-2.5 border ${
+                isDavidAbsent
+                  ? 'bg-rose-50/40 border-rose-200/80 opacity-75'
+                  : 'bg-purple-50/50 border-purple-200/90'
+              }`}>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
@@ -770,9 +806,15 @@ export default function DashboardPage() {
                       Wage Rate: $32.50/h &bull; Est. Shift Cost: $260.00
                     </div>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    96% Match • Recommended
-                  </span>
+                  {isDavidAbsent ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                      ✗ Unavailable • On Medical Leave
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      96% Match • Recommended
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
@@ -780,23 +822,31 @@ export default function DashboardPage() {
                     <ShieldCheckIcon className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Welding L4 + ISO 9001 ✓</span>
                   </div>
-                  <div className="p-2 bg-white rounded-xl border border-purple-100 flex items-center gap-1.5 text-indigo-700 font-semibold">
-                    <ClockIcon className="w-4 h-4 text-indigo-600 shrink-0" />
-                    <span>14.5h Rest Interval ✓</span>
+                  <div className={`p-2 bg-white rounded-xl border flex items-center gap-1.5 font-semibold ${
+                    isDavidAbsent ? 'text-rose-700 border-rose-200' : 'text-indigo-700 border-purple-100'
+                  }`}>
+                    <ClockIcon className="w-4 h-4 shrink-0" />
+                    <span>{isDavidAbsent ? 'Shift Availability Suspended ✗' : '14.5h Rest Interval ✓'}</span>
                   </div>
                   <div
                     className={`p-2 bg-white rounded-xl border flex items-center gap-1.5 font-semibold ${
-                      davidOtConsent
+                      davidOtConsent && !isDavidAbsent
                         ? 'border-purple-100 text-purple-700'
                         : 'border-rose-200 text-rose-700 bg-rose-50/50'
                     }`}
                   >
-                    {davidOtConsent ? (
+                    {davidOtConsent && !isDavidAbsent ? (
                       <SparklesIcon className="w-4 h-4 text-purple-600 shrink-0" />
                     ) : (
                       <ExclamationTriangleIcon className="w-4 h-4 text-rose-600 shrink-0" />
                     )}
-                    <span>{davidOtConsent ? `OT Consent (${davidMaxOt}h max) ✓` : 'OT Consent Revoked in Portal'}</span>
+                    <span>
+                      {isDavidAbsent
+                        ? 'Leave Status Active'
+                        : davidOtConsent
+                        ? `OT Consent (${davidMaxOt}h max) ✓`
+                        : 'OT Consent Revoked in Portal'}
+                    </span>
                   </div>
                 </div>
 
@@ -806,7 +856,9 @@ export default function DashboardPage() {
                   </div>
                   <button
                     type="button"
+                    disabled={isDavidAbsent}
                     onClick={() => {
+                      if (isDavidAbsent) return;
                       dispatchReplacementToWorker('emp_david', {
                         shift_name: 'Afternoon (Replacement)',
                         day: 'Tuesday, Nov 04',
@@ -825,15 +877,19 @@ export default function DashboardPage() {
                       );
                       setTimeout(() => setDispatchToast(null), 5000);
                     }}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 cursor-pointer ${
-                      davidOtConsent
-                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                        : 'bg-amber-600 hover:bg-amber-700 text-white'
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all shadow-2xs flex items-center gap-1.5 ${
+                      isDavidAbsent
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
+                        : davidOtConsent
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                        : 'bg-amber-600 hover:bg-amber-700 text-white cursor-pointer'
                     }`}
                   >
                     <CheckCircleIcon className="w-4 h-4" />
                     <span>
-                      {replacementAssigned
+                      {isDavidAbsent
+                        ? 'Unavailable (On Medical Leave)'
+                        : replacementAssigned
                         ? 'Reconfirm Dispatch'
                         : davidOtConsent
                         ? 'Dispatch David Kim to Cell 03'

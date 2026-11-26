@@ -9,6 +9,7 @@ import {
   getWorkersSyncState,
   saveWorkersSyncState,
   subscribeWorkersSync,
+  setWorkerAbsence,
   DEFAULT_WORKERS_DATA,
   WorkerProfile,
 } from '@/lib/workerSync';
@@ -148,10 +149,10 @@ export default function WorkerPortalPage() {
               <button
                 type="button"
                 onClick={() => {
-                  updateCurrentWorker(
-                    (w) => ({ ...w, is_absent: false, absence_reason: undefined }),
-                    `${currentWorker.name} marked Active for Duty. Supervisor notified.`
-                  );
+                  const updated = setWorkerAbsence(selectedWorkerId, false);
+                  setWorkersState(updated);
+                  setSyncToast(`${currentWorker.name} marked Active for Duty. Shifts restored.`);
+                  setTimeout(() => setSyncToast(null), 4000);
                   addNotification({
                     title: `${currentWorker.name} Returned to Active`,
                     message: `${currentWorker.name} cleared medical leave and is available for roster assignments.`,
@@ -161,7 +162,7 @@ export default function WorkerPortalPage() {
                     actionLabel: 'View Worker Schedule',
                   });
                 }}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-full shadow-2xs transition-all"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-full shadow-2xs transition-all cursor-pointer"
               >
                 Clear Medical Leave & Return to Active
               </button>
@@ -169,26 +170,53 @@ export default function WorkerPortalPage() {
               <button
                 type="button"
                 onClick={() => {
-                  updateCurrentWorker(
-                    (w) => ({ ...w, is_absent: true, absence_reason: 'Reported Absence / Medical Leave' }),
-                    `${currentWorker.name} reported absent. Supervisor shortage alert triggered.`
-                  );
+                  const updated = setWorkerAbsence(selectedWorkerId, true, 'Reported Sick Leave');
+                  setWorkersState(updated);
+                  setSyncToast(`${currentWorker.name} reported absent. Shifts vacated & supervisor alerted.`);
+                  setTimeout(() => setSyncToast(null), 4000);
                   addNotification({
                     title: `Absence Call-Out: ${currentWorker.name}`,
-                    message: `${currentWorker.name} (${currentWorker.role}) reported medical leave. Immediate replacement or Recovery MILP required.`,
+                    message: `${currentWorker.name} (${currentWorker.role}) reported medical leave. Shifts vacated. Replacement required.`,
                     type: 'absence',
                     severity: 'danger',
                     actionUrl: '/dashboard',
                     actionLabel: 'Assign Replacement',
                   });
                 }}
-                className="px-4 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold rounded-full shadow-2xs transition-all"
+                className="px-4 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold rounded-full shadow-2xs transition-all cursor-pointer"
               >
                 Report Absence / Sick Leave
               </button>
             )}
           </div>
         </div>
+
+        {/* Absence Warning Banner if worker is on medical leave */}
+        {currentWorker.is_absent && (
+          <div className="mt-4 p-4 bg-rose-50/90 border border-rose-300 rounded-2xl flex items-center justify-between gap-3 text-xs text-rose-900">
+            <div className="flex items-center gap-2.5">
+              <ExclamationCircleIcon className="w-5 h-5 text-rose-600 shrink-0" />
+              <div>
+                <strong className="block font-bold">Medical Leave Active ({currentWorker.absence_reason || 'Medical Leave'})</strong>
+                <span className="text-rose-700">
+                  Your regular shifts have been vacated and flagged to the Supervisor Command Center. You will not be scheduled until leave is cleared.
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const updated = setWorkerAbsence(selectedWorkerId, false);
+                setWorkersState(updated);
+                setSyncToast(`${currentWorker.name} marked Active for Duty. Shifts restored.`);
+                setTimeout(() => setSyncToast(null), 4000);
+              }}
+              className="px-3 py-1.5 bg-white border border-rose-300 hover:bg-rose-100 text-rose-900 rounded-full font-semibold transition-colors cursor-pointer shrink-0"
+            >
+              End Leave Now
+            </button>
+          </div>
+        )}
 
         {/* Quick Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
