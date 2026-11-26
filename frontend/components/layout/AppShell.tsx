@@ -21,6 +21,8 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
 
+import NotificationDropdown from './NotificationDropdown';
+
 const PRIMARY_NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: Squares2X2Icon },
   { href: '/schedule', label: 'Shift Planner (M1)', icon: CalendarDaysIcon, highlight: true },
@@ -184,15 +186,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
 
-            {/* Notification Bell */}
-            <Link
-              href="/dashboard"
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 transition-colors relative shrink-0"
-              title="Supervisory Alerts"
-            >
-              <BellIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-            </Link>
+            {/* Interactive Shop-Floor Notification Bell Dropdown */}
+            <NotificationDropdown />
 
             {/* Persona Profile Avatar Badge */}
             {pathname === '/worker' ? (

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import PageHeader from '@/components/ui/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import KpiCard from '@/components/ui/KpiCard';
+import { addNotification } from '@/lib/notifications';
 
 interface BenchmarkInfo {
   id: string;
@@ -69,6 +70,17 @@ export default function RealismDemoPage() {
 
   const runSimulation = () => {
     setExecuted(true);
+    addNotification({
+      title: algorithm === 'recovery_milp' ? 'Recovery MILP Completed' : 'Schedule Simulation Executed',
+      message:
+        algorithm === 'recovery_milp'
+          ? `Lexicographic Recovery MILP restored 82.4% coverage under ${absenteeism}% absenteeism, saving 80.1% schedule churn.`
+          : `Full rescheduling evaluated under ${absenteeism}% absenteeism with ${demandSurge}% surge.`,
+      type: 'recovery',
+      severity: algorithm === 'recovery_milp' ? 'success' : 'warning',
+      actionUrl: '/demo',
+      actionLabel: 'Inspect Recovery Results',
+    });
   };
 
   const activeBench = BENCHMARKS.find((b) => b.id === selectedBenchmark) || BENCHMARKS[0];

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageHeader from '@/components/ui/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { addNotification } from '@/lib/notifications';
 import {
   ClockIcon,
   ShieldCheckIcon,
@@ -208,12 +209,20 @@ export default function WorkerPortalPage() {
             {currentWorker.is_absent ? (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   updateCurrentWorker(
                     (w) => ({ ...w, is_absent: false, absence_reason: undefined }),
                     `${currentWorker.name} marked Active for Duty. Supervisor notified.`
-                  )
-                }
+                  );
+                  addNotification({
+                    title: `${currentWorker.name} Returned to Active`,
+                    message: `${currentWorker.name} cleared medical leave and is available for roster assignments.`,
+                    type: 'system',
+                    severity: 'success',
+                    actionUrl: '/worker',
+                    actionLabel: 'View Worker Schedule',
+                  });
+                }}
                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-full shadow-2xs transition-all"
               >
                 Clear Medical Leave & Return to Active
@@ -221,12 +230,20 @@ export default function WorkerPortalPage() {
             ) : (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   updateCurrentWorker(
                     (w) => ({ ...w, is_absent: true, absence_reason: 'Reported Absence / Medical Leave' }),
                     `${currentWorker.name} reported absent. Supervisor shortage alert triggered.`
-                  )
-                }
+                  );
+                  addNotification({
+                    title: `Absence Call-Out: ${currentWorker.name}`,
+                    message: `${currentWorker.name} (${currentWorker.role}) reported medical leave. Immediate replacement or Recovery MILP required.`,
+                    type: 'absence',
+                    severity: 'danger',
+                    actionUrl: '/dashboard',
+                    actionLabel: 'Assign Replacement',
+                  });
+                }}
                 className="px-4 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs font-semibold rounded-full shadow-2xs transition-all"
               >
                 Report Absence / Sick Leave

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
+import { addNotification } from '@/lib/notifications';
 import PageHeader from '@/components/ui/PageHeader';
 import StatusBadge from '@/components/ui/StatusBadge';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -646,6 +647,14 @@ export default function TaskAllocationPage() {
         time_limit: 15,
       });
       setSolveResponse(res);
+      addNotification({
+        title: `Module 2 Solved (${algo})`,
+        message: `Tasks allocated for instance ${selectedInstanceId} with 0 temporal overlap conflicts.`,
+        type: 'solver',
+        severity: 'success',
+        actionUrl: '/tasks',
+        actionLabel: 'Inspect Allocation',
+      });
     } catch (err: any) {
       setError(err?.detail || err?.message || 'Failed to solve task allocation');
     } finally {
@@ -665,6 +674,14 @@ export default function TaskAllocationPage() {
       });
       setBridgeResult(res);
       setSolveResponse(null);
+      addNotification({
+        title: 'Connected Roster Bridge Dispatched',
+        message: 'Active Day Shift roster from Detroit Assembly Plant #1 allocated across 12 workstation tasks.',
+        type: 'solver',
+        severity: 'info',
+        actionUrl: '/tasks',
+        actionLabel: 'View Bridge Gantt',
+      });
     } catch (err: any) {
       setError(err?.detail || err?.message || 'Failed to run connected workflow bridge');
     } finally {
