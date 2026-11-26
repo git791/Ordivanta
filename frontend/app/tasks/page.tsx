@@ -162,7 +162,7 @@ const FALLBACK_TASK_BENCHMARKS: Record<string, BenchmarkInstance[]> = {
   smptsp: [
     {
       instance_id: 'data_1_50_258_20_90_100_200_300',
-      name: 'SMPTSP Full Instance 1 (50w / 258t)',
+      name: 'SMPTSP Instance 1 (50w / 258t)',
       filename: 'data_1_50_258_20_90_100_200_300.txt',
       workers: 50,
       tasks: 258,
@@ -171,7 +171,7 @@ const FALLBACK_TASK_BENCHMARKS: Record<string, BenchmarkInstance[]> = {
     },
     {
       instance_id: 'data_2_44_510_20_90_0_100_200',
-      name: 'SMPTSP Full Instance 2 (44w / 510t)',
+      name: 'SMPTSP Instance 2 (44w / 510t)',
       filename: 'data_2_44_510_20_90_0_100_200.txt',
       workers: 44,
       tasks: 510,
@@ -180,12 +180,75 @@ const FALLBACK_TASK_BENCHMARKS: Record<string, BenchmarkInstance[]> = {
     },
     {
       instance_id: 'data_3_102_525_30_90_100_200_300',
-      name: 'SMPTSP Full Instance 3 (102w / 525t)',
+      name: 'SMPTSP Instance 3 (102w / 525t)',
       filename: 'data_3_102_525_30_90_100_200_300.txt',
       workers: 102,
       tasks: 525,
       compatibility_status: 'FULL_COMPATIBLE',
       notes: 'Large academic SMPTSP instance with 102 workers and 525 tasks',
+    },
+    {
+      instance_id: 'data_4_113_647_20_90_100_200_300',
+      name: 'SMPTSP Instance 4 (113w / 647t)',
+      filename: 'data_4_113_647_20_90_100_200_300.txt',
+      workers: 113,
+      tasks: 647,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 113 workers and 647 tasks',
+    },
+    {
+      instance_id: 'data_5_77_777_30_90_0_100_200',
+      name: 'SMPTSP Instance 5 (77w / 777t)',
+      filename: 'data_5_77_777_30_90_0_100_200.txt',
+      workers: 77,
+      tasks: 777,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 77 workers and 777 tasks',
+    },
+    {
+      instance_id: 'data_6_135_777_20_90_100_200_300',
+      name: 'SMPTSP Instance 6 (135w / 777t)',
+      filename: 'data_6_135_777_20_90_100_200_300.txt',
+      workers: 135,
+      tasks: 777,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 135 workers and 777 tasks',
+    },
+    {
+      instance_id: 'data_7_70_781_20_90_0_100_200',
+      name: 'SMPTSP Instance 7 (70w / 781t)',
+      filename: 'data_7_70_781_20_90_0_100_200.txt',
+      workers: 70,
+      tasks: 781,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 70 workers and 781 tasks',
+    },
+    {
+      instance_id: 'data_8_88_1022_20_90_0_100_200',
+      name: 'SMPTSP Instance 8 (88w / 1022t)',
+      filename: 'data_8_88_1022_20_90_0_100_200.txt',
+      workers: 88,
+      tasks: 1022,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 88 workers and 1022 tasks',
+    },
+    {
+      instance_id: 'data_9_125_1308_20_90_0_100_200',
+      name: 'SMPTSP Instance 9 (125w / 1308t)',
+      filename: 'data_9_125_1308_20_90_0_100_200.txt',
+      workers: 125,
+      tasks: 1308,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Academic SMPTSP benchmark with 125 workers and 1308 tasks',
+    },
+    {
+      instance_id: 'data_10_153_1577_20_90_0_100_200',
+      name: 'SMPTSP Instance 10 (153w / 1577t)',
+      filename: 'data_10_153_1577_20_90_0_100_200.txt',
+      workers: 153,
+      tasks: 1577,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Largest academic SMPTSP benchmark instance with 153 workers and 1577 tasks',
     },
   ],
   ptsp: [
@@ -216,13 +279,76 @@ const FALLBACK_TASK_BENCHMARKS: Record<string, BenchmarkInstance[]> = {
       compatibility_status: 'FULL_COMPATIBLE',
       notes: 'OR-Library PTSP instance with 25 workers and 40 tasks',
     },
+    {
+      instance_id: 'data_4_26_40_66',
+      name: 'PTSP Instance 4 (26w / 40t)',
+      filename: 'data_4_26_40_66.txt',
+      workers: 26,
+      tasks: 40,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP instance with 26 workers and 40 tasks',
+    },
+    {
+      instance_id: 'data_10_51_111_66',
+      name: 'PTSP Instance 10 (51w / 111t)',
+      filename: 'data_10_51_111_66.txt',
+      workers: 51,
+      tasks: 111,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP medium instance with 51 workers and 111 tasks',
+    },
+    {
+      instance_id: 'data_15_68_192_66',
+      name: 'PTSP Instance 15 (68w / 192t)',
+      filename: 'data_15_68_192_66.txt',
+      workers: 68,
+      tasks: 192,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP instance with 68 workers and 192 tasks',
+    },
+    {
+      instance_id: 'data_20_83_222_66',
+      name: 'PTSP Instance 20 (83w / 222t)',
+      filename: 'data_20_83_222_66.txt',
+      workers: 83,
+      tasks: 222,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP instance with 83 workers and 222 tasks',
+    },
+    {
+      instance_id: 'data_30_128_395_66',
+      name: 'PTSP Instance 30 (128w / 395t)',
+      filename: 'data_30_128_395_66.txt',
+      workers: 128,
+      tasks: 395,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP large instance with 128 workers and 395 tasks',
+    },
+    {
+      instance_id: 'data_40_187_607_66',
+      name: 'PTSP Instance 40 (187w / 607t)',
+      filename: 'data_40_187_607_66.txt',
+      workers: 187,
+      tasks: 607,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'OR-Library PTSP instance with 187 workers and 607 tasks',
+    },
+    {
+      instance_id: 'data_50_422_2105_66',
+      name: 'PTSP Instance 50 (422w / 2105t)',
+      filename: 'data_50_422_2105_66.txt',
+      workers: 422,
+      tasks: 2105,
+      compatibility_status: 'FULL_COMPATIBLE',
+      notes: 'Largest OR-Library PTSP instance with 422 workers and 2105 tasks',
+    },
   ],
 };
 
 export default function TaskAllocationPage() {
   const [datasetId, setDatasetId] = useState<'smptsp' | 'ptsp'>('smptsp');
-  const [benchmarks, setBenchmarks] = useState<Record<string, BenchmarkInstance[]>>({});
-  const [selectedInstanceId, setSelectedInstanceId] = useState<string>('');
+  const [benchmarks, setBenchmarks] = useState<Record<string, BenchmarkInstance[]>>(FALLBACK_TASK_BENCHMARKS);
+  const [selectedInstanceId, setSelectedInstanceId] = useState<string>('data_1_50_258_20_90_100_200_300');
   const [loadingBenchmarks, setLoadingBenchmarks] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -15,20 +15,44 @@ interface BenchmarkInfo {
 
 const BENCHMARKS: BenchmarkInfo[] = [
   {
-    id: 'instances1_24',
-    name: 'Nurse Rostering Benchmark (instances1_24)',
-    provenance: 'Curtois & Qu (2014), International Nurse Rostering Competition (INRC-I)',
-    source: 'https://www.schedulingbenchmarks.org/nrp/',
-    checksum: 'f982418dfd05e44e3738656d2da18e751bf9b7741d36d299dd394d79c275af64 (Instance1.txt)',
-    notes: 'Preserved unchanged in data/instances1_24. Mapped transparently without synthetic additions.',
-  },
-  {
     id: 'synthetic_mfg',
     name: 'Primary Synthetic Manufacturing Facility',
     provenance: 'Ordivanta Scalability & Disruption Benchmark Suite',
     source: 'Deterministic Generator (app.datasets.scalability_generator)',
     checksum: 'Bitwise deterministic random seeds (Seed 1001-1020)',
     notes: 'Models production work cells, skill levels 1-5, certifications, and overtime consent.',
+  },
+  {
+    id: 'matsp',
+    name: 'Multi-Activity Tour Scheduling (MATSP / instances1_225)',
+    provenance: 'Côté, Gendreau, & Rousseau (2011), INFORMS Journal on Computing',
+    source: 'https://www.schedulingbenchmarks.org/matsp/',
+    checksum: '64d2572a11b8dd820fa4bc88a5360fbc3532cf2b (225 benchmark instances)',
+    notes: 'Macro-level workforce shift roster planning (10-150 employees, 1-19 tasks, 15-min intervals).',
+  },
+  {
+    id: 'smptsp',
+    name: 'Shift Minimisation Personnel Task Scheduling (SMPTSP)',
+    provenance: 'Smet, Wauters, Mihaylov, & Vanden Berghe (2014), Journal of Heuristics',
+    source: 'https://github.com/psmet1/smptsp/tree/main/instances',
+    checksum: 'da895a04fbe7d5bb0da938e5352c80c25a07530c (10 academic instances)',
+    notes: 'Skill-constrained discrete workstation task allocation & shift minimisation (44-153 workers, 258-1577 tasks).',
+  },
+  {
+    id: 'ptsp',
+    name: 'Personnel Task Scheduling Problem (PTSP OR-Library)',
+    provenance: 'Krishnamoorthy, Ernst, & Baatar (2012), Annals of Operations Research',
+    source: 'https://andreas-ernst.github.io/Mathprog-ORlib/info/readmePTSP.html',
+    checksum: '3a342416f406bd23bb0d740ebc77d9c0e0b3c6bb (137 academic instances)',
+    notes: 'Continuous minute-level personnel task assignments with qualification matrices (22-422 workers, 40-2105 tasks).',
+  },
+  {
+    id: 'instances1_24',
+    name: 'Nurse Rostering Benchmark (instances1_24 / INRC-I)',
+    provenance: 'Curtois & Qu (2014), International Nurse Rostering Competition (INRC-I)',
+    source: 'https://www.schedulingbenchmarks.org/nrp/',
+    checksum: 'f982418dfd05e44e3738656d2da18e751bf9b7741d36d299dd394d79c275af64 (Instance1.txt)',
+    notes: 'Preserved unchanged in data/instances1_24. Mapped transparently without synthetic additions.',
   },
 ];
 
